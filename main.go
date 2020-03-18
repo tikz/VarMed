@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"varq/config"
@@ -71,8 +72,8 @@ func init() {
 
 func main() {
 	// !DEBUG
-	// _, err := protein.NewProtein("P69892")
-	// fmt.Println("newp err:", err)
+	_, err := protein.NewProtein("P04090")
+	fmt.Println("newp err:", err)
 
 	// REST API entrypoints
 	http.HandleFunc("/status", statusEndpoint)
