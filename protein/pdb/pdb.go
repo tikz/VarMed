@@ -25,6 +25,7 @@ type PDB struct {
 	Chains     map[string][]*utils.Aminoacid
 }
 
+// Fetch populates the instance with parsed data retrieved from RCSB
 func (pdb *PDB) Fetch() error {
 	url := "https://www.rcsb.org/structure/" + pdb.ID
 	urlCIF := "https://files.rcsb.org/download/" + pdb.ID + ".cif"
