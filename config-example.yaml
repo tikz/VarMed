@@ -6,6 +6,9 @@ http-server:
   port: 3000
 
 database:
+  type: "sqlite" # "sqlite" or "postgresql"
+  # sqlite is recommended for simplified usage as a local app. In that case, the next 4 parameters are ignored.
+  
   host: ""
   port: 1234
   username: ""
