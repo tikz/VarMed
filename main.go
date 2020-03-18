@@ -2,51 +2,81 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"net/http"
-
-	"gopkg.in/yaml.v2"
+	"varq/config"
+	"varq/protein"
 )
 
-// Config holds the parsed config file
-var Config *Configuration
+var (
+	cfg *config.Config
+)
 
 // StatusResponse contains the JSON response about the server status
 type StatusResponse struct {
-	StatusCode int    `json:"status_code"`
-	StatusMsg  string `json:"status_msg"`
+	Code int    `json:"status_code"`
+	Msg  string `json:"status_msg"`
 }
 
-// loadConfig opens and parses config.yaml
-func loadConfig() {
-	f, err := ioutil.ReadFile("config.yaml")
-	if err != nil {
-		log.Fatalf("error opening config.yaml: %v", err)
-	}
-
-	cfg := Configuration{}
-	err = yaml.Unmarshal([]byte(f), &cfg)
-	if err != nil {
-		log.Fatalf("error parsing config.yaml: %v", err)
-	}
-	Config = &cfg
+// ErrorResponse contains the JSON response when an error occurs
+type ErrorResponse struct {
+	Msg string `json:"error_msg"`
 }
 
-// status is the function for the GET /status entrypoint
-// Shows general information about the VarQ server status
-func status(w http.ResponseWriter, r *http.Request) {
-	s := StatusResponse{StatusCode: 0, StatusMsg: "online"}
+func errorResponse(msg string) []byte {
+	s := ErrorResponse{Msg: msg}
+	out, _ := json.Marshal(s)
+	return out
+}
+
+// proteinEndpoint is the function for the GET /proteinEndpoint endpoint
+func proteinEndpoint(w http.ResponseWriter, r *http.Request) {
+	params, ok := r.URL.Query()["uniprot"]
+
+	if !ok || len(params[0]) < 1 {
+		w.Write(errorResponse("GET params not present in request."))
+		return
+	}
+
+	uniprotID := params[0]
+	log.Println("New request from", r.RemoteAddr, "- UniProt", uniprotID)
+
+	p, err := protein.NewProtein(uniprotID)
+	if err != nil {
+		w.Write(errorResponse(err.Error()))
+		return
+	}
+
+	out, _ := json.Marshal(p)
+	w.Write(out)
+}
+
+// statusEndpoint is the function for the GET /statusEndpoint endpoint
+// Shows general information about the VarQ server statusEndpoint
+func statusEndpoint(w http.ResponseWriter, r *http.Request) {
+	s := StatusResponse{Code: 0, Msg: "online"}
 	out, _ := json.Marshal(s)
 	w.Write(out)
 }
 
+func init() {
+	// Load config.yaml
+	c, err := config.LoadFile("config.yaml")
+	if err != nil {
+		log.Fatalf("Cannot open and parse config.yaml: %v", err)
+	}
+	cfg = c
+}
+
 func main() {
-	loadConfig()
+	// !DEBUG
+	// _, err := protein.NewProtein("P69892")
+	// fmt.Println("newp err:", err)
 
 	// REST API entrypoints
-	http.HandleFunc("/status", status)
+	http.HandleFunc("/status", statusEndpoint)
+	http.HandleFunc("/protein", proteinEndpoint)
 
-	log.Printf("Starting VarQ web server: http://127.0.0.1:%s/", Config.HTTPServer.Port)
-	http.ListenAndServe(":"+Config.HTTPServer.Port, nil)
+	log.Printf("Starting VarQ web server: http://127.0.0.1:%s/", cfg.HTTPServer.Port)
+	http.ListenAndServe(":"+cfg.HTTPServer.Port, nil)
 }
