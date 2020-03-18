@@ -1,5 +1,6 @@
 package main
 
+// Configuration holds constant parameters for the app
 type Configuration struct {
 	HTTPClient struct {
 		UserAgent string `yaml:"user-agent"`
