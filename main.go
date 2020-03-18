@@ -9,10 +9,10 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// Config holds the parsed config.yaml
+// Config holds the parsed config file
 var Config *Configuration
 
-// StatusResponse contains JSON data about the server status
+// StatusResponse contains the JSON response about the server status
 type StatusResponse struct {
 	StatusCode int    `json:"status_code"`
 	StatusMsg  string `json:"status_msg"`
@@ -22,7 +22,7 @@ type StatusResponse struct {
 func loadConfig() {
 	f, err := ioutil.ReadFile("config.yaml")
 	if err != nil {
-		log.Fatal("error opening config.yaml: %v", err)
+		log.Fatalf("error opening config.yaml: %v", err)
 	}
 
 	cfg := Configuration{}
@@ -33,7 +33,7 @@ func loadConfig() {
 	Config = &cfg
 }
 
-// Status is the entrypoint function for GET /status
+// status is the function for the GET /status entrypoint
 // Shows general information about the VarQ server status
 func status(w http.ResponseWriter, r *http.Request) {
 	s := StatusResponse{StatusCode: 0, StatusMsg: "online"}
