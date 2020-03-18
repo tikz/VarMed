@@ -9,13 +9,14 @@ import (
 	"varq/protein/pdb"
 )
 
-// Protein holds all the raw and parsed data for a protein
+// Protein contains all the raw and parsed data for a protein
 type Protein struct {
 	UniProt     *UniProt
 	Crystals    []*pdb.PDB `json:"-"`
 	BestCrystal *pdb.PDB
 }
 
+// UniProt contains general protein data retrieved from UniProt
 type UniProt struct {
 	AccessionID string
 	URL         string
