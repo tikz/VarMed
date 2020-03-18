@@ -29,7 +29,7 @@ func errorResponse(msg string) []byte {
 	return out
 }
 
-// proteinEndpoint is the function for the GET /proteinEndpoint endpoint
+// proteinEndpoint is the function for the GET /protein endpoint
 // Shows all parsed and calculated data for a given UniProt accession. For debug purposes only.
 func proteinEndpoint(w http.ResponseWriter, r *http.Request) {
 	params, ok := r.URL.Query()["uniprot"]
