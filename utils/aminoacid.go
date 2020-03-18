@@ -53,16 +53,6 @@ func NewAminoacid(pos int64, input string) (*Aminoacid, error) {
 	return &aminoacid, err
 }
 
-// AminoacidExists checks if the given aminoacid position already exists in a given slice (list) of aminoacids
-func AminoacidExists(aminoacids []*Aminoacid, pos int64) bool {
-	for _, aa := range aminoacids {
-		if aa.Position == pos {
-			return true
-		}
-	}
-	return false
-}
-
 func matchName(input string) (*[3]string, error) {
 	s := strings.Title(strings.ToLower(input))
 	for _, aa := range aas {
