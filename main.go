@@ -30,6 +30,7 @@ func errorResponse(msg string) []byte {
 }
 
 // proteinEndpoint is the function for the GET /proteinEndpoint endpoint
+// Shows all parsed and calculated data for a given UniProt accession. For debug purposes only.
 func proteinEndpoint(w http.ResponseWriter, r *http.Request) {
 	params, ok := r.URL.Query()["uniprot"]
 
@@ -51,8 +52,8 @@ func proteinEndpoint(w http.ResponseWriter, r *http.Request) {
 	w.Write(out)
 }
 
-// statusEndpoint is the function for the GET /statusEndpoint endpoint
-// Shows general information about the VarQ server statusEndpoint
+// statusEndpoint is the function for the GET /status endpoint
+// Shows general information about the VarQ server status
 func statusEndpoint(w http.ResponseWriter, r *http.Request) {
 	s := StatusResponse{Code: 0, Msg: "online"}
 	out, _ := json.Marshal(s)

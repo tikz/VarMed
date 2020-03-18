@@ -36,7 +36,7 @@ type Aminoacid struct {
 	Abbrv3   string
 }
 
-// NewAminoacid returns a new *Aminoacid from a string that can be either full name, one or three letter abbreviation.
+// NewAminoacid constructs a new aminoacid from a case-insensitive string that can be either full name, one or three letter abbreviation.
 func NewAminoacid(pos int64, input string) (*Aminoacid, error) {
 	r, err := matchName(input)
 	if err != nil {

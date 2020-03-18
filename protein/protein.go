@@ -23,6 +23,7 @@ type UniProt struct {
 	Raw         []byte `json:"-"`
 }
 
+// NewProtein constructs a Protein instance from an UniProt accession ID
 func NewProtein(uniprotID string) (*Protein, error) {
 	url := "https://www.uniprot.org/uniprot/" + uniprotID
 	txtURL := url + ".txt"
@@ -102,6 +103,7 @@ func (p *Protein) extractPDBIDs() error {
 	return nil
 }
 
+// decideBestCrystal picks the best crystal to our criteria from the available ones
 func decideBestCrystal(crystals []*pdb.PDB) (*pdb.PDB, error) {
 	bestCovLength := crystals[0].Length
 	var bestCovCrystals []*pdb.PDB
