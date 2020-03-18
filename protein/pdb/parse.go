@@ -59,9 +59,6 @@ func parsePDBChains(atoms []*Atom) (map[string][]*utils.Aminoacid, error) {
 	lastChainName := atoms[0].Chain
 	var lastResNumber int64
 	for _, atom := range atoms {
-		if atom.Chain == "117" {
-			fmt.Println(atom)
-		}
 		if atom.Chain != lastChainName {
 			chains[lastChainName] = chain
 			chain = nil
