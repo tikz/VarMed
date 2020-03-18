@@ -60,14 +60,14 @@ func (p *Protein) extractPDBIDs() error {
 		return errors.New("UniProt entry has no associated crystal PDB entries")
 	}
 
-	// Parse each match
+	// Parse each PDB match in TXT
 	for _, match := range matches {
 		resolution, err := strconv.ParseFloat(match[3], 64)
 		if err != nil {
 			return fmt.Errorf("parsing resolution %v as float: %v", resolution, err)
 		}
 
-		// Calculate sum of chains length
+		// Extract start and end positions for each chain, and calculate length sum
 		regexChains, _ := regexp.Compile("=([0-9]*)-([0-9]*)")
 		chains := regexChains.FindAllStringSubmatch(match[0], -1)
 		var totalLength int64
@@ -93,7 +93,7 @@ func (p *Protein) extractPDBIDs() error {
 		p.Crystals = append(p.Crystals, &crystal)
 	}
 
-	bestCrystal, err := decideBestCrystal(p.Crystals)
+	bestCrystal, err := pickBestCrystal(p.Crystals)
 	if err != nil {
 		return fmt.Errorf("choosing best crystal: %v", err)
 	}
@@ -109,8 +109,8 @@ func (p *Protein) extractPDBIDs() error {
 	return nil
 }
 
-// decideBestCrystal picks the best crystal to our criteria from the available ones
-func decideBestCrystal(crystals []*pdb.PDB) (*pdb.PDB, error) {
+// pickBestCrystal picks the best crystal to our criteria from the available ones
+func pickBestCrystal(crystals []*pdb.PDB) (*pdb.PDB, error) {
 	bestCovLength := crystals[0].Length
 	var bestCovCrystals []*pdb.PDB
 
