@@ -1,0 +1,12 @@
+http-client:
+  user-agent: "VarQ - varq.qb.fcen.uba.ar"
+  timeout: 2
+
+http-server:
+  port: 3000
+
+database:
+  host: ""
+  port: 1234
+  username: ""
+  password: ""
