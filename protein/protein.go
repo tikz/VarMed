@@ -12,7 +12,7 @@ import (
 // Protein contains all the raw and parsed data for a protein
 type Protein struct {
 	UniProt     *UniProt
-	Crystals    []*pdb.PDB `json:"-"`
+	Crystals    []*pdb.PDB
 	BestCrystal *pdb.PDB
 }
 
@@ -53,9 +53,9 @@ func NewProtein(uniprotID string) (*Protein, error) {
 
 func (p *Protein) extractPDBIDs() error {
 	// Regex match all PDB IDs in the UniProt TXT entry. X-ray only, ignore others (NMR, etc).
-	// https://regex101.com/r/QCI3cu/3
-	regexpPDB, _ := regexp.Compile("PDB;[ ]*(.*?);[ ]*(X.*?ray);[ ]*([0-9\\.]*).*?;[ ]*(.*?)=([0-9]*)-([0-9]*)")
-	matches := regexpPDB.FindAllStringSubmatch(string(p.UniProt.Raw), -1)
+	// https://regex101.com/r/BpJ3QB/1
+	regexPDB, _ := regexp.Compile("PDB;[ ]*(.*?);[ ]*(X.*?ray);[ ]*([0-9\\.]*).*?;.*?\n")
+	matches := regexPDB.FindAllStringSubmatch(string(p.UniProt.Raw), -1)
 	if len(matches) == 0 {
 		return errors.New("UniProt entry has no associated crystal PDB entries")
 	}
@@ -67,23 +67,28 @@ func (p *Protein) extractPDBIDs() error {
 			return fmt.Errorf("parsing resolution %v as float: %v", resolution, err)
 		}
 
-		from, err := strconv.ParseInt(match[5], 10, 64)
-		if err != nil {
-			return fmt.Errorf("parsing from position %v as int: %v", from, err)
-		}
+		// Calculate sum of chains length
+		regexChains, _ := regexp.Compile("=([0-9]*)-([0-9]*)")
+		chains := regexChains.FindAllStringSubmatch(match[0], -1)
+		var totalLength int64
+		for _, chain := range chains {
+			fromPos, err := strconv.ParseInt(chain[1], 10, 64)
+			if err != nil {
+				return fmt.Errorf("parsing from position %v as int: %v", fromPos, err)
+			}
 
-		to, err := strconv.ParseInt(match[6], 10, 64)
-		if err != nil {
-			return fmt.Errorf("parsing to position %v as int: %v", to, err)
+			toPos, err := strconv.ParseInt(chain[2], 10, 64)
+			if err != nil {
+				return fmt.Errorf("parsing to position %v as int: %v", toPos, err)
+			}
+			totalLength += toPos - fromPos + 1
 		}
 
 		crystal := pdb.PDB{
 			ID:         match[1],
 			Method:     match[2],
 			Resolution: resolution,
-			FromPos:    from,
-			ToPos:      to,
-			Length:     to - from + 1,
+			Length:     totalLength,
 		}
 		p.Crystals = append(p.Crystals, &crystal)
 	}

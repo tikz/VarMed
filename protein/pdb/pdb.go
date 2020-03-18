@@ -18,9 +18,7 @@ type PDB struct {
 	Date       *time.Time
 	Method     string
 	Resolution float64
-	FromPos    int64
-	ToPos      int64
-	Length     int64
+	Length     int64 // Sum of chains length
 	Atoms      []*Atom
 	Chains     map[string][]*utils.Aminoacid
 }

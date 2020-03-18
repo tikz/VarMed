@@ -33,7 +33,7 @@ func parsePDBAtoms(raw []byte) ([]*Atom, error) {
 	for _, match := range matches {
 		var atom Atom
 
-		// Columns spec: https://www.cgl.ucsf.edu/chimera/docs/UsersGuide/tutorials/pdbintro.html
+		// Columns position spec: https://www.cgl.ucsf.edu/chimera/docs/UsersGuide/tutorials/pdbintro.html
 		atom.Number, _ = strconv.ParseInt(strings.TrimSpace(match[6:11]), 10, 64)
 		atom.Residue = match[17:20]
 		atom.Chain = match[21:22]
