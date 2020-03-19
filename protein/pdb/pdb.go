@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 	"varq/http"
-	"varq/utils"
 )
 
 type PDB struct {
@@ -20,7 +19,7 @@ type PDB struct {
 	Resolution float64
 	Length     int64 // Sum of chains length
 	Atoms      []*Atom
-	Chains     map[string][]*utils.Aminoacid
+	Chains     map[string][]*Aminoacid
 }
 
 // Fetch populates the instance with parsed data retrieved from RCSB
