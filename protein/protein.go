@@ -43,7 +43,7 @@ func NewProtein(uniprotID string) (*Protein, error) {
 	}
 
 	// Parse UniProt TXT
-	err = p.extractPDBIDs()
+	err = p.extract()
 	if err != nil {
 		return nil, fmt.Errorf("extract PDB crystals %v: %v", uniprotID, err)
 	}
@@ -51,47 +51,12 @@ func NewProtein(uniprotID string) (*Protein, error) {
 	return &p, nil
 }
 
-func (p *Protein) extractPDBIDs() error {
-	// Regex match all PDB IDs in the UniProt TXT entry. X-ray only, ignore others (NMR, etc).
-	// https://regex101.com/r/BpJ3QB/1
-	regexPDB, _ := regexp.Compile("PDB;[ ]*(.*?);[ ]*(X.*?ray);[ ]*([0-9\\.]*).*?;.*?\n")
-	matches := regexPDB.FindAllStringSubmatch(string(p.UniProt.Raw), -1)
-	if len(matches) == 0 {
-		return errors.New("UniProt entry has no associated crystal PDB entries")
+func (p *Protein) extract() error {
+	crystals, err := extractCrystals(p.UniProt.Raw)
+	if err != nil {
+		return fmt.Errorf("extracting crystals from UniProt TXT: %v", err)
 	}
-
-	// Parse each PDB match in TXT
-	for _, match := range matches {
-		resolution, err := strconv.ParseFloat(match[3], 64)
-		if err != nil {
-			return fmt.Errorf("parsing resolution %v as float: %v", resolution, err)
-		}
-
-		// Extract start and end positions for each chain, and calculate length sum
-		regexChains, _ := regexp.Compile("=([0-9]*)-([0-9]*)")
-		chains := regexChains.FindAllStringSubmatch(match[0], -1)
-		var totalLength int64
-		for _, chain := range chains {
-			fromPos, err := strconv.ParseInt(chain[1], 10, 64)
-			if err != nil {
-				return fmt.Errorf("parsing from position %v as int: %v", fromPos, err)
-			}
-
-			toPos, err := strconv.ParseInt(chain[2], 10, 64)
-			if err != nil {
-				return fmt.Errorf("parsing to position %v as int: %v", toPos, err)
-			}
-			totalLength += toPos - fromPos + 1
-		}
-
-		crystal := pdb.PDB{
-			ID:         match[1],
-			Method:     match[2],
-			Resolution: resolution,
-			Length:     totalLength,
-		}
-		p.Crystals = append(p.Crystals, &crystal)
-	}
+	p.Crystals = crystals
 
 	bestCrystal, err := pickBestCrystal(p.Crystals)
 	if err != nil {
@@ -107,6 +72,51 @@ func (p *Protein) extractPDBIDs() error {
 	}
 
 	return nil
+}
+
+func extractCrystals(txt []byte) (crystals []*pdb.PDB, err error) {
+	// Regex match all PDB IDs in the UniProt TXT entry. X-ray only, ignore others (NMR, etc).
+	// https://regex101.com/r/BpJ3QB/1
+	regexPDB, _ := regexp.Compile("PDB;[ ]*(.*?);[ ]*(X.*?ray);[ ]*([0-9\\.]*).*?;.*?\n")
+	matches := regexPDB.FindAllStringSubmatch(string(txt), -1)
+	if len(matches) == 0 {
+		return nil, errors.New("UniProt entry has no associated crystal PDB entries")
+	}
+
+	// Parse each PDB match in TXT
+	for _, match := range matches {
+		resolution, err := strconv.ParseFloat(match[3], 64)
+		if err != nil {
+			return nil, fmt.Errorf("parsing resolution %v as float: %v", resolution, err)
+		}
+
+		// Extract start and end positions for each chain, and calculate length sum
+		regexChains, _ := regexp.Compile("=([0-9]*)-([0-9]*)")
+		chains := regexChains.FindAllStringSubmatch(match[0], -1)
+		var totalLength int64
+		for _, chain := range chains {
+			fromPos, err := strconv.ParseInt(chain[1], 10, 64)
+			if err != nil {
+				return nil, fmt.Errorf("parsing from position %v as int: %v", fromPos, err)
+			}
+
+			toPos, err := strconv.ParseInt(chain[2], 10, 64)
+			if err != nil {
+				return nil, fmt.Errorf("parsing to position %v as int: %v", toPos, err)
+			}
+			totalLength += toPos - fromPos + 1
+		}
+
+		crystal := pdb.PDB{
+			ID:         match[1],
+			Method:     match[2],
+			Resolution: resolution,
+			Length:     totalLength,
+		}
+		crystals = append(crystals, &crystal)
+	}
+
+	return crystals, nil
 }
 
 // pickBestCrystal picks the best crystal to our criteria from the available ones
