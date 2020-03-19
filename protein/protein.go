@@ -11,17 +11,17 @@ import (
 
 // Protein contains all the raw and parsed data for a protein
 type Protein struct {
-	UniProt     *UniProt
-	Crystals    []*pdb.PDB `json:"-"`
-	BestCrystal *pdb.PDB
+	UniProt  *UniProt
+	Crystals []*pdb.PDB
+	// BestCrystal *pdb.PDB
 }
 
 // UniProt contains general protein data retrieved from UniProt
 type UniProt struct {
-	AccessionID string
-	URL         string
-	TXTURL      string
-	Raw         []byte `json:"-"`
+	ID     string
+	URL    string
+	TXTURL string
+	Raw    []byte `json:"-"`
 }
 
 // NewProtein constructs a Protein instance from an UniProt accession ID
@@ -35,10 +35,10 @@ func NewProtein(uniprotID string) (*Protein, error) {
 
 	p := Protein{
 		UniProt: &UniProt{
-			AccessionID: uniprotID,
-			URL:         url,
-			TXTURL:      txtURL,
-			Raw:         raw,
+			ID:     uniprotID,
+			URL:    url,
+			TXTURL: txtURL,
+			Raw:    raw,
 		},
 	}
 
@@ -52,33 +52,26 @@ func NewProtein(uniprotID string) (*Protein, error) {
 }
 
 func (p *Protein) extract() error {
-	crystals, err := extractCrystals(p.UniProt.Raw)
+	crystals, err := p.extractCrystals()
 	if err != nil {
 		return fmt.Errorf("extracting crystals from UniProt TXT: %v", err)
 	}
 	p.Crystals = crystals
 
-	bestCrystal, err := pickBestCrystal(p.Crystals)
-	if err != nil {
-		return fmt.Errorf("choosing best crystal: %v", err)
-	}
-	p.BestCrystal = bestCrystal
-
-	// TODO: for now just fetch the PDB data for the best crystal.
-	// decide if it's worth it to grab all crystals for use in other projects.
-	err = p.BestCrystal.Fetch()
-	if err != nil {
-		return fmt.Errorf("fetching crystal: %v", err)
-	}
+	// bestCrystal, err := pickBestCrystal(p.Crystals)
+	// if err != nil {
+	// 	return fmt.Errorf("choosing best crystal: %v", err)
+	// }
+	// p.BestCrystal = bestCrystal
 
 	return nil
 }
 
-func extractCrystals(txt []byte) (crystals []*pdb.PDB, err error) {
+func (p *Protein) extractCrystals() (crystals []*pdb.PDB, err error) {
 	// Regex match all PDB IDs in the UniProt TXT entry. X-ray only, ignore others (NMR, etc).
 	// https://regex101.com/r/BpJ3QB/1
 	regexPDB, _ := regexp.Compile("PDB;[ ]*(.*?);[ ]*(X.*?ray);[ ]*([0-9\\.]*).*?;.*?\n")
-	matches := regexPDB.FindAllStringSubmatch(string(txt), -1)
+	matches := regexPDB.FindAllStringSubmatch(string(p.UniProt.Raw), -1)
 	if len(matches) == 0 {
 		return nil, errors.New("UniProt entry has no associated crystal PDB entries")
 	}
@@ -108,6 +101,7 @@ func extractCrystals(txt []byte) (crystals []*pdb.PDB, err error) {
 		}
 
 		crystal := pdb.PDB{
+			UniProtID:  p.UniProt.ID,
 			ID:         match[1],
 			Method:     match[2],
 			Resolution: resolution,

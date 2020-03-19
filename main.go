@@ -42,7 +42,7 @@ func proteinEndpoint(w http.ResponseWriter, r *http.Request) {
 	uniprotID := params[0]
 	log.Println("New request from", r.RemoteAddr, "- UniProt", uniprotID)
 
-	p, err := protein.NewProtein(uniprotID)
+	p, err := protein.RunPipeline(uniprotID)
 	if err != nil {
 		w.Write(errorResponse(err.Error()))
 		return
@@ -72,7 +72,7 @@ func init() {
 func main() {
 	// !DEBUG
 	// p, err := protein.NewProtein("P69892")
-	// interaction.NewInteraction(p.BestCrystal.Atoms)
+	// interaction.NewInteraction(p.BestCrystal.Chains)
 	// fmt.Println("newp err:", err)
 
 	// REST API entrypoints

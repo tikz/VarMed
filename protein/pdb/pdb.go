@@ -2,11 +2,13 @@ package pdb
 
 import (
 	"fmt"
+	"log"
 	"time"
 	"varq/http"
 )
 
 type PDB struct {
+	UniProtID  string
 	ID         string
 	URL        string
 	PDBURL     string
@@ -23,6 +25,8 @@ type PDB struct {
 
 // Fetch populates the instance with parsed data retrieved from RCSB
 func (pdb *PDB) Fetch() error {
+	start := time.Now()
+	log.Printf("[UniProt %s] Downloading PDB file for %s", pdb.UniProtID, pdb.ID)
 	url := "https://www.rcsb.org/structure/" + pdb.ID
 	urlCIF := "https://files.rcsb.org/download/" + pdb.ID + ".cif"
 	rawCIF, err := http.Get(urlCIF)
@@ -30,6 +34,7 @@ func (pdb *PDB) Fetch() error {
 		return fmt.Errorf("download CIF file: %v", err)
 	}
 
+	log.Printf("[UniProt %s] Downloading CIF file for %s", pdb.UniProtID, pdb.ID)
 	urlPDB := "https://files.rcsb.org/download/" + pdb.ID + ".pdb"
 	rawPDB, err := http.Get(urlPDB)
 	if err != nil {
@@ -55,6 +60,8 @@ func (pdb *PDB) Fetch() error {
 	if d, err := extractCIFDate(pdb.RawCIF); err == nil {
 		pdb.Date = d
 	}
+	end := time.Since(start)
+	log.Printf("[UniProt %s] PDB %s loaded in %d msecs", pdb.UniProtID, pdb.ID, end.Milliseconds())
 
 	return nil
 }

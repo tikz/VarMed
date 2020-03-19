@@ -7,15 +7,12 @@ import (
 	"varq/protein/pdb"
 )
 
-// TODO: better names
 type InteractionData struct {
-	Interactions []*Interaction
+	Interactions []*AminoacidsInteraction
 }
 
-type Interaction struct {
+type AminoacidsInteraction struct {
 	Distance   float64
-	Atom1      *pdb.Atom
-	Atom2      *pdb.Atom
 	Aminoacid1 *pdb.Aminoacid
 	Aminoacid2 *pdb.Aminoacid
 }
@@ -24,31 +21,40 @@ func calculateDistance(atom1 *pdb.Atom, atom2 *pdb.Atom) float64 {
 	return math.Sqrt(math.Pow(atom1.X-atom2.X, 2) + math.Pow(atom1.Y-atom2.Y, 2) + math.Pow(atom1.Z-atom2.Z, 2))
 }
 
-func calculateInteractions(atoms []*pdb.Atom) (interactions []*Interaction) {
+func calculateInteractions(chains map[string][]*pdb.Aminoacid) (interactions []*AminoacidsInteraction) {
+	atoms := flatten(chains)
 	start := time.Now()
+
 	for i1, atom1 := range atoms {
 		for i2, atom2 := range atoms {
-			if i2 > i1 && atom1.Chain != atom2.Chain {
+			if i2 > i1 && atom1.Chain != atom2.Chain && atom1.Aminoacid != atom2.Aminoacid {
 				if dist := calculateDistance(atom1, atom2); dist < 5 {
-					// aa1, _ := pdb.NewAminoacid(atom1.Chain, atom1.ResidueNumber, atom1.Residue)
-					// aa2, _ := pdb.NewAminoacid(atom2.Chain, atom2.ResidueNumber, atom2.Residue)
-					// interactions = append(interactions, &Interaction{
-					// 	Distance:   dist,
-					// 	Atom1:      atom1,
-					// 	Atom2:      atom2,
-					// 	Aminoacid1: aa1,
-					// 	Aminoacid2: aa2,
-					// })
+					interactions = append(interactions, &AminoacidsInteraction{
+						Distance:   dist,
+						Aminoacid1: atom1.Aminoacid,
+						Aminoacid2: atom2.Aminoacid,
+					})
+					fmt.Println(dist, "aa1 pos", atom1.Aminoacid.Position, "aa2 pos", atom2.Aminoacid.Position, "aa1 chain", atom1.Chain, "aa2 chain", atom2.Chain)
 				}
 			}
 		}
 	}
 	end := time.Since(start)
 	fmt.Println("finished in", end)
-	fmt.Printf("%v+", interactions)
 	return interactions
 }
 
-func NewInteraction(atoms []*pdb.Atom) {
-	calculateInteractions(atoms)
+func flatten(chains map[string][]*pdb.Aminoacid) (atoms []*pdb.Atom) {
+	for _, aminoacids := range chains {
+		for _, aminoacid := range aminoacids {
+			for _, atom := range aminoacid.Atoms {
+				atoms = append(atoms, atom)
+			}
+		}
+	}
+	return atoms
+}
+
+func NewInteraction(chains map[string][]*pdb.Aminoacid) {
+	calculateInteractions(chains)
 }

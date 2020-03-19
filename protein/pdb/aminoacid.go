@@ -44,7 +44,7 @@ func NewAminoacid(pos int64, input string, atoms []*Atom) (*Aminoacid, error) {
 		return nil, err
 	}
 
-	aminoacid := Aminoacid{
+	aminoacid := &Aminoacid{
 		Position: pos,
 		Name:     r[0],
 		Abbrv1:   r[1],
@@ -52,7 +52,12 @@ func NewAminoacid(pos int64, input string, atoms []*Atom) (*Aminoacid, error) {
 		Atoms:    atoms,
 	}
 
-	return &aminoacid, err
+	// Add parent reference
+	for _, atom := range atoms {
+		atom.Aminoacid = aminoacid
+	}
+
+	return aminoacid, err
 }
 
 func matchName(input string) (*[3]string, error) {
