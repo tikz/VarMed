@@ -44,20 +44,20 @@ func (pdb *PDB) Fetch() error {
 	pdb.CIFURL = urlCIF
 	pdb.RawPDB = rawPDB
 	pdb.RawCIF = rawCIF
-	pdb.Atoms, err = parsePDBAtoms(pdb.RawPDB)
+	pdb.Atoms, err = extractPDBAtoms(pdb.RawPDB)
 	if err != nil {
 		return fmt.Errorf("parsing PDB atoms: %v", err)
 	}
-	pdb.Chains, err = parsePDBChains(pdb.Atoms)
+	pdb.Chains, err = extractPDBChains(pdb.Atoms)
 	if err != nil {
 		return fmt.Errorf("parsing chains: %v", err)
 	}
 
 	// Optional data, but can be nice to have
-	if t, err := parseCIFTitle(pdb.RawCIF); err == nil {
+	if t, err := extractCIFTitle(pdb.RawCIF); err == nil {
 		pdb.Title = t
 	}
-	if d, err := parseCIFDate(pdb.RawCIF); err == nil {
+	if d, err := extractCIFDate(pdb.RawCIF); err == nil {
 		pdb.Date = d
 	}
 

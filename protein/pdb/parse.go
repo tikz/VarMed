@@ -21,7 +21,8 @@ type Atom struct {
 	Z             float64
 }
 
-func parsePDBAtoms(raw []byte) ([]*Atom, error) {
+// extractPDBAtoms extracts the atoms from raw PDB contents
+func extractPDBAtoms(raw []byte) ([]*Atom, error) {
 	var atoms []*Atom
 
 	regex, _ := regexp.Compile("(?m)^ATOM.*$")
@@ -49,7 +50,8 @@ func parsePDBAtoms(raw []byte) ([]*Atom, error) {
 	return atoms, nil
 }
 
-func parsePDBChains(atoms []*Atom) (map[string][]*utils.Aminoacid, error) {
+// extractPDBChains extracts the aminoacid chains from a slice of atoms
+func extractPDBChains(atoms []*Atom) (map[string][]*utils.Aminoacid, error) {
 	if len(atoms) == 0 {
 		return nil, errors.New("empty atoms slice")
 	}
@@ -77,7 +79,10 @@ func parsePDBChains(atoms []*Atom) (map[string][]*utils.Aminoacid, error) {
 	return chains, nil
 }
 
-func parseCIFTitle(raw []byte) (string, error) {
+// CIF contains additional data that in PDB files is included under the REMARK tag, which is not standarized and hard to parse.
+
+// extractCIFTitle extracts the main publication title from the CIF file
+func extractCIFTitle(raw []byte) (string, error) {
 	regex, _ := regexp.Compile("(?s)_struct.title.*?'(.*?)'")
 	matches := regex.FindAllStringSubmatch(string(raw), -1)
 	if len(matches) == 0 {
@@ -86,7 +91,8 @@ func parseCIFTitle(raw []byte) (string, error) {
 	return matches[0][1], nil
 }
 
-func parseCIFDate(raw []byte) (*time.Time, error) {
+// extractCIFDate extracts the main publication date from the CIF file
+func extractCIFDate(raw []byte) (*time.Time, error) {
 	regex, _ := regexp.Compile("_pdbx_database_status.recvd_initial_deposition_date[ ]*([0-9]*-[0-9]*-[0-9]*)")
 	matches := regex.FindAllStringSubmatch(string(raw), -1)
 	if len(matches) == 0 {
