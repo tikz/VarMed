@@ -12,7 +12,7 @@ import (
 // Protein contains all the raw and parsed data for a protein
 type Protein struct {
 	UniProt     *UniProt
-	Crystals    []*pdb.PDB
+	Crystals    []*pdb.PDB `json:"-"`
 	BestCrystal *pdb.PDB
 }
 

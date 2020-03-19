@@ -8,18 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"varq/utils"
 )
-
-type Atom struct {
-	Number        int64
-	Residue       string
-	Chain         string
-	ResidueNumber int64
-	X             float64
-	Y             float64
-	Z             float64
-}
 
 // extractPDBAtoms extracts the atoms from raw PDB contents
 func extractPDBAtoms(raw []byte) ([]*Atom, error) {
@@ -51,28 +40,40 @@ func extractPDBAtoms(raw []byte) ([]*Atom, error) {
 }
 
 // extractPDBChains extracts the aminoacid chains from a slice of atoms
-func extractPDBChains(atoms []*Atom) (map[string][]*utils.Aminoacid, error) {
+func extractPDBChains(atoms []*Atom) (map[string][]*Aminoacid, error) {
 	if len(atoms) == 0 {
 		return nil, errors.New("empty atoms slice")
 	}
 
-	chains := make(map[string][]*utils.Aminoacid)
-	var chain []*utils.Aminoacid
-	lastChainName := atoms[0].Chain
-	var lastResNumber int64
-	for _, atom := range atoms {
-		if atom.Chain != lastChainName {
-			chains[lastChainName] = chain
+	chains := make(map[string][]*Aminoacid)
+	var chain []*Aminoacid
+
+	var residueAtoms []*Atom
+	lastResAtom := atoms[0]
+	for i, atom := range atoms {
+		if atom.Chain != lastResAtom.Chain {
+			chains[lastResAtom.Chain] = chain
+			lastResAtom = atom
 			chain = nil
-			lastChainName = atom.Chain
 		}
-		if atom.ResidueNumber != lastResNumber {
-			aa, err := utils.NewAminoacid(atom.ResidueNumber, atom.Residue)
+
+		end := i == len(atoms)-1
+		if atom.ResidueNumber == lastResAtom.ResidueNumber && !end {
+			residueAtoms = append(residueAtoms, atom)
+		} else {
+			if end {
+				residueAtoms = append(residueAtoms, atom)
+			}
+			aa, err := NewAminoacid(lastResAtom.Chain, lastResAtom.ResidueNumber, lastResAtom.Residue, residueAtoms)
 			if err != nil {
 				return nil, fmt.Errorf("cannot parse aminoacid: %v", atom.Residue)
 			}
 			chain = append(chain, aa)
-			lastResNumber = atom.ResidueNumber
+			if end {
+				chains[lastResAtom.Chain] = chain
+			}
+			residueAtoms = nil
+			lastResAtom = atom
 		}
 	}
 
