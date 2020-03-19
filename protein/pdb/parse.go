@@ -35,7 +35,6 @@ func extractPDBAtoms(raw []byte) ([]*Atom, error) {
 		atoms = append(atoms, &atom)
 	}
 
-	// TODO: HETATM ligands
 	return atoms, nil
 }
 

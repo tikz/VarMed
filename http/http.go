@@ -11,7 +11,7 @@ var ErrHTTPNotOk = errors.New("HTTP response with status code not 200 OK")
 
 func Get(url string) ([]byte, error) {
 	client := http.Client{
-		Timeout: time.Duration(20) * time.Second,
+		Timeout: time.Duration(120) * time.Second,
 	}
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
