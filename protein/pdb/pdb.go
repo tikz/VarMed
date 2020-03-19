@@ -18,7 +18,6 @@ type PDB struct {
 	Method     string
 	Resolution float64
 	Length     int64 // Sum of chains length
-	Atoms      []*Atom
 	Chains     map[string][]*Aminoacid
 }
 
@@ -43,11 +42,8 @@ func (pdb *PDB) Fetch() error {
 	pdb.CIFURL = urlCIF
 	pdb.RawPDB = rawPDB
 	pdb.RawCIF = rawCIF
-	pdb.Atoms, err = extractPDBAtoms(pdb.RawPDB)
-	if err != nil {
-		return fmt.Errorf("parsing PDB atoms: %v", err)
-	}
-	pdb.Chains, err = extractPDBChains(pdb.Atoms)
+
+	pdb.Chains, err = extractPDBChains(pdb.RawPDB)
 	if err != nil {
 		return fmt.Errorf("parsing chains: %v", err)
 	}

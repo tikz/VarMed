@@ -30,7 +30,6 @@ var aas = [...][3]string{
 
 // Aminoacid represents a single aminoacid. Holds all the ways that can be represented as a string.
 type Aminoacid struct {
-	Chain    string
 	Position int64
 	Name     string
 	Abbrv1   string
@@ -39,14 +38,13 @@ type Aminoacid struct {
 }
 
 // NewAminoacid constructs a new aminoacid from a case-insensitive string that can be either full name, one or three letter abbreviation.
-func NewAminoacid(chain string, pos int64, input string, atoms []*Atom) (*Aminoacid, error) {
+func NewAminoacid(pos int64, input string, atoms []*Atom) (*Aminoacid, error) {
 	r, err := matchName(input)
 	if err != nil {
 		return nil, err
 	}
 
 	aminoacid := Aminoacid{
-		Chain:    chain,
 		Position: pos,
 		Name:     r[0],
 		Abbrv1:   r[1],
