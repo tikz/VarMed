@@ -40,7 +40,11 @@ func extractPDBAtoms(raw []byte) ([]*Atom, error) {
 }
 
 // extractPDBChains extracts the aminoacid chains from a slice of atoms
-func extractPDBChains(atoms []*Atom) (map[string][]*Aminoacid, error) {
+func extractPDBChains(raw []byte) (map[string][]*Aminoacid, error) {
+	atoms, err := extractPDBAtoms(raw)
+	if err != nil {
+		return nil, fmt.Errorf("parsing PDB atoms: %v", err)
+	}
 	if len(atoms) == 0 {
 		return nil, errors.New("empty atoms slice")
 	}
@@ -64,7 +68,7 @@ func extractPDBChains(atoms []*Atom) (map[string][]*Aminoacid, error) {
 			if end {
 				residueAtoms = append(residueAtoms, atom)
 			}
-			aa, err := NewAminoacid(lastResAtom.Chain, lastResAtom.ResidueNumber, lastResAtom.Residue, residueAtoms)
+			aa, err := NewAminoacid(lastResAtom.ResidueNumber, lastResAtom.Residue, residueAtoms)
 			if err != nil {
 				return nil, fmt.Errorf("cannot parse aminoacid: %v", atom.Residue)
 			}
