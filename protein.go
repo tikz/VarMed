@@ -1,4 +1,4 @@
-package protein
+package main
 
 import (
 	"errors"
@@ -11,9 +11,9 @@ import (
 
 // Protein contains all the raw and parsed data for a protein
 type Protein struct {
-	UniProt  *UniProt
-	Crystals []*pdb.PDB
-	// BestCrystal *pdb.PDB
+	UniProt     *UniProt
+	Crystals    []*pdb.PDB `json:"-"`
+	PDBAnalysis []*PDBAnalysis
 }
 
 // UniProt contains general protein data retrieved from UniProt
@@ -57,12 +57,6 @@ func (p *Protein) extract() error {
 		return fmt.Errorf("extracting crystals from UniProt TXT: %v", err)
 	}
 	p.Crystals = crystals
-
-	// bestCrystal, err := pickBestCrystal(p.Crystals)
-	// if err != nil {
-	// 	return fmt.Errorf("choosing best crystal: %v", err)
-	// }
-	// p.BestCrystal = bestCrystal
 
 	return nil
 }
@@ -111,41 +105,4 @@ func (p *Protein) extractCrystals() (crystals []*pdb.PDB, err error) {
 	}
 
 	return crystals, nil
-}
-
-// pickBestCrystal picks the best crystal to our criteria from the available ones
-func pickBestCrystal(crystals []*pdb.PDB) (*pdb.PDB, error) {
-	bestCovLength := crystals[0].Length
-	var bestCovCrystals []*pdb.PDB
-
-	// One or more crystals with the same best coverage
-	for _, crystal := range crystals {
-		if crystal.Length >= 20 {
-			if crystal.Length > bestCovLength {
-				bestCovLength = crystal.Length
-				bestCovCrystals = []*pdb.PDB{crystal}
-			} else {
-				if crystal.Length == bestCovLength {
-					bestCovCrystals = append(bestCovCrystals, crystal)
-				}
-			}
-		}
-	}
-
-	if len(bestCovCrystals) == 0 {
-		return nil, errors.New("no suitable crystal with >= 20 aminoacids found")
-	}
-
-	// From the crystals with the best coverage, pick the one with the best resolution
-	var bestResCrystal *pdb.PDB = bestCovCrystals[0]
-	for _, crystal := range bestCovCrystals {
-		if crystal.Resolution < bestResCrystal.Resolution {
-			bestResCrystal = crystal
-		}
-	}
-
-	// TODO: !! a reasonable structure for having multiple PDB files with different ligands,
-	// also complexes (maybe Protein{} pointers)
-
-	return bestResCrystal, nil
 }
