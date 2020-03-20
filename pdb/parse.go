@@ -50,6 +50,7 @@ func extractPDBChains(raw []byte) (map[string]map[int64]*Aminoacid, error) {
 
 	chains := make(map[string]map[int64]*Aminoacid)
 
+	var aa *Aminoacid
 	for _, atom := range atoms {
 		chain, chainOk := chains[atom.Chain]
 		pos, posOk := chain[atom.ResidueNumber]
@@ -58,7 +59,7 @@ func extractPDBChains(raw []byte) (map[string]map[int64]*Aminoacid, error) {
 			chains[atom.Chain] = make(map[int64]*Aminoacid)
 		}
 		if !posOk {
-			aa, err := NewAminoacid(atom.ResidueNumber, atom.Residue, []*Atom{atom})
+			aa, err = NewAminoacid(atom.ResidueNumber, atom.Residue, []*Atom{atom})
 			if err != nil {
 				return nil, fmt.Errorf("cannot parse aminoacid: %v", atom.Residue)
 			}
@@ -66,6 +67,8 @@ func extractPDBChains(raw []byte) (map[string]map[int64]*Aminoacid, error) {
 		} else {
 			pos.Atoms = append(pos.Atoms, atom)
 		}
+		// Parent ref
+		atom.Aminoacid = aa
 	}
 
 	return chains, nil
