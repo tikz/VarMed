@@ -6,15 +6,18 @@ import (
 	"varq/pdb"
 )
 
+// BindingAnalysis holds the collected data in the binding analysis step
 type BindingAnalysis struct {
 	Pockets []*fpocket.Pocket
+	Error   error
 }
 
-func NewBindingAnalysis(pdb *pdb.PDB) (*BindingAnalysis, error) {
+// RunBindingAnalysis starts the binding analysis step
+func RunBindingAnalysis(pdb *pdb.PDB, results chan<- *BindingAnalysis) {
 	pockets, err := fpocket.Run(pdb)
 	if err != nil {
-		return nil, fmt.Errorf("running Fpocket: %v", err)
+		results <- &BindingAnalysis{Error: fmt.Errorf("running Fpocket: %v", err)}
 	}
 
-	return &BindingAnalysis{Pockets: pockets}, nil
+	results <- &BindingAnalysis{Pockets: pockets}
 }

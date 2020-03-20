@@ -12,17 +12,20 @@ import (
 	"varq/pdb"
 )
 
+//Pocket represents a single pocket found with Fpocket (pocketN_atm.pdb)
 type Pocket struct {
 	Name      string
 	DrugScore float64
 	Chains    map[string]map[int64]*pdb.Aminoacid
 }
 
+// Run creates a temp file of the specified PDB structure, runs Fpocket on it and parses the results
 func Run(crystal *pdb.PDB) (pockets []*Pocket, err error) {
 	// Create tmp file with the PDB data
 	fileName := "varq_" + crystal.ID
 	path := "/tmp/" + fileName + ".pdb"
 	outPath := "/tmp/" + fileName + "_out"
+
 	// Delete tmp files on function exit
 	defer func() {
 		os.Remove(path)
@@ -34,7 +37,7 @@ func Run(crystal *pdb.PDB) (pockets []*Pocket, err error) {
 		return nil, err
 	}
 
-	// Run FPocket
+	// Run Fpocket
 	out, err := exec.Command("fpocket", "-f", path).CombinedOutput()
 	if err != nil {
 		return nil, err
@@ -55,13 +58,13 @@ func Run(crystal *pdb.PDB) (pockets []*Pocket, err error) {
 
 func walkPocketDir(dir string) (pockets []*Pocket, err error) {
 	err = filepath.Walk(dir, func(file string, info os.FileInfo, err error) error {
-		// For each pocket PDB file
+		// For each Fpocket result PDB file
 		if strings.Contains(file, "_atm.pdb") {
 			data, err := ioutil.ReadFile(file)
 			if err != nil {
 				return err
 			}
-			// Extract drug score from FPocket result PDB
+			// Extract drug score
 			regexScore, _ := regexp.Compile("Drug Score.*: ([0-9.]*)")
 			drugScore, err := strconv.ParseFloat(regexScore.FindAllStringSubmatch(string(data), -1)[0][1], 64)
 			if err != nil {
@@ -70,6 +73,7 @@ func walkPocketDir(dir string) (pockets []*Pocket, err error) {
 
 			// Druggability score threshold as VarQ spec
 			if drugScore > 0.5 {
+				// then load PDB
 				pocketPDB := &pdb.PDB{RawPDB: data}
 				err := pocketPDB.ExtractChains()
 				if err != nil {
