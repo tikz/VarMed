@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"varq/config"
+	"varq/interaction"
+	"varq/pdb"
 	"varq/protein"
 )
 
@@ -74,6 +76,10 @@ func main() {
 	// p, err := protein.NewProtein("P69892")
 	// interaction.NewInteraction(p.BestCrystal.Chains)
 	// fmt.Println("newp err:", err)
+
+	testPDB := pdb.PDB{ID: "1ZNI"}
+	testPDB.Fetch()
+	interaction.NewInteraction(&testPDB)
 
 	// REST API entrypoints
 	http.HandleFunc("/status", statusEndpoint)
