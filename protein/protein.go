@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strconv"
 	"varq/http"
-	"varq/protein/pdb"
+	"varq/pdb"
 )
 
 // Protein contains all the raw and parsed data for a protein

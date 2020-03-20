@@ -39,7 +39,7 @@ func extractPDBAtoms(raw []byte) ([]*Atom, error) {
 }
 
 // extractPDBChains extracts the aminoacid chains from a slice of atoms
-func extractPDBChains(raw []byte) (map[string][]*Aminoacid, error) {
+func extractPDBChains(raw []byte) (map[string]map[int64]*Aminoacid, error) {
 	atoms, err := extractPDBAtoms(raw)
 	if err != nil {
 		return nil, fmt.Errorf("parsing PDB atoms: %v", err)
@@ -48,35 +48,23 @@ func extractPDBChains(raw []byte) (map[string][]*Aminoacid, error) {
 		return nil, errors.New("empty atoms slice")
 	}
 
-	chains := make(map[string][]*Aminoacid)
-	var chain []*Aminoacid
+	chains := make(map[string]map[int64]*Aminoacid)
 
-	var residueAtoms []*Atom
-	lastResAtom := atoms[0]
-	for i, atom := range atoms {
-		if atom.Chain != lastResAtom.Chain {
-			chains[lastResAtom.Chain] = chain
-			lastResAtom = atom
-			chain = nil
+	for _, atom := range atoms {
+		chain, chainOk := chains[atom.Chain]
+		pos, posOk := chain[atom.ResidueNumber]
+
+		if !chainOk {
+			chains[atom.Chain] = make(map[int64]*Aminoacid)
 		}
-
-		end := i == len(atoms)-1
-		if atom.ResidueNumber == lastResAtom.ResidueNumber && !end {
-			residueAtoms = append(residueAtoms, atom)
-		} else {
-			if end {
-				residueAtoms = append(residueAtoms, atom)
-			}
-			aa, err := NewAminoacid(lastResAtom.ResidueNumber, lastResAtom.Residue, residueAtoms)
+		if !posOk {
+			aa, err := NewAminoacid(atom.ResidueNumber, atom.Residue, []*Atom{atom})
 			if err != nil {
 				return nil, fmt.Errorf("cannot parse aminoacid: %v", atom.Residue)
 			}
-			chain = append(chain, aa)
-			if end {
-				chains[lastResAtom.Chain] = chain
-			}
-			residueAtoms = nil
-			lastResAtom = atom
+			chains[atom.Chain][atom.ResidueNumber] = aa
+		} else {
+			pos.Atoms = append(pos.Atoms, atom)
 		}
 	}
 
