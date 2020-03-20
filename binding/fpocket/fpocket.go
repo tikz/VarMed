@@ -69,7 +69,7 @@ func walkPocketDir(dir string) (pockets []*Pocket, err error) {
 			}
 
 			// Druggability score threshold as VarQ spec
-			if drugScore > 0.00001 {
+			if drugScore > 0.5 {
 				pocketPDB := &pdb.PDB{RawPDB: data}
 				err := pocketPDB.ExtractChains()
 				if err != nil {
