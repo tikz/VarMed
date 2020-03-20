@@ -20,7 +20,7 @@ type PDB struct {
 	Method     string
 	Resolution float64
 	Length     int64 // Sum of chains length
-	Chains     map[string][]*Aminoacid
+	Chains     map[string]map[int64]*Aminoacid
 }
 
 // Fetch populates the instance with parsed data retrieved from RCSB
@@ -48,9 +48,9 @@ func (pdb *PDB) Fetch() error {
 	pdb.RawPDB = rawPDB
 	pdb.RawCIF = rawCIF
 
-	pdb.Chains, err = extractPDBChains(pdb.RawPDB)
+	err = pdb.ExtractChains()
 	if err != nil {
-		return fmt.Errorf("parsing chains: %v", err)
+		return err
 	}
 
 	// Optional data, but can be nice to have
@@ -63,5 +63,14 @@ func (pdb *PDB) Fetch() error {
 	end := time.Since(start)
 	log.Printf("[UniProt %s] PDB %s loaded in %d msecs", pdb.UniProtID, pdb.ID, end.Milliseconds())
 
+	return nil
+}
+
+func (pdb *PDB) ExtractChains() error {
+	chains, err := extractPDBChains(pdb.RawPDB)
+	if err != nil {
+		return fmt.Errorf("parsing chains: %v", err)
+	}
+	pdb.Chains = chains
 	return nil
 }

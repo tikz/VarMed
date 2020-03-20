@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"time"
-	"varq/protein/pdb"
+	"varq/pdb"
 )
 
 func pipelineCrystalWorker(crystalChan <-chan *pdb.PDB, errChan chan<- error) {
@@ -32,7 +32,7 @@ func RunPipeline(uniprotID string) (*Protein, error) {
 	errChan := make(chan error, length)
 
 	// Fetch all crystals in parallel
-	for w := 1; w <= 10; w++ {
+	for w := 1; w <= 20; w++ {
 		go pipelineCrystalWorker(crystalChan, errChan)
 	}
 
