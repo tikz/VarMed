@@ -2,12 +2,14 @@ package interaction
 
 import (
 	"math"
+	"time"
 	"varq/pdb"
 )
 
 // InteractionAnalysis holds the collected data in the interaction analysis step
 type InteractionAnalysis struct {
 	Interactions []*AminoacidsInteraction
+	Duration     time.Duration
 	Error        error
 }
 
@@ -28,7 +30,9 @@ type AminoacidsInteraction struct {
 // RunInteractionAnalysis starts the interaction analysis step
 func RunInteractionAnalysis(p *pdb.PDB, results chan<- *InteractionAnalysis) {
 	// TODO: too trusting of the data sent by the external caller, do error checking around here.
-	results <- &InteractionAnalysis{Interactions: calculateChainsInteraction(p.Chains)}
+	start := time.Now()
+	interactions := calculateChainsInteraction(p.Chains)
+	results <- &InteractionAnalysis{Interactions: interactions, Duration: time.Since(start)}
 }
 
 // calculateDistance returns the distance between two atoms

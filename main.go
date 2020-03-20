@@ -5,9 +5,6 @@ import (
 	"log"
 	"net/http"
 	"varq/config"
-	"varq/interaction"
-	"varq/pdb"
-	"varq/protein"
 )
 
 var (
@@ -44,7 +41,7 @@ func proteinEndpoint(w http.ResponseWriter, r *http.Request) {
 	uniprotID := params[0]
 	log.Println("New request from", r.RemoteAddr, "- UniProt", uniprotID)
 
-	p, err := protein.RunPipeline(uniprotID)
+	p, err := RunPipeline(uniprotID)
 	if err != nil {
 		w.Write(errorResponse(err.Error()))
 		return
@@ -77,9 +74,9 @@ func main() {
 	// interaction.NewInteraction(p.BestCrystal.Chains)
 	// fmt.Println("newp err:", err)
 
-	testPDB := pdb.PDB{ID: "1ZNI"}
-	testPDB.Fetch()
-	interaction.NewInteraction(&testPDB)
+	// testPDB := pdb.PDB{ID: "1ZNI"}
+	// testPDB.Fetch()
+	// interaction.RunInteractionAnalysis(&testPDB, nil)
 
 	// REST API entrypoints
 	http.HandleFunc("/status", statusEndpoint)

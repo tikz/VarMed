@@ -26,6 +26,7 @@ var aas = [...][3]string{
 	[3]string{"Tryptophan", "Trp", "W"},
 	[3]string{"Tyrosine", "Tyr", "Y"},
 	[3]string{"Valine", "Val", "V"},
+	[3]string{"Unknown", "Unk", "X"},
 }
 
 // Aminoacid represents a single aminoacid. Holds all the ways that can be represented as a string.
