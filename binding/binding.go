@@ -6,15 +6,15 @@ import (
 	"varq/pdb"
 )
 
-type Binding struct {
+type BindingAnalysis struct {
 	Pockets []*fpocket.Pocket
 }
 
-func NewBinding(pdb *pdb.PDB) (*Binding, error) {
+func NewBindingAnalysis(pdb *pdb.PDB) (*BindingAnalysis, error) {
 	pockets, err := fpocket.Run(pdb)
 	if err != nil {
 		return nil, fmt.Errorf("running Fpocket: %v", err)
 	}
 
-	return &Binding{Pockets: pockets}, nil
+	return &BindingAnalysis{Pockets: pockets}, nil
 }
