@@ -47,14 +47,9 @@ func NewAminoacid(pos int64, input string, atoms []*Atom) (*Aminoacid, error) {
 	aminoacid := &Aminoacid{
 		Position: pos,
 		Name:     r[0],
-		Abbrv1:   r[1],
-		Abbrv3:   r[2],
+		Abbrv3:   r[1],
+		Abbrv1:   r[2],
 		Atoms:    atoms,
-	}
-
-	// Add parent reference
-	for _, atom := range atoms {
-		atom.Aminoacid = aminoacid
 	}
 
 	return aminoacid, err
