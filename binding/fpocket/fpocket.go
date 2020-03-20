@@ -2,7 +2,6 @@ package fpocket
 
 import (
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -76,7 +75,6 @@ func walkPocketDir(dir string) (pockets []*Pocket, err error) {
 				if err != nil {
 					return err
 				}
-				fmt.Println(pocketPDB.Chains)
 				pocket := &Pocket{
 					Name:      file,
 					DrugScore: drugScore,
