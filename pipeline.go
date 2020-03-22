@@ -84,8 +84,8 @@ func RunPipeline(crystals []*pdb.PDB) (analyses []*Analysis, err error) {
 	return analyses, nil
 }
 
-// RunPipelineFromUniProt grabs and analyses all structures from a given UniProt ID.
-func RunPipelineFromUniProt(uniprotID string) ([]*Analysis, error) {
+// RunPipelineForUniProt grabs and analyses all structures from a given UniProt ID.
+func RunPipelineForUniProt(uniprotID string) ([]*Analysis, error) {
 	start := time.Now()
 
 	u, err := uniprot.NewUniProt(uniprotID)
@@ -103,18 +103,21 @@ func RunPipelineFromUniProt(uniprotID string) ([]*Analysis, error) {
 	return analyses, nil
 }
 
-// RunPipelineFromPDB grabs and analyses a single structure from a given PDB ID.
-func RunPipelineFromPDB(PDBID string) ([]*Analysis, error) {
+// RunPipelineForPDBs grabs and analyses structures from a slice of given PDB IDs.
+func RunPipelineForPDBs(PDBIDs []string) ([]*Analysis, error) {
 	start := time.Now()
 
-	crystal := pdb.PDB{ID: PDBID}
+	var crystals []*pdb.PDB
+	for _, ID := range PDBIDs {
+		crystals = append(crystals, &pdb.PDB{ID: ID})
+	}
 
-	analyses, err := RunPipeline([]*pdb.PDB{&crystal})
+	analyses, err := RunPipeline(crystals)
 	if err != nil {
 		return nil, fmt.Errorf("analyzing crystals: %v", err)
 	}
 
 	end := time.Since(start)
-	log.Printf("Finished PDB %s in %f secs", PDBID, end.Seconds())
+	log.Printf("Finished PDBs %s in %f secs", PDBIDs, end.Seconds())
 	return analyses, nil
 }
