@@ -76,14 +76,17 @@ func extractPDBChains(raw []byte) (map[string]map[int64]*Aminoacid, error) {
 
 // CIF contains additional data that in PDB files is included under the REMARK tag, which is not standarized and hard to parse.
 
-// extractCIFTitle extracts the main publication title from the CIF file
-func extractCIFTitle(raw []byte) (string, error) {
-	regex, _ := regexp.Compile("(?s)_struct.title.*?'(.*?)'")
+func extractCIFLine(name string, pattern string, raw []byte) (string, error) {
+	regex, _ := regexp.Compile("(?s)" + pattern + "[ ]*(.*?)_")
 	matches := regex.FindAllStringSubmatch(string(raw), -1)
 	if len(matches) == 0 {
-		return "", errors.New("CIF title not found")
+		return "", errors.New("CIF " + name + " not found")
 	}
-	return matches[0][1], nil
+	match := matches[0][1]
+	match = strings.TrimSpace(match)
+	match = strings.Replace(match, "'", "", -1)
+
+	return match, nil
 }
 
 // extractCIFDate extracts the main publication date from the CIF file

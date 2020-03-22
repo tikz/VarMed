@@ -3,12 +3,12 @@ package pdb
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 	"varq/http"
 )
 
 type PDB struct {
-	UniProtID  string
 	ID         string
 	URL        string
 	PDBURL     string
@@ -26,7 +26,7 @@ type PDB struct {
 // Fetch populates the instance with parsed data retrieved from RCSB
 func (pdb *PDB) Fetch() error {
 	start := time.Now()
-	log.Printf("[UniProt %s] Downloading PDB file for %s", pdb.UniProtID, pdb.ID)
+	log.Printf("Downloading PDB file for %s", pdb.ID)
 	url := "https://www.rcsb.org/structure/" + pdb.ID
 	urlCIF := "https://files.rcsb.org/download/" + pdb.ID + ".cif"
 	rawCIF, err := http.Get(urlCIF)
@@ -34,34 +34,31 @@ func (pdb *PDB) Fetch() error {
 		return fmt.Errorf("download CIF file: %v", err)
 	}
 
-	log.Printf("[UniProt %s] Downloading CIF file for %s", pdb.UniProtID, pdb.ID)
+	log.Printf("Downloading CIF file for %s", pdb.ID)
 	urlPDB := "https://files.rcsb.org/download/" + pdb.ID + ".pdb"
 	rawPDB, err := http.Get(urlPDB)
 	if err != nil {
 		return fmt.Errorf("download PDB file: %v", err)
 	}
 
-	// Mandatory data
 	pdb.URL = url
 	pdb.PDBURL = urlPDB
 	pdb.CIFURL = urlCIF
 	pdb.RawPDB = rawPDB
 	pdb.RawCIF = rawCIF
 
-	err = pdb.ExtractChains()
+	err = pdb.ExtractCIFData()
 	if err != nil {
-		return err
+		return fmt.Errorf("extracting CIF data: %v", err)
 	}
 
-	// Optional data, but can be nice to have
-	if t, err := extractCIFTitle(pdb.RawCIF); err == nil {
-		pdb.Title = t
+	err = pdb.ExtractChains()
+	if err != nil {
+		return fmt.Errorf("extracting PDB atoms to chains: %v", err)
 	}
-	if d, err := extractCIFDate(pdb.RawCIF); err == nil {
-		pdb.Date = d
-	}
+
 	end := time.Since(start)
-	log.Printf("[UniProt %s] PDB %s loaded in %d msecs", pdb.UniProtID, pdb.ID, end.Milliseconds())
+	log.Printf("PDB %s loaded in %d msecs", pdb.ID, end.Milliseconds())
 
 	return nil
 }
@@ -72,5 +69,43 @@ func (pdb *PDB) ExtractChains() error {
 		return fmt.Errorf("parsing chains: %v", err)
 	}
 	pdb.Chains = chains
+
+	for _, chain := range pdb.Chains {
+		pdb.Length += int64(len(chain))
+	}
+
+	return nil
+}
+
+func (pdb *PDB) ExtractCIFData() error {
+	title, err := extractCIFLine("title", "_struct.title", pdb.RawCIF)
+	if err != nil {
+		return err
+	}
+
+	method, err := extractCIFLine("method", "_refine.pdbx_refine_id", pdb.RawCIF)
+	if err != nil {
+		return err
+	}
+
+	resolutionStr, err := extractCIFLine("resolution", "_refine.ls_d_res_high", pdb.RawCIF)
+	if err != nil {
+		return err
+	}
+	resolution, err := strconv.ParseFloat(resolutionStr, 64)
+	if err != nil {
+		return err
+	}
+
+	date, err := extractCIFDate(pdb.RawCIF)
+	if err != nil {
+		return err
+	}
+
+	pdb.Title = title
+	pdb.Method = method
+	pdb.Resolution = resolution
+	pdb.Date = date
+
 	return nil
 }

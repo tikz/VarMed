@@ -77,29 +77,10 @@ func (p *Protein) extractCrystals() (crystals []*pdb.PDB, err error) {
 			return nil, fmt.Errorf("parsing resolution %v as float: %v", resolution, err)
 		}
 
-		// Extract start and end positions for each chain, and calculate length sum
-		regexChains, _ := regexp.Compile("=([0-9]*)-([0-9]*)")
-		chains := regexChains.FindAllStringSubmatch(match[0], -1)
-		var totalLength int64
-		for _, chain := range chains {
-			fromPos, err := strconv.ParseInt(chain[1], 10, 64)
-			if err != nil {
-				return nil, fmt.Errorf("parsing from position %v as int: %v", fromPos, err)
-			}
-
-			toPos, err := strconv.ParseInt(chain[2], 10, 64)
-			if err != nil {
-				return nil, fmt.Errorf("parsing to position %v as int: %v", toPos, err)
-			}
-			totalLength += toPos - fromPos + 1
-		}
-
 		crystal := pdb.PDB{
-			UniProtID:  p.UniProt.ID,
 			ID:         match[1],
 			Method:     match[2],
 			Resolution: resolution,
-			Length:     totalLength,
 		}
 		crystals = append(crystals, &crystal)
 	}
