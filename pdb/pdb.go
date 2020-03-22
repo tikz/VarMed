@@ -9,24 +9,24 @@ import (
 )
 
 type PDB struct {
-	ID         string
-	URL        string
-	PDBURL     string
-	CIFURL     string
-	RawPDB     []byte `json:"-"`
-	RawCIF     []byte `json:"-"`
-	Title      string
-	Date       *time.Time
-	Method     string
-	Resolution float64
-	Length     int64 // Sum of chains length
-	Chains     map[string]map[int64]*Aminoacid
+	ID          string
+	URL         string
+	PDBURL      string
+	CIFURL      string
+	RawPDB      []byte `json:"-"`
+	RawCIF      []byte `json:"-"`
+	Title       string
+	Date        *time.Time
+	Method      string
+	Resolution  float64
+	TotalLength int64
+	Chains      map[string]map[int64]*Aminoacid `json:"-"`
 }
 
 // Fetch populates the instance with parsed data retrieved from RCSB
 func (pdb *PDB) Fetch() error {
 	start := time.Now()
-	log.Printf("Downloading PDB file for %s", pdb.ID)
+	log.Printf("Downloading PDB and CIF files for %s", pdb.ID)
 	url := "https://www.rcsb.org/structure/" + pdb.ID
 	urlCIF := "https://files.rcsb.org/download/" + pdb.ID + ".cif"
 	rawCIF, err := http.Get(urlCIF)
@@ -34,7 +34,6 @@ func (pdb *PDB) Fetch() error {
 		return fmt.Errorf("download CIF file: %v", err)
 	}
 
-	log.Printf("Downloading CIF file for %s", pdb.ID)
 	urlPDB := "https://files.rcsb.org/download/" + pdb.ID + ".pdb"
 	rawPDB, err := http.Get(urlPDB)
 	if err != nil {
@@ -71,7 +70,7 @@ func (pdb *PDB) ExtractChains() error {
 	pdb.Chains = chains
 
 	for _, chain := range pdb.Chains {
-		pdb.Length += int64(len(chain))
+		pdb.TotalLength += int64(len(chain))
 	}
 
 	return nil
