@@ -2,8 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"strings"
 	"varq/config"
 )
 
@@ -41,7 +45,7 @@ func proteinEndpoint(w http.ResponseWriter, r *http.Request) {
 	uniprotID := params[0]
 	log.Println("New request from", r.RemoteAddr, "- UniProt", uniprotID)
 
-	p, err := RunPipeline(uniprotID)
+	p, err := RunPipeline(uniprotID, nil)
 	if err != nil {
 		w.Write(errorResponse(err.Error()))
 		return
@@ -68,6 +72,34 @@ func init() {
 	cfg = c
 }
 
+func httpServe() {
+	// REST API entrypoints
+	http.HandleFunc("/status", statusEndpoint)
+	http.HandleFunc("/protein", proteinEndpoint)
+
+	log.Printf("Starting VarQ web server: http://127.0.0.1:%s/", cfg.HTTPServer.Port)
+	http.ListenAndServe(":"+cfg.HTTPServer.Port, nil)
+}
+
+func cliRun(uniprotID string, pdbIDs []string) {
+	if pdbIDs[0] == "" {
+		pdbIDs = nil
+	}
+	p, err := RunPipeline(uniprotID, pdbIDs)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, crystal := range p.PDBAnalysis {
+		out, _ := json.MarshalIndent(crystal, "", "\t")
+		err := ioutil.WriteFile(crystal.PDB.ID+".json", out, 0644)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+}
+
 func main() {
 	// !DEBUG
 	// p, err := protein.NewProtein("P69892")
@@ -77,11 +109,23 @@ func main() {
 	// testPDB := pdb.PDB{ID: "1ZNI"}
 	// testPDB.Fetch()
 	// interaction.RunInteractionAnalysis(&testPDB, nil)
+	uniprotFlag := flag.String("u", "", "UniProt ID")
+	pdbFlag := flag.String("p", "", "Only analyse specified PDB IDs for the given UniProt entry. One or more PDB IDs, comma separated")
 
-	// REST API entrypoints
-	http.HandleFunc("/status", statusEndpoint)
-	http.HandleFunc("/protein", proteinEndpoint)
+	flag.Parse()
+	pdbIDs := strings.Split(*pdbFlag, ",")
 
-	log.Printf("Starting VarQ web server: http://127.0.0.1:%s/", cfg.HTTPServer.Port)
-	http.ListenAndServe(":"+cfg.HTTPServer.Port, nil)
+	// for i, pdbID := range pdbIDs {
+	// 	pdbIDs[i] = strings.TrimSpace(pdbID)
+	// }
+
+	if len(pdbIDs) == 0 && *uniprotFlag == "" {
+		log.Fatal("Specified PDB ID(s) but no UniProt ID given. To see the help: ./" + os.Args[0] + " -h")
+	}
+
+	if *uniprotFlag != "" {
+		cliRun(*uniprotFlag, pdbIDs)
+	} else {
+		httpServe()
+	}
 }

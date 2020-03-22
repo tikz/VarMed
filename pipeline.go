@@ -51,13 +51,13 @@ func analyseCrystal(analysis *PDBAnalysis) *PDBAnalysis {
 		return analysis
 	}
 	analysis.Interaction = interactionRes
-	log.Printf("PDB %s interaction analysis done in %d ms", analysis.PDB.ID, interactionRes.Duration.Milliseconds())
+	log.Printf("PDB %s interaction analysis done in %d ns", analysis.PDB.ID, interactionRes.Duration.Nanoseconds())
 
 	return analysis
 }
 
 // RunPipeline manages the workers for parallel fetching and processing of protein data
-func RunPipeline(uniprotID string) (*Protein, error) {
+func RunPipeline(uniprotID string, pdbIDsFilter []string) (*Protein, error) {
 	start := time.Now()
 
 	p, err := NewProtein(uniprotID)
@@ -66,6 +66,10 @@ func RunPipeline(uniprotID string) (*Protein, error) {
 	}
 
 	length := len(p.Crystals)
+	if len(pdbIDsFilter) != 0 {
+		length = len(pdbIDsFilter)
+	}
+
 	crystalChan := make(chan *pdb.PDB, length)
 	analysisChan := make(chan *PDBAnalysis, length)
 
@@ -74,8 +78,25 @@ func RunPipeline(uniprotID string) (*Protein, error) {
 		go pipelineCrystalWorker(crystalChan, analysisChan)
 	}
 
-	for _, crystal := range p.Crystals {
-		crystalChan <- crystal
+	if len(pdbIDsFilter) == 0 {
+		// No PDB IDs specified, grab all crystals in the UniProt entry
+		for _, crystal := range p.Crystals {
+			crystalChan <- crystal
+		}
+	} else {
+		for _, pdbID := range pdbIDsFilter {
+			var exists bool
+			for _, crystal := range p.Crystals {
+				if pdbID == crystal.ID {
+					exists = true
+					crystalChan <- crystal
+				}
+			}
+			// User has specified a PDB ID that's not in the UniProt entry. Fail loudly.
+			if !exists {
+				return nil, fmt.Errorf("specified PDB ID %s not found inside UniProt entry %s", pdbID, p.UniProt.ID)
+			}
+		}
 	}
 	close(crystalChan)
 
