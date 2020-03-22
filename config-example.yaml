@@ -1,15 +1,16 @@
 http-client:
   user-agent: "VarQ - varq.qb.fcen.uba.ar"
-  timeout: 2
+  timeout: 120
 
 http-server:
   port: 3000
 
 database:
-  type: "sqlite" # "sqlite" or "postgresql"
-  # sqlite is recommended for simplified usage as a local app. In that case, the next 4 parameters are ignored.
-  
+  type: "sqlite"
   host: ""
   port: 1234
   username: ""
   password: ""
+
+varq:
+  fetch-workers: 16

@@ -17,8 +17,8 @@ type PDBAnalysis struct {
 	Error       error `json:"-"`
 }
 
-// pipelineCrystalWorker fetches a single PDB crystal file, then fires more goroutines to do each analysis in parallel
-func pipelineCrystalWorker(crystalChan <-chan *pdb.PDB, analysisChan chan<- *PDBAnalysis) {
+// pipelineStructureWorker fetches a single PDB crystal file, then fires more goroutines to do each analysis in parallel
+func pipelineStructureWorker(crystalChan <-chan *pdb.PDB, analysisChan chan<- *PDBAnalysis) {
 	for crystal := range crystalChan {
 		err := crystal.Fetch()
 		if err != nil {
@@ -26,11 +26,11 @@ func pipelineCrystalWorker(crystalChan <-chan *pdb.PDB, analysisChan chan<- *PDB
 			continue
 		}
 
-		analysisChan <- analyseCrystal(&PDBAnalysis{PDB: crystal})
+		analysisChan <- analyseStructure(&PDBAnalysis{PDB: crystal})
 	}
 }
 
-func analyseCrystal(analysis *PDBAnalysis) *PDBAnalysis {
+func analyseStructure(analysis *PDBAnalysis) *PDBAnalysis {
 	bindingChan := make(chan *binding.BindingAnalysis)
 	interactionChan := make(chan *interaction.InteractionAnalysis)
 
@@ -75,7 +75,7 @@ func RunPipeline(uniprotID string, pdbIDsFilter []string) (*Protein, error) {
 
 	// Fetch all crystals in parallel
 	for w := 1; w <= 20; w++ {
-		go pipelineCrystalWorker(crystalChan, analysisChan)
+		go pipelineStructureWorker(crystalChan, analysisChan)
 	}
 
 	if len(pdbIDsFilter) == 0 {

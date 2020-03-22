@@ -29,7 +29,6 @@ type AminoacidsInteraction struct {
 
 // RunInteractionAnalysis starts the interaction analysis step
 func RunInteractionAnalysis(p *pdb.PDB, results chan<- *InteractionAnalysis) {
-	// TODO: too trusting of the data sent by the external caller, do error checking around here.
 	start := time.Now()
 	interactions := calculateChainsInteraction(p.Chains)
 	results <- &InteractionAnalysis{Interactions: interactions, Duration: time.Since(start)}

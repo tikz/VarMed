@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
-	"strconv"
 	"varq/http"
 	"varq/pdb"
 )
@@ -72,15 +71,8 @@ func (p *Protein) extractCrystals() (crystals []*pdb.PDB, err error) {
 
 	// Parse each PDB match in TXT
 	for _, match := range matches {
-		resolution, err := strconv.ParseFloat(match[3], 64)
-		if err != nil {
-			return nil, fmt.Errorf("parsing resolution %v as float: %v", resolution, err)
-		}
-
 		crystal := pdb.PDB{
-			ID:         match[1],
-			Method:     match[2],
-			Resolution: resolution,
+			ID: match[1],
 		}
 		crystals = append(crystals, &crystal)
 	}
