@@ -7,30 +7,32 @@ import (
 	"varq/binding"
 	"varq/interaction"
 	"varq/pdb"
+	"varq/uniprot"
 )
 
-// PDBAnalysis contains all pipeline steps results for an associated PDB entry
-type PDBAnalysis struct {
+// Analysis contains all pipeline steps results for a single PDB entry.
+type Analysis struct {
 	PDB         *pdb.PDB
 	Binding     *binding.BindingAnalysis
 	Interaction *interaction.InteractionAnalysis
 	Error       error `json:"-"`
 }
 
-// pipelineStructureWorker fetches a single PDB crystal file, then fires more goroutines to do each analysis in parallel
-func pipelineStructureWorker(crystalChan <-chan *pdb.PDB, analysisChan chan<- *PDBAnalysis) {
+// pipelineStructureWorker fetches a single PDB crystal file.
+func pipelineStructureWorker(crystalChan <-chan *pdb.PDB, analysisChan chan<- *Analysis) {
 	for crystal := range crystalChan {
 		err := crystal.Fetch()
 		if err != nil {
-			analysisChan <- &PDBAnalysis{PDB: crystal, Error: fmt.Errorf("PDB %s: %v", crystal.ID, err)}
+			analysisChan <- &Analysis{PDB: crystal, Error: fmt.Errorf("PDB %s: %v", crystal.ID, err)}
 			continue
 		}
 
-		analysisChan <- analyseStructure(&PDBAnalysis{PDB: crystal})
+		analysisChan <- analyseStructure(&Analysis{PDB: crystal})
 	}
 }
 
-func analyseStructure(analysis *PDBAnalysis) *PDBAnalysis {
+// analyseStructure runs each available analysis in parallel for a single structure.
+func analyseStructure(analysis *Analysis) *Analysis {
 	bindingChan := make(chan *binding.BindingAnalysis)
 	interactionChan := make(chan *interaction.InteractionAnalysis)
 
@@ -51,52 +53,23 @@ func analyseStructure(analysis *PDBAnalysis) *PDBAnalysis {
 		return analysis
 	}
 	analysis.Interaction = interactionRes
-	log.Printf("PDB %s interaction analysis done in %d ns", analysis.PDB.ID, interactionRes.Duration.Nanoseconds())
+	log.Printf("PDB %s interaction analysis done in %d ms", analysis.PDB.ID, interactionRes.Duration.Milliseconds())
 
 	return analysis
 }
 
-// RunPipeline manages the workers for parallel fetching and processing of protein data
-func RunPipeline(uniprotID string, pdbIDsFilter []string) (*Protein, error) {
-	start := time.Now()
-
-	p, err := NewProtein(uniprotID)
-	if err != nil {
-		return nil, fmt.Errorf("run pipeline: %v", err)
-	}
-
-	length := len(p.Crystals)
-	if len(pdbIDsFilter) != 0 {
-		length = len(pdbIDsFilter)
-	}
-
+func RunPipeline(crystals []*pdb.PDB) (analyses []*Analysis, err error) {
+	length := len(crystals)
 	crystalChan := make(chan *pdb.PDB, length)
-	analysisChan := make(chan *PDBAnalysis, length)
+	analysisChan := make(chan *Analysis, length)
 
-	// Fetch all crystals in parallel
+	// Launch crystal workers
 	for w := 1; w <= 20; w++ {
 		go pipelineStructureWorker(crystalChan, analysisChan)
 	}
 
-	if len(pdbIDsFilter) == 0 {
-		// No PDB IDs specified, grab all crystals in the UniProt entry
-		for _, crystal := range p.Crystals {
-			crystalChan <- crystal
-		}
-	} else {
-		for _, pdbID := range pdbIDsFilter {
-			var exists bool
-			for _, crystal := range p.Crystals {
-				if pdbID == crystal.ID {
-					exists = true
-					crystalChan <- crystal
-				}
-			}
-			// User has specified a PDB ID that's not in the UniProt entry. Fail loudly.
-			if !exists {
-				return nil, fmt.Errorf("specified PDB ID %s not found inside UniProt entry %s", pdbID, p.UniProt.ID)
-			}
-		}
+	for _, crystal := range crystals {
+		crystalChan <- crystal
 	}
 	close(crystalChan)
 
@@ -105,10 +78,43 @@ func RunPipeline(uniprotID string, pdbIDsFilter []string) (*Protein, error) {
 		if analysis.Error != nil {
 			return nil, analysis.Error
 		}
-		p.PDBAnalysis = append(p.PDBAnalysis, analysis)
+		analyses = append(analyses, analysis)
+	}
+
+	return analyses, nil
+}
+
+// RunPipelineFromUniProt grabs and analyses all structures from a given UniProt ID.
+func RunPipelineFromUniProt(uniprotID string) ([]*Analysis, error) {
+	start := time.Now()
+
+	u, err := uniprot.NewUniProt(uniprotID)
+	if err != nil {
+		return nil, fmt.Errorf("run pipeline: %v", err)
+	}
+
+	analyses, err := RunPipeline(u.Crystals)
+	if err != nil {
+		return nil, fmt.Errorf("analyzing crystals: %v", err)
 	}
 
 	end := time.Since(start)
-	log.Printf("Finished UniProt %s in %f secs", p.UniProt.ID, end.Seconds())
-	return p, nil
+	log.Printf("Finished UniProt %s in %f secs", u.ID, end.Seconds())
+	return analyses, nil
+}
+
+// RunPipelineFromPDB grabs and analyses a single structure from a given PDB ID.
+func RunPipelineFromPDB(PDBID string) ([]*Analysis, error) {
+	start := time.Now()
+
+	crystal := pdb.PDB{ID: PDBID}
+
+	analyses, err := RunPipeline([]*pdb.PDB{&crystal})
+	if err != nil {
+		return nil, fmt.Errorf("analyzing crystals: %v", err)
+	}
+
+	end := time.Since(start)
+	log.Printf("Finished PDB %s in %f secs", PDBID, end.Seconds())
+	return analyses, nil
 }

@@ -1,4 +1,4 @@
-package main
+package uniprot
 
 import (
 	"errors"
@@ -8,23 +8,17 @@ import (
 	"varq/pdb"
 )
 
-// Protein contains all the raw and parsed data for a protein
-type Protein struct {
-	UniProt     *UniProt
-	Crystals    []*pdb.PDB `json:"-"`
-	PDBAnalysis []*PDBAnalysis
-}
-
 // UniProt contains general protein data retrieved from UniProt
 type UniProt struct {
-	ID     string
-	URL    string
-	TXTURL string
-	Raw    []byte `json:"-"`
+	ID       string
+	URL      string
+	TXTURL   string
+	Raw      []byte     `json:"-"`
+	Crystals []*pdb.PDB `json:"-"`
 }
 
-// NewProtein constructs a Protein instance from an UniProt accession ID
-func NewProtein(uniprotID string) (*Protein, error) {
+// NewUniProt constructs a Protein instance from an UniProt accession ID
+func NewUniProt(uniprotID string) (*UniProt, error) {
 	url := "https://www.uniprot.org/uniprot/" + uniprotID
 	txtURL := url + ".txt"
 	raw, err := http.Get(txtURL)
@@ -32,39 +26,37 @@ func NewProtein(uniprotID string) (*Protein, error) {
 		return nil, fmt.Errorf("get UniProt accession %v: %v", uniprotID, err)
 	}
 
-	p := Protein{
-		UniProt: &UniProt{
-			ID:     uniprotID,
-			URL:    url,
-			TXTURL: txtURL,
-			Raw:    raw,
-		},
+	u := &UniProt{
+		ID:     uniprotID,
+		URL:    url,
+		TXTURL: txtURL,
+		Raw:    raw,
 	}
 
 	// Parse UniProt TXT
-	err = p.extract()
+	err = u.extract()
 	if err != nil {
 		return nil, fmt.Errorf("extract PDB crystals %v: %v", uniprotID, err)
 	}
 
-	return &p, nil
+	return u, nil
 }
 
-func (p *Protein) extract() error {
-	crystals, err := p.extractCrystals()
+func (u *UniProt) extract() error {
+	crystals, err := u.extractCrystals()
 	if err != nil {
 		return fmt.Errorf("extracting crystals from UniProt TXT: %v", err)
 	}
-	p.Crystals = crystals
+	u.Crystals = crystals
 
 	return nil
 }
 
-func (p *Protein) extractCrystals() (crystals []*pdb.PDB, err error) {
+func (u *UniProt) extractCrystals() (crystals []*pdb.PDB, err error) {
 	// Regex match all PDB IDs in the UniProt TXT entry. X-ray only, ignore others (NMR, etc).
 	// https://regex101.com/r/BpJ3QB/1
 	regexPDB, _ := regexp.Compile("PDB;[ ]*(.*?);[ ]*(X.*?ray);[ ]*([0-9\\.]*).*?;.*?\n")
-	matches := regexPDB.FindAllStringSubmatch(string(p.UniProt.Raw), -1)
+	matches := regexPDB.FindAllStringSubmatch(string(u.Raw), -1)
 	if len(matches) == 0 {
 		return nil, errors.New("UniProt entry has no associated crystal PDB entries")
 	}
