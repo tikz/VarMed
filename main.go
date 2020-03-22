@@ -9,6 +9,8 @@ import (
 	"os"
 	"strings"
 	"varq/config"
+
+	"github.com/gorilla/mux"
 )
 
 var (
@@ -32,20 +34,31 @@ func errorResponse(msg string) []byte {
 	return out
 }
 
-// proteinEndpoint is the function for the GET /protein endpoint
-// Shows all parsed and calculated data for a given UniProt accession. For debug purposes only.
-func proteinEndpoint(w http.ResponseWriter, r *http.Request) {
-	params, ok := r.URL.Query()["uniprot"]
+// UniProtEndpoint is the function for the /uniprot/{id} endpoint
+// Shows parsed and calculated data for a given UniProt accession for debug purposes.
+func UniProtEndpoint(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	ID := vars["ID"]
+	log.Println("New request from", r.RemoteAddr, "- UniProt", ID)
 
-	if !ok || len(params[0]) < 1 {
-		w.Write(errorResponse("GET params not present in request."))
+	p, err := RunPipelineFromUniProt(ID)
+	if err != nil {
+		w.Write(errorResponse(err.Error()))
 		return
 	}
 
-	uniprotID := params[0]
-	log.Println("New request from", r.RemoteAddr, "- UniProt", uniprotID)
+	out, _ := json.Marshal(p)
+	w.Write(out)
+}
 
-	p, err := RunPipeline(uniprotID, nil)
+// PDBEndpoint is the function for the /uniprot/{id} endpoint
+// Shows parsed and calculated data for a given PDB for debug purposes.
+func PDBEndpoint(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	ID := vars["ID"]
+	log.Println("New request from", r.RemoteAddr, "- PDB", ID)
+
+	p, err := RunPipelineFromPDB(ID)
 	if err != nil {
 		w.Write(errorResponse(err.Error()))
 		return
@@ -74,8 +87,11 @@ func init() {
 
 func httpServe() {
 	// REST API entrypoints
-	http.HandleFunc("/status", statusEndpoint)
-	http.HandleFunc("/protein", proteinEndpoint)
+	r := mux.NewRouter()
+	r.HandleFunc("/status", statusEndpoint)
+	r.HandleFunc("/uniprot/{ID}", UniProtEndpoint)
+	r.HandleFunc("/pdb/{ID}", PDBEndpoint)
+	http.Handle("/", r)
 
 	log.Printf("Starting VarQ web server: http://127.0.0.1:%s/", cfg.HTTPServer.Port)
 	http.ListenAndServe(":"+cfg.HTTPServer.Port, nil)
@@ -85,12 +101,12 @@ func cliRun(uniprotID string, pdbIDs []string) {
 	if pdbIDs[0] == "" {
 		pdbIDs = nil
 	}
-	p, err := RunPipeline(uniprotID, pdbIDs)
+	analyses, err := RunPipelineFromUniProt(uniprotID)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, crystal := range p.PDBAnalysis {
+	for _, crystal := range analyses {
 		out, _ := json.MarshalIndent(crystal, "", "\t")
 		err := ioutil.WriteFile(crystal.PDB.ID+".json", out, 0644)
 		if err != nil {

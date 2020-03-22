@@ -9,7 +9,7 @@ import (
 
 // BindingAnalysis holds the collected data in the binding analysis step
 type BindingAnalysis struct {
-	Pockets  []*fpocket.Pocket
+	Pockets  []*fpocket.Pocket // Only pockets with drug score >0.5
 	Duration time.Duration
 	Error    error
 }
