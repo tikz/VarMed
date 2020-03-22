@@ -101,23 +101,15 @@ func cliRun(uniprotID string, pdbIDs []string) {
 }
 
 func main() {
-	// !DEBUG
-	// p, err := protein.NewProtein("P69892")
-	// interaction.NewInteraction(p.BestCrystal.Chains)
-	// fmt.Println("newp err:", err)
-
-	// testPDB := pdb.PDB{ID: "1ZNI"}
-	// testPDB.Fetch()
-	// interaction.RunInteractionAnalysis(&testPDB, nil)
 	uniprotFlag := flag.String("u", "", "UniProt ID")
 	pdbFlag := flag.String("p", "", "Only analyse specified PDB IDs for the given UniProt entry. One or more PDB IDs, comma separated")
 
 	flag.Parse()
 	pdbIDs := strings.Split(*pdbFlag, ",")
 
-	// for i, pdbID := range pdbIDs {
-	// 	pdbIDs[i] = strings.TrimSpace(pdbID)
-	// }
+	for i, pdbID := range pdbIDs {
+		pdbIDs[i] = strings.TrimSpace(pdbID)
+	}
 
 	if len(pdbIDs) == 0 && *uniprotFlag == "" {
 		log.Fatal("Specified PDB ID(s) but no UniProt ID given. To see the help: ./" + os.Args[0] + " -h")
