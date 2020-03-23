@@ -3,3 +3,4 @@ varq
 *.json
 *.pdb
 *.pyc
+__pycache__

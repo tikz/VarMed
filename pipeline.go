@@ -18,8 +18,8 @@ type Analysis struct {
 	Error       error `json:"-"`
 }
 
-// pipelineStructureWorker fetches a single PDB crystal file.
-func pipelineStructureWorker(crystalChan <-chan *pdb.PDB, analysisChan chan<- *Analysis) {
+// pipelinePDBWorker fetches a single PDB crystal file.
+func pipelinePDBWorker(crystalChan <-chan *pdb.PDB, analysisChan chan<- *Analysis) {
 	for crystal := range crystalChan {
 		err := crystal.Fetch()
 		if err != nil {
@@ -27,12 +27,12 @@ func pipelineStructureWorker(crystalChan <-chan *pdb.PDB, analysisChan chan<- *A
 			continue
 		}
 
-		analysisChan <- analyseStructure(&Analysis{PDB: crystal})
+		analysisChan <- analysePDB(&Analysis{PDB: crystal})
 	}
 }
 
-// analyseStructure runs each available analysis in parallel for a single structure.
-func analyseStructure(analysis *Analysis) *Analysis {
+// analysePDB runs each available analysis in parallel for a single structure.
+func analysePDB(analysis *Analysis) *Analysis {
 	bindingChan := make(chan *binding.BindingAnalysis)
 	interactionChan := make(chan *interaction.InteractionAnalysis)
 
@@ -65,7 +65,7 @@ func RunPipeline(crystals []*pdb.PDB) (analyses []*Analysis, err error) {
 
 	// Launch crystal workers
 	for w := 1; w <= 20; w++ {
-		go pipelineStructureWorker(crystalChan, analysisChan)
+		go pipelinePDBWorker(crystalChan, analysisChan)
 	}
 
 	for _, crystal := range crystals {
