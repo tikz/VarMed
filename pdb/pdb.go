@@ -9,18 +9,20 @@ import (
 )
 
 type PDB struct {
-	ID          string
-	URL         string
-	PDBURL      string
-	CIFURL      string
-	RawPDB      []byte `json:"-"`
-	RawCIF      []byte `json:"-"`
-	Title       string
-	Date        *time.Time
-	Method      string
-	Resolution  float64
-	TotalLength int64
-	Chains      map[string]map[int64]*Aminoacid `json:"-"`
+	ID            string
+	URL           string
+	PDBURL        string
+	CIFURL        string
+	LocalPath     string
+	LocalFilename string
+	RawPDB        []byte `json:"-"`
+	RawCIF        []byte `json:"-"`
+	Title         string
+	Date          *time.Time
+	Method        string
+	Resolution    float64
+	TotalLength   int64
+	Chains        map[string]map[int64]*Aminoacid `json:"-"`
 }
 
 // Fetch populates the instance with parsed data retrieved from RCSB

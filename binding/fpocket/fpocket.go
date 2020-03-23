@@ -2,6 +2,7 @@ package fpocket
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -21,28 +22,20 @@ type Pocket struct {
 
 // Run creates a temp file of the specified PDB structure, runs Fpocket on it and parses the results
 func Run(crystal *pdb.PDB) (pockets []*Pocket, err error) {
-	// Create tmp file with the PDB data
-	fileName := "varq_" + crystal.ID
-	path := "/tmp/" + fileName + ".pdb"
-	outPath := "/tmp/" + fileName + "_out"
+	outPath := "/tmp/" + crystal.LocalFilename + "_out"
 
-	// Delete tmp files on function exit
+	// Delete Fpocket result files on function exit
 	defer func() {
-		os.Remove(path)
 		os.RemoveAll(outPath)
 	}()
 
-	err = ioutil.WriteFile(path, crystal.RawPDB, 0644)
-	if err != nil {
-		return nil, err
-	}
-
 	// Run Fpocket
-	out, err := exec.Command("fpocket", "-f", path).CombinedOutput()
+	out, err := exec.Command("fpocket", "-f", crystal.LocalPath).CombinedOutput()
 	if err != nil {
 		return nil, err
 	}
 	if strings.Contains(string(out), "failed") {
+		fmt.Println(string(out))
 		return nil, errors.New("FPocket failed")
 	}
 
@@ -73,7 +66,6 @@ func walkPocketDir(dir string) (pockets []*Pocket, err error) {
 
 			// Druggability score threshold as VarQ spec
 			if drugScore > 0.5 {
-				// then load PDB
 				pocketPDB := &pdb.PDB{RawPDB: data}
 				err := pocketPDB.ExtractChains()
 				if err != nil {
