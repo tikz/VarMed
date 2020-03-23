@@ -45,7 +45,7 @@ func analyseStructure(analysis *Analysis) *Analysis {
 		return analysis
 	}
 	analysis.Binding = bindingRes
-	log.Printf("PDB %s binding analysis done in %d ms", analysis.PDB.ID, bindingRes.Duration.Milliseconds())
+	log.Printf("PDB %s binding analysis done in %.3f secs", analysis.PDB.ID, bindingRes.Duration.Seconds())
 
 	interactionRes := <-interactionChan
 	if interactionRes.Error != nil {
@@ -53,7 +53,7 @@ func analyseStructure(analysis *Analysis) *Analysis {
 		return analysis
 	}
 	analysis.Interaction = interactionRes
-	log.Printf("PDB %s interaction analysis done in %d ms", analysis.PDB.ID, interactionRes.Duration.Milliseconds())
+	log.Printf("PDB %s interaction analysis done in %.3f secs", analysis.PDB.ID, interactionRes.Duration.Seconds())
 
 	return analysis
 }
@@ -99,7 +99,7 @@ func RunPipelineForUniProt(uniprotID string) ([]*Analysis, error) {
 	}
 
 	end := time.Since(start)
-	log.Printf("Finished UniProt %s in %f secs", u.ID, end.Seconds())
+	log.Printf("Finished UniProt %s in %.3f secs", u.ID, end.Seconds())
 	return analyses, nil
 }
 
@@ -118,6 +118,6 @@ func RunPipelineForPDBs(PDBIDs []string) ([]*Analysis, error) {
 	}
 
 	end := time.Since(start)
-	log.Printf("Finished PDBs %s in %f secs", PDBIDs, end.Seconds())
+	log.Printf("Finished PDBs %s in %.3f secs", PDBIDs, end.Seconds())
 	return analyses, nil
 }
