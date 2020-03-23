@@ -19,8 +19,8 @@ type Analysis struct {
 }
 
 // pipelinePDBWorker fetches a single PDB crystal file.
-func pipelinePDBWorker(crystalChan <-chan *pdb.PDB, analysisChan chan<- *Analysis) {
-	for crystal := range crystalChan {
+func pipelinePDBWorker(pdbChan <-chan *pdb.PDB, analysisChan chan<- *Analysis) {
+	for crystal := range pdbChan {
 		err := crystal.Fetch()
 		if err != nil {
 			analysisChan <- &Analysis{PDB: crystal, Error: fmt.Errorf("PDB %s: %v", crystal.ID, err)}
@@ -58,20 +58,20 @@ func analysePDB(analysis *Analysis) *Analysis {
 	return analysis
 }
 
-func RunPipeline(crystals []*pdb.PDB) (analyses []*Analysis, err error) {
-	length := len(crystals)
-	crystalChan := make(chan *pdb.PDB, length)
+func RunPipeline(pdbs []*pdb.PDB) (analyses []*Analysis, err error) {
+	length := len(pdbs)
+	pdbChan := make(chan *pdb.PDB, length)
 	analysisChan := make(chan *Analysis, length)
 
 	// Launch crystal workers
 	for w := 1; w <= 20; w++ {
-		go pipelinePDBWorker(crystalChan, analysisChan)
+		go pipelinePDBWorker(pdbChan, analysisChan)
 	}
 
-	for _, crystal := range crystals {
-		crystalChan <- crystal
+	for _, pdb := range pdbs {
+		pdbChan <- pdb
 	}
-	close(crystalChan)
+	close(pdbChan)
 
 	for a := 1; a <= length; a++ {
 		analysis := <-analysisChan
