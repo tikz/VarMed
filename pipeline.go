@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"time"
 	"varq/binding"
+	"varq/exposure"
 	"varq/interaction"
 	"varq/pdb"
 	"varq/uniprot"
@@ -15,6 +17,7 @@ type Analysis struct {
 	PDB         *pdb.PDB
 	Binding     *binding.BindingAnalysis
 	Interaction *interaction.InteractionAnalysis
+	Exposure    *exposure.ExposureAnalysis
 	Error       error `json:"-"`
 }
 
@@ -33,12 +36,29 @@ func pipelinePDBWorker(pdbChan <-chan *pdb.PDB, analysisChan chan<- *Analysis) {
 
 // analysePDB runs each available analysis in parallel for a single structure.
 func analysePDB(analysis *Analysis) *Analysis {
+	// Create temp PDB on filesystem for analysis with external tools
+	analysis.PDB.LocalFilename = "varq_" + analysis.PDB.ID
+	analysis.PDB.LocalPath = "/tmp/" + analysis.PDB.LocalFilename + ".pdb"
+
+	err := ioutil.WriteFile(analysis.PDB.LocalPath, analysis.PDB.RawPDB, 0644)
+	if err != nil {
+		analysis.Error = fmt.Errorf("create tmp PDB: %v", err)
+		return analysis
+	}
+
+	// defer func() {
+	// 	os.Remove(analysis.PDB.LocalPath)
+	// }()
+
 	bindingChan := make(chan *binding.BindingAnalysis)
 	interactionChan := make(chan *interaction.InteractionAnalysis)
+	exposureChan := make(chan *exposure.ExposureAnalysis)
 
 	go binding.RunBindingAnalysis(analysis.PDB, bindingChan)
 	go interaction.RunInteractionAnalysis(analysis.PDB, interactionChan)
+	go exposure.RunExposureAnalysis(analysis.PDB, exposureChan)
 
+	// TODO: Maybe refactor these repeated patterns
 	bindingRes := <-bindingChan
 	if bindingRes.Error != nil {
 		analysis.Error = fmt.Errorf("binding analysis: %v", bindingRes.Error)
@@ -54,6 +74,14 @@ func analysePDB(analysis *Analysis) *Analysis {
 	}
 	analysis.Interaction = interactionRes
 	log.Printf("PDB %s interaction analysis done in %.3f secs", analysis.PDB.ID, interactionRes.Duration.Seconds())
+
+	exposureRes := <-exposureChan
+	if exposureRes.Error != nil {
+		analysis.Error = fmt.Errorf("exposure analysis: %v", exposureRes.Error)
+		return analysis
+	}
+	analysis.Exposure = exposureRes
+	log.Printf("PDB %s exposure analysis done in %.3f secs", analysis.PDB.ID, exposureRes.Duration.Seconds())
 
 	return analysis
 }
@@ -103,7 +131,7 @@ func RunPipelineForUniProt(uniprotID string) ([]*Analysis, error) {
 	return analyses, nil
 }
 
-// RunPipelineForPDBs grabs and analyses structures from a slice of given PDB IDs.
+// RunPipelineForPDBs grabs and analyses structures from a given slice of PDB IDs.
 func RunPipelineForPDBs(PDBIDs []string) ([]*Analysis, error) {
 	start := time.Now()
 

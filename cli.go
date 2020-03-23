@@ -20,17 +20,22 @@ func (i *arrayFlags) Set(value string) error {
 func cliRun(uniprotFlags arrayFlags, pdbFlags arrayFlags) {
 	var analyses []*Analysis
 
-	analyses, err := RunPipelineForPDBs(pdbFlags)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, uniprotID := range uniprotFlags {
-		a, err := RunPipelineForUniProt(uniprotID)
+	if len(pdbFlags) > 0 {
+		a, err := RunPipelineForPDBs(pdbFlags)
 		if err != nil {
 			log.Fatal(err)
 		}
-		analyses = append(analyses, a...)
+		analyses = a
+	}
+
+	if len(uniprotFlags) > 0 {
+		for _, uniprotID := range uniprotFlags {
+			a, err := RunPipelineForUniProt(uniprotID)
+			if err != nil {
+				log.Fatal(err)
+			}
+			analyses = append(analyses, a...)
+		}
 	}
 
 	dumpJSON(analyses)
