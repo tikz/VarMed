@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"time"
 	"varq/binding"
 	"varq/exposure"
@@ -46,9 +47,9 @@ func analysePDB(analysis *Analysis) *Analysis {
 		return analysis
 	}
 
-	// defer func() {
-	// 	os.Remove(analysis.PDB.LocalPath)
-	// }()
+	defer func() {
+		os.Remove(analysis.PDB.LocalPath)
+	}()
 
 	bindingChan := make(chan *binding.BindingAnalysis)
 	interactionChan := make(chan *interaction.InteractionAnalysis)
