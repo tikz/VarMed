@@ -19,9 +19,9 @@ residues = stored.residues[int(start):int(end)]
 cmd.set('dot_density', 1)
 
 cmd.set('dot_solvent', 0)
-res_area = [cmd.get_area(f'chain {res[0]} and resi {res[1]}') for res in residues]
+res_area = [cmd.get_area('chain %s and resi %s' % (res[0], res[1])) for res in residues]
 cmd.set('dot_solvent', 1)
-res_sasa = [cmd.get_area(f'chain {res[0]} and resi {res[1]}') for res in residues]
+res_sasa = [cmd.get_area('chain %s and resi %s' % (res[0], res[1])) for res in residues]
 
 
 for l in [res + [sasa / area] for res, sasa, area in zip(residues, res_sasa, res_area)]:
