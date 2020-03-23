@@ -57,7 +57,7 @@ func (pdb *PDB) Fetch() error {
 	}
 
 	end := time.Since(start)
-	log.Printf("PDB %s loaded in %d msecs", pdb.ID, end.Milliseconds())
+	log.Printf("PDB %s loaded in %.3f secs", pdb.ID, end.Seconds())
 
 	return nil
 }
