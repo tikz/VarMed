@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 	"varq/http"
 )
 
 type PDB struct {
+	UniProtID     string
 	ID            string
 	URL           string
 	PDBURL        string
@@ -56,6 +58,13 @@ func (pdb *PDB) Fetch() error {
 	err = pdb.ExtractChains()
 	if err != nil {
 		return fmt.Errorf("extracting PDB atoms to chains: %v", err)
+	}
+
+	if pdb.UniProtID == "" {
+		err = pdb.RetrieveUniProtID()
+		if err != nil {
+			return fmt.Errorf("retrieving UniProt ID: %v", err)
+		}
 	}
 
 	end := time.Since(start)
@@ -108,5 +117,22 @@ func (pdb *PDB) ExtractCIFData() error {
 	pdb.Resolution = resolution
 	pdb.Date = date
 
+	return nil
+}
+
+// RetrieveUniProtID retrieves the associated UniProt ID for the PDB, using the UniProt query API.
+func (pdb *PDB) RetrieveUniProtID() error {
+	url := "https://www.uniprot.org/uniprot/?query=database:(type:pdb%20" + pdb.ID + ")&format=list"
+	rawResp, err := http.Get(url)
+	if err != nil {
+		return fmt.Errorf("query API: %v", err)
+	}
+
+	lines := strings.Split(string(rawResp), "\n")
+	if len(lines) < 1 {
+		return fmt.Errorf("query API not found: %v", err)
+	}
+
+	pdb.UniProtID = lines[0]
 	return nil
 }

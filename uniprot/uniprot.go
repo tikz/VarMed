@@ -64,7 +64,8 @@ func (u *UniProt) extractCrystals() (crystals []*pdb.PDB, err error) {
 	// Parse each PDB match in TXT
 	for _, match := range matches {
 		crystal := pdb.PDB{
-			ID: match[1],
+			ID:        match[1],
+			UniProtID: u.ID,
 		}
 		crystals = append(crystals, &crystal)
 	}
