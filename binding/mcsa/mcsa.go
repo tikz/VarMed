@@ -10,7 +10,7 @@ import (
 )
 
 // CatalyticResidues holds the protein's residues that have catalytic activity according to M-CSA.
-type CatalyticResidues struct {
+type Catalytic struct {
 	Chains map[string]map[int64][]*pdb.Aminoacid
 }
 
@@ -46,7 +46,7 @@ type residueChain struct {
 }
 
 // GetCSA queries M-CSA for the catalytic positions of the given UniProt ID
-func GetCSA(uniprotID string) (*CatalyticResidues, error) {
+func GetCSA(uniprotID string) (*Catalytic, error) {
 	url := "https://www.ebi.ac.uk/thornton-srv/m-csa/api/entries/?" + url.Values{
 		"format":                                 {"json"},
 		"entries.proteins.sequences.uniprot_ids": {uniprotID},
@@ -68,7 +68,7 @@ func GetCSA(uniprotID string) (*CatalyticResidues, error) {
 	}
 
 	chains := make(map[string]map[int64][]*pdb.Aminoacid)
-	cs := CatalyticResidues{Chains: chains}
+	cs := Catalytic{Chains: chains}
 
 	for _, res := range response.Results[0].Residues {
 		for _, resC := range res.ResidueChains {

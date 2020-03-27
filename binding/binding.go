@@ -10,10 +10,10 @@ import (
 
 // BindingAnalysis holds the collected data in the binding analysis step
 type BindingAnalysis struct {
-	Pockets           []*fpocket.Pocket // Only pockets with drug score >0.5
-	CatalyticResidues *mcsa.CatalyticResidues
-	Duration          time.Duration
-	Error             error
+	Pockets   []*fpocket.Pocket // Only pockets with drug score >0.5
+	Catalytic *mcsa.Catalytic
+	Duration  time.Duration
+	Error     error
 }
 
 // RunBindingAnalysis starts the binding analysis step
@@ -29,5 +29,5 @@ func RunBindingAnalysis(pdb *pdb.PDB, results chan<- *BindingAnalysis) {
 		results <- &BindingAnalysis{Error: fmt.Errorf("M-CSA: %v", err)}
 	}
 
-	results <- &BindingAnalysis{Pockets: pockets, CatalyticResidues: csa, Duration: time.Since(start)}
+	results <- &BindingAnalysis{Pockets: pockets, Catalytic: csa, Duration: time.Since(start)}
 }
