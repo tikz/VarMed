@@ -1,6 +1,7 @@
 package pdb
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strconv"
@@ -130,7 +131,7 @@ func (pdb *PDB) RetrieveUniProtID() error {
 
 	lines := strings.Split(string(rawResp), "\n")
 	if len(lines) < 1 {
-		return fmt.Errorf("query API not found: %v", err)
+		return errors.New("query API not found")
 	}
 
 	pdb.UniProtID = lines[0]
