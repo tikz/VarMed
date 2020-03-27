@@ -73,7 +73,7 @@ func calculateAminoacidsInteraction(chain1 []*pdb.Atom, chain2 []*pdb.Atom) (aaI
 	return aaInteracts
 }
 
-// flatten converts the aminoacid slice datatype to a flat slice of atom pointers
+// flatten converts the aminoacid map datatype to a flat slice of atom pointers
 func flatten(chain map[int64]*pdb.Aminoacid) (atoms []*pdb.Atom) {
 	for _, aminoacid := range chain {
 		for _, atom := range aminoacid.Atoms {
