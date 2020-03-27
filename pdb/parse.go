@@ -59,10 +59,11 @@ func extractPDBChains(raw []byte) (map[string]map[int64]*Aminoacid, error) {
 			chains[atom.Chain] = make(map[int64]*Aminoacid)
 		}
 		if !posOk {
-			aa, err = NewAminoacid(atom.ResidueNumber, atom.Residue, []*Atom{atom})
+			aa, err = NewAminoacid(atom.ResidueNumber, atom.Residue)
 			if err != nil {
 				return nil, fmt.Errorf("cannot parse aminoacid: %v", atom.Residue)
 			}
+			aa.Atoms = []*Atom{atom}
 			chains[atom.Chain][atom.ResidueNumber] = aa
 		} else {
 			pos.Atoms = append(pos.Atoms, atom)
