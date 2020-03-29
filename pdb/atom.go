@@ -12,5 +12,5 @@ type Atom struct {
 	// TODO: add remaining
 
 	// Parent ref
-	Aminoacid *Aminoacid `json:"-"`
+	Aminoacid *Residue `json:"-"`
 }

@@ -9,7 +9,7 @@ import (
 
 // CatalyticResidues holds the protein's residues that have catalytic activity according to M-CSA.
 type Catalytic struct {
-	UniProtChains map[string]map[int64][]*pdb.Aminoacid
+	UniProtChains map[string]map[int64][]*pdb.Residue
 }
 
 type searchAPIResponse struct {
@@ -65,16 +65,16 @@ func GetCSA(uniprotID string) (*Catalytic, error) {
 		return nil, nil
 	}
 
-	chains := make(map[string]map[int64][]*pdb.Aminoacid)
+	chains := make(map[string]map[int64][]*pdb.Residue)
 	cs := Catalytic{UniProtChains: chains}
 
 	for _, res := range response.Results[0].Residues {
 		for _, resC := range res.ResidueChains {
 			if _, ok := chains[resC.ChainName]; !ok {
-				chains[resC.ChainName] = make(map[int64][]*pdb.Aminoacid)
+				chains[resC.ChainName] = make(map[int64][]*pdb.Residue)
 			}
-			aa := pdb.NewAminoacid(resC.Resid, resC.Code)
-			chains[resC.ChainName][resC.Resid] = append(chains[resC.ChainName][resC.Resid], aa)
+			res := pdb.NewResidue(resC.Resid, resC.Code)
+			chains[resC.ChainName][resC.Resid] = append(chains[resC.ChainName][resC.Resid], res)
 		}
 	}
 

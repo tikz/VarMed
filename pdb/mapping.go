@@ -4,18 +4,18 @@ import "fmt"
 
 func (pdb *PDB) makeMappings() {
 	// SEQRES chain and pos to residues
-	pdb.SeqResChains = make(map[string]map[int64]*Aminoacid)
+	pdb.SeqResChains = make(map[string]map[int64]*Residue)
 
 	for chain, offset := range pdb.SeqResOffsets {
-		pdb.SeqResChains[chain] = make(map[int64]*Aminoacid)
+		pdb.SeqResChains[chain] = make(map[int64]*Residue)
 		minPos := pdb.minChainPos(chain)
-		for pos, aa := range pdb.Chains[chain] {
-			pdb.SeqResChains[chain][pos+offset-minPos] = aa
+		for pos, res := range pdb.Chains[chain] {
+			pdb.SeqResChains[chain][pos+offset-minPos] = res
 		}
 	}
 
 	// UniProt canonical sequence to residues
-	pdb.UniProtPositions = make(map[int64][]*Aminoacid)
+	pdb.UniProtPositions = make(map[int64][]*Residue)
 	fmt.Println(pdb.UniProtID, pdb.ID)
 	chainMapping := pdb.SIFTS.UniProtIDs[pdb.UniProtID].Chains
 	for chain, mapping := range chainMapping {
@@ -42,9 +42,9 @@ func (pdb *PDB) calculateChainsOffset() {
 
 		for offset := 0; offset < steps; offset++ {
 			score := 0
-			for pos, aa := range pdb.Chains[chain] {
+			for pos, res := range pdb.Chains[chain] {
 				seqResPos := pos + int64(offset) - minPos
-				if aa.Abbrv1 == pdb.SeqRes[chain][seqResPos].Abbrv1 {
+				if res.Abbrv1 == pdb.SeqRes[chain][seqResPos].Abbrv1 {
 					score++
 				}
 			}
@@ -89,7 +89,7 @@ func (pdb *PDB) maxChainPos(chain string) int64 {
 
 func (pdb *PDB) debugAlignment() {
 	for chain, mapping := range pdb.SIFTS.UniProtIDs[pdb.UniProtID].Chains {
-		aas := pdb.SeqRes[chain]
+		residues := pdb.SeqRes[chain]
 		unpStart := int(mapping.UniProtStart)
 		pdbStart := int(mapping.PDBStart)
 		fmt.Println("-----")
@@ -104,18 +104,18 @@ func (pdb *PDB) debugAlignment() {
 		for i := 1; i < unpStart; i++ {
 			fmt.Print(" ")
 		}
-		for _, aa := range aas {
-			fmt.Printf(aa.Abbrv1)
+		for _, res := range residues {
+			fmt.Printf(res.Abbrv1)
 		}
 		fmt.Println()
 		fmt.Print(">CRYSTAL     ")
 		for i := 1; i < unpStart; i++ {
 			fmt.Print(" ")
 		}
-		for i := range aas {
-			aa, ok := pdb.SeqResChains[chain][int64(i)]
+		for i := range residues {
+			res, ok := pdb.SeqResChains[chain][int64(i)]
 			if ok {
-				fmt.Print(aa.Abbrv1)
+				fmt.Print(res.Abbrv1)
 			} else {
 				fmt.Print(" ")
 			}
