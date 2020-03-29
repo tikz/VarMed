@@ -29,7 +29,7 @@ var aas = [...][3]string{
 
 // Aminoacid represents a single aminoacid. Holds all the ways that can be represented as a string.
 type Aminoacid struct {
-	Position int64
+	Position int64 // TODO: is it useful to have it repeated here?
 	Name     string
 	Abbrv1   string
 	Abbrv3   string

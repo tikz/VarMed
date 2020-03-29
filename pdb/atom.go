@@ -9,6 +9,7 @@ type Atom struct {
 	X             float64
 	Y             float64
 	Z             float64
+	// TODO: add remaining
 
 	// Parent ref
 	Aminoacid *Aminoacid `json:"-"`

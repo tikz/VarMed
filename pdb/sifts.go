@@ -8,7 +8,7 @@ import (
 	"varq/http"
 )
 
-// https://www.ebi.ac.uk/pdbe/api/doc/sifts.html
+// Reference: https://www.ebi.ac.uk/pdbe/api/doc/sifts.html
 
 type SIFTS struct {
 	UniProtIDs map[string]*SIFTSUniProt
@@ -76,7 +76,7 @@ func (pdb *PDB) GetSIFTSMappings() error {
 	for accessionID, accession := range accessions {
 		s[accessionID] = &SIFTSUniProt{Chains: make(map[string]*SIFTSMapping)}
 		for _, mapping := range accession.Mappings {
-			s[accessionID].Chains[mapping.StructAsymID] = &SIFTSMapping{
+			s[accessionID].Chains[mapping.ChainID] = &SIFTSMapping{
 				UniProtStart: mapping.UnpStart,
 				UniProtEnd:   mapping.UnpEnd,
 				PDBStart:     mapping.Start.ResidueNumber,
@@ -86,5 +86,10 @@ func (pdb *PDB) GetSIFTSMappings() error {
 	}
 
 	pdb.SIFTS = &SIFTS{UniProtIDs: s}
+
+	if _, ok := pdb.SIFTS.UniProtIDs[pdb.UniProtID]; !ok {
+		fmt.Println("NO MAPPINGS")
+		return fmt.Errorf("no mappings available between %s and %s", pdb.ID, pdb.UniProtID)
+	}
 	return nil
 }

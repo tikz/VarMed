@@ -8,28 +8,40 @@ import (
 )
 
 type PDB struct {
-	UniProtID        string
-	ID               string
-	URL              string
-	PDBURL           string
-	CIFURL           string
-	LocalPath        string
-	LocalFilename    string
-	RawPDB           []byte `json:"-"`
-	RawCIF           []byte `json:"-"`
-	Title            string
-	Date             *time.Time
-	Method           string
-	Resolution       float64
-	TotalLength      int64
-	Unpseq           string                          // TODO: delete
+	ID     string
+	URL    string
+	PDBURL string
+	CIFURL string
+
+	Title       string
+	Date        *time.Time
+	Method      string
+	Resolution  float64
+	TotalLength int64
+
+	UniProtID       string // UniProt accession. If the PDB is a complex of multiple proteins, this defines the chains of interest.
+	UniProtSequence string // UniProt choosen canonical sequence.
+
+	SIFTS            *SIFTS                          // EBI SIFTS data for residue position mapping between UniProt and PDB.
 	Chains           map[string]map[int64]*Aminoacid `json:"-"` // PDB ATOM chain name and position to Aminoacid pointer.
 	SeqRes           map[string][]*Aminoacid         `json:"-"`
-	SeqResChains     map[string]map[int64]*Aminoacid `json:"-"` // PDB SEQRES chain name and position to Aminoacid pointer (same instance as PDB).
-	UniProtPositions map[int64][]*Aminoacid          `json:"-"` // UniProt primary sequence position to Aminoacid pointers (same instances as PDB).
-	ChainsOffsets    map[string]int64                `json:"-"` // ATOM residue number to SEQRES position offsets.
-	SIFTS            *SIFTS
-	Error            error
+	SeqResChains     map[string]map[int64]*Aminoacid `json:"-"` // PDB SEQRES chain name and position to Aminoacid pointer in structure.
+	SeqResOffsets    map[string]int64                `json:"-"` // PDB ATOM residue number to SEQRES position offsets.
+	UniProtPositions map[int64][]*Aminoacid          `json:"-"` // UniProt sequence position to Aminoacid pointer(s) in structure. Multiple chains can come from same positions in the sequence.
+
+	RawPDB        []byte `json:"-"`
+	RawCIF        []byte `json:"-"`
+	LocalPath     string
+	LocalFilename string
+
+	Error error
+}
+
+type Chain struct {
+	UniProtName string
+	PDBName     string
+
+	Residues map[int64]*Aminoacid
 }
 
 // Fetch populates the instance with parsed data retrieved from RCSB
@@ -58,21 +70,25 @@ func (pdb *PDB) Fetch() {
 	err = pdb.GetSIFTSMappings()
 	if err != nil {
 		pdb.Error = fmt.Errorf("SIFTS: %v", err)
+		return
 	}
 
 	err = pdb.ExtractSeqRes()
 	if err != nil {
 		pdb.Error = fmt.Errorf("extracting SEQRES: %v", err)
+		return
 	}
 
 	err = pdb.ExtractChains()
 	if err != nil {
 		pdb.Error = fmt.Errorf("extracting PDB atoms to chains: %v", err)
+		return
 	}
 
 	err = pdb.ExtractCIFData()
 	if err != nil {
 		pdb.Error = fmt.Errorf("extracting CIF data: %v", err)
+		return
 	}
 
 	pdb.calculateChainsOffset()

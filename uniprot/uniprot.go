@@ -41,16 +41,16 @@ func NewUniProt(uniprotID string) (*UniProt, error) {
 		Raw:    raw,
 	}
 
-	// Parse UniProt TXT
-	err = u.extract()
-	if err != nil {
-		return nil, fmt.Errorf("extract PDB crystals %v: %v", uniprotID, err)
-	}
-
 	// Get canonical sequence
 	err = u.getSequence()
 	if err != nil {
 		return nil, fmt.Errorf("get seq %v: %v", uniprotID, err)
+	} // TODO: see if its not in the TXT
+
+	// Parse UniProt TXT
+	err = u.extract()
+	if err != nil {
+		return nil, fmt.Errorf("extract PDB crystals %v: %v", uniprotID, err)
 	}
 
 	return u, nil
@@ -78,8 +78,9 @@ func (u *UniProt) extractCrystals() (crystals []*pdb.PDB, err error) {
 	// Parse each PDB match in TXT
 	for _, match := range matches {
 		crystal := pdb.PDB{
-			ID:        match[1],
-			UniProtID: u.ID,
+			ID:              match[1],
+			UniProtID:       u.ID,
+			UniProtSequence: u.Sequence,
 		}
 		crystals = append(crystals, &crystal)
 	}
