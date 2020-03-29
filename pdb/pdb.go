@@ -22,12 +22,12 @@ type PDB struct {
 	UniProtID       string // UniProt accession. If the PDB is a complex of multiple proteins, this defines the chains of interest.
 	UniProtSequence string // UniProt choosen canonical sequence.
 
-	SIFTS            *SIFTS                          // EBI SIFTS data for residue position mapping between UniProt and PDB.
-	Chains           map[string]map[int64]*Aminoacid `json:"-"` // PDB ATOM chain name and position to Aminoacid pointer.
-	SeqRes           map[string][]*Aminoacid         `json:"-"`
-	SeqResChains     map[string]map[int64]*Aminoacid `json:"-"` // PDB SEQRES chain name and position to Aminoacid pointer in structure.
-	SeqResOffsets    map[string]int64                `json:"-"` // PDB ATOM residue number to SEQRES position offsets.
-	UniProtPositions map[int64][]*Aminoacid          `json:"-"` // UniProt sequence position to Aminoacid pointer(s) in structure. Multiple chains can come from same positions in the sequence.
+	SIFTS            *SIFTS                        // EBI SIFTS data for residue position mapping between UniProt and PDB.
+	Chains           map[string]map[int64]*Residue `json:"-"` // PDB ATOM chain name and position to Residue pointer.
+	SeqRes           map[string][]*Residue         `json:"-"`
+	SeqResChains     map[string]map[int64]*Residue `json:"-"` // PDB SEQRES chain name and position to Residue pointer in structure.
+	SeqResOffsets    map[string]int64              `json:"-"` // PDB ATOM residue number to SEQRES position offsets.
+	UniProtPositions map[int64][]*Residue          `json:"-"` // UniProt sequence position to Residue pointer(s) in structure. Multiple chains can come from same positions in the sequence.
 
 	RawPDB        []byte `json:"-"`
 	RawCIF        []byte `json:"-"`
@@ -41,7 +41,7 @@ type Chain struct {
 	UniProtName string
 	PDBName     string
 
-	Residues map[int64]*Aminoacid
+	Residues map[int64]*Residue
 }
 
 // Fetch populates the instance with parsed data retrieved from RCSB

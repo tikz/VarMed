@@ -10,14 +10,14 @@ import (
 )
 
 type ExposureAnalysis struct {
-	PDBChains map[string]map[int64]*AminoacidExposure
+	PDBChains map[string]map[int64]*ResidueExposure
 	Duration  time.Duration
 	Error     error
 }
-type AminoacidExposure struct {
+type ResidueExposure struct {
 	BFactor   float64
 	ExposureP float64
-	Aminoacid *pdb.Aminoacid `json:"-"`
+	Residue   *pdb.Residue `json:"-"`
 }
 
 type PyMOLResults struct {
@@ -37,7 +37,7 @@ func RunExposureAnalysis(pdb *pdb.PDB, results chan<- *ExposureAnalysis) {
 }
 
 // Run creates a temp file of the specified PDB structure, runs the PyMOL script on it and parses the results
-func Run(crystal *pdb.PDB) (map[string]map[int64]*AminoacidExposure, error) {
+func Run(crystal *pdb.PDB) (map[string]map[int64]*ResidueExposure, error) {
 	pymolWorkers := 16
 
 	length := totalLength(crystal.Chains)
@@ -67,7 +67,7 @@ func Run(crystal *pdb.PDB) (map[string]map[int64]*AminoacidExposure, error) {
 	}
 	close(jobs)
 
-	exposureChains := make(map[string]map[int64]*AminoacidExposure)
+	exposureChains := make(map[string]map[int64]*ResidueExposure)
 	for a := 0; a < totalJobs; a++ {
 		res := <-results
 
@@ -80,12 +80,12 @@ func Run(crystal *pdb.PDB) (map[string]map[int64]*AminoacidExposure, error) {
 				}
 
 				if _, ok := exposureChains[chain]; !ok {
-					exposureChains[chain] = make(map[int64]*AminoacidExposure)
+					exposureChains[chain] = make(map[int64]*ResidueExposure)
 				}
-				exposureChains[chain][pos] = &AminoacidExposure{
+				exposureChains[chain][pos] = &ResidueExposure{
 					BFactor:   bFactor,
 					ExposureP: exposureP,
-					Aminoacid: crystal.Chains[chain][pos],
+					Residue:   crystal.Chains[chain][pos],
 				}
 			}
 
@@ -106,7 +106,7 @@ func pymolWorker(path string, jobs <-chan [2]int, results chan<- *PyMOLResults) 
 	}
 }
 
-func totalLength(chains map[string]map[int64]*pdb.Aminoacid) (totalLength int) {
+func totalLength(chains map[string]map[int64]*pdb.Residue) (totalLength int) {
 	for _, chain := range chains {
 		totalLength += len(chain)
 	}

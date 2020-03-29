@@ -17,7 +17,7 @@ import (
 type Pocket struct {
 	Name      string
 	DrugScore float64
-	PDBChains map[string]map[int64]*pdb.Aminoacid
+	PDBChains map[string]map[int64]*pdb.Residue
 }
 
 // Run creates a temp file of the specified PDB structure, runs Fpocket on it and parses the results

@@ -16,14 +16,14 @@ func (pdb *PDB) ExtractSeqRes() error {
 		return errors.New("SEQRES not found")
 	}
 
-	pdb.SeqRes = make(map[string][]*Aminoacid)
+	pdb.SeqRes = make(map[string][]*Residue)
 	for _, match := range matches {
 		chain := match[1]
-		aaStr := strings.Split(match[3], " ")
-		for i, aaStr := range aaStr {
-			if aaStr != "" {
-				aa := NewAminoacid(int64(i), aaStr)
-				pdb.SeqRes[chain] = append(pdb.SeqRes[chain], aa)
+		resSplit := strings.Split(match[3], " ")
+		for i, resStr := range resSplit {
+			if resStr != "" {
+				res := NewResidue(int64(i), resStr)
+				pdb.SeqRes[chain] = append(pdb.SeqRes[chain], res)
 			}
 		}
 	}
@@ -106,8 +106,8 @@ func extractPDBAtoms(raw []byte) ([]*Atom, error) {
 	return atoms, nil
 }
 
-// extractPDBChains extracts the aminoacid chains from a slice of atoms
-func extractPDBChains(raw []byte) (map[string]map[int64]*Aminoacid, error) {
+// extractPDBChains extracts the residue chains from a slice of atoms
+func extractPDBChains(raw []byte) (map[string]map[int64]*Residue, error) {
 	atoms, err := extractPDBAtoms(raw)
 	if err != nil {
 		return nil, fmt.Errorf("parsing PDB atoms: %v", err)
@@ -116,25 +116,25 @@ func extractPDBChains(raw []byte) (map[string]map[int64]*Aminoacid, error) {
 		return nil, errors.New("empty atoms slice")
 	}
 
-	chains := make(map[string]map[int64]*Aminoacid)
+	chains := make(map[string]map[int64]*Residue)
 
-	var aa *Aminoacid
+	var res *Residue
 	for _, atom := range atoms {
 		chain, chainOk := chains[atom.Chain]
 		pos, posOk := chain[atom.ResidueNumber]
 
 		if !chainOk {
-			chains[atom.Chain] = make(map[int64]*Aminoacid)
+			chains[atom.Chain] = make(map[int64]*Residue)
 		}
 		if !posOk {
-			aa = NewAminoacid(atom.ResidueNumber, atom.Residue)
-			aa.Atoms = []*Atom{atom}
-			chains[atom.Chain][atom.ResidueNumber] = aa
+			res = NewResidue(atom.ResidueNumber, atom.Residue)
+			res.Atoms = []*Atom{atom}
+			chains[atom.Chain][atom.ResidueNumber] = res
 		} else {
 			pos.Atoms = append(pos.Atoms, atom)
 		}
 		// Parent ref
-		atom.Aminoacid = aa
+		atom.Aminoacid = res
 	}
 
 	return chains, nil

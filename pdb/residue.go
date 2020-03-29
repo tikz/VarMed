@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-var aas = [...][3]string{
+var residueNames = [...][3]string{
 	[3]string{"Alanine", "Ala", "A"},
 	[3]string{"Arginine", "Arg", "R"},
 	[3]string{"Asparagine", "Asn", "N"},
@@ -27,8 +27,8 @@ var aas = [...][3]string{
 	[3]string{"Valine", "Val", "V"},
 }
 
-// Aminoacid represents a single aminoacid. Holds all the ways that can be represented as a string.
-type Aminoacid struct {
+// Residue holds the PDB atoms and all the ways that can be represented as a string.
+type Residue struct {
 	Position int64 // TODO: is it useful to have it repeated here?
 	Name     string
 	Abbrv1   string
@@ -36,25 +36,25 @@ type Aminoacid struct {
 	Atoms    []*Atom
 }
 
-// NewAminoacid constructs a new aminoacid from a case-insensitive string that can be either full name, one or three letter abbreviation.
-func NewAminoacid(pos int64, input string) *Aminoacid {
+// NewResidue constructs a new residue from a case-insensitive string that can be either full name, one or three letter abbreviation.
+func NewResidue(pos int64, input string) *Residue {
 	r := matchName(input)
 
-	aminoacid := &Aminoacid{
+	res := &Residue{
 		Position: pos,
 		Name:     r[0],
 		Abbrv3:   r[1],
 		Abbrv1:   r[2],
 	}
 
-	return aminoacid
+	return res
 }
 
 func matchName(input string) *[3]string {
 	s := strings.Title(strings.ToLower(input))
-	for _, aa := range aas {
-		if aa[0] == s || aa[1] == s || aa[2] == s {
-			return &aa
+	for _, res := range residueNames {
+		if res[0] == s || res[1] == s || res[2] == s {
+			return &res
 		}
 	}
 
