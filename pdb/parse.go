@@ -1,6 +1,5 @@
 package pdb
 
-// Just a bunch of auxiliary regexes and parsing functions.
 import (
 	"errors"
 	"fmt"
@@ -9,6 +8,75 @@ import (
 	"strings"
 	"time"
 )
+
+func (pdb *PDB) ExtractSeqRes() error {
+	regex, _ := regexp.Compile("SEQRES[ ]*.*?[ ]+(.*?)[ ]+([0-9]*)[ ]*([A-Z ]*)") // https://regex101.com/r/9vwbyc/1
+	matches := regex.FindAllStringSubmatch(string(pdb.RawPDB), -1)
+	if len(matches) == 0 {
+		return errors.New("SEQRES not found")
+	}
+
+	pdb.SeqRes = make(map[string][]*Aminoacid)
+	for _, match := range matches {
+		chain := match[1]
+		aaStr := strings.Split(match[3], " ")
+		for i, aaStr := range aaStr {
+			if aaStr != "" {
+				aa := NewAminoacid(int64(i), aaStr)
+				pdb.SeqRes[chain] = append(pdb.SeqRes[chain], aa)
+			}
+		}
+	}
+
+	return nil
+}
+
+func (pdb *PDB) ExtractChains() error {
+	chains, err := extractPDBChains(pdb.RawPDB)
+	if err != nil {
+		return fmt.Errorf("parsing chains: %v", err)
+	}
+	pdb.Chains = chains
+
+	for _, chain := range pdb.Chains {
+		pdb.TotalLength += int64(len(chain))
+	}
+
+	return nil
+}
+
+func (pdb *PDB) ExtractCIFData() error {
+	title, err := extractCIFLine("title", "_struct.title", pdb.RawCIF)
+	if err != nil {
+		return err
+	}
+
+	method, err := extractCIFLine("method", "_refine.pdbx_refine_id", pdb.RawCIF)
+	if err != nil {
+		return err
+	}
+
+	resolutionStr, err := extractCIFLine("resolution", "_refine.ls_d_res_high", pdb.RawCIF)
+	if err != nil {
+		return err
+	}
+	resolution, err := strconv.ParseFloat(resolutionStr, 64)
+	if err != nil {
+		return err
+	}
+
+	date, err := extractCIFDate(pdb.RawCIF)
+	if err != nil {
+		return err
+	}
+
+	pdb.Title = title
+	pdb.Method = method
+	pdb.Resolution = resolution
+	pdb.Date = date
+
+	return nil
+}
 
 // extractPDBAtoms extracts the atoms from raw PDB contents
 func extractPDBAtoms(raw []byte) ([]*Atom, error) {
@@ -59,10 +127,7 @@ func extractPDBChains(raw []byte) (map[string]map[int64]*Aminoacid, error) {
 			chains[atom.Chain] = make(map[int64]*Aminoacid)
 		}
 		if !posOk {
-			aa, err = NewAminoacid(atom.ResidueNumber, atom.Residue)
-			if err != nil {
-				return nil, fmt.Errorf("cannot parse aminoacid: %v", atom.Residue)
-			}
+			aa = NewAminoacid(atom.ResidueNumber, atom.Residue)
 			aa.Atoms = []*Atom{atom}
 			chains[atom.Chain][atom.ResidueNumber] = aa
 		} else {

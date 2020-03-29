@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strings"
 	"varq/http"
 	"varq/pdb"
 )
@@ -13,8 +14,15 @@ type UniProt struct {
 	ID       string
 	URL      string
 	TXTURL   string
+	Sequence string
 	Raw      []byte     `json:"-"`
 	Crystals []*pdb.PDB `json:"-"`
+}
+
+type SeqPosMap struct {
+	Chains []string // Chain name in PDB
+	Start  int      // Start pos compared to UniProt canonical seq
+	End    int      // End pos compared to UniProt canonical seq
 }
 
 // NewUniProt constructs a Protein instance from an UniProt accession ID
@@ -37,6 +45,12 @@ func NewUniProt(uniprotID string) (*UniProt, error) {
 	err = u.extract()
 	if err != nil {
 		return nil, fmt.Errorf("extract PDB crystals %v: %v", uniprotID, err)
+	}
+
+	// Get canonical sequence
+	err = u.getSequence()
+	if err != nil {
+		return nil, fmt.Errorf("get seq %v: %v", uniprotID, err)
 	}
 
 	return u, nil
@@ -71,4 +85,35 @@ func (u *UniProt) extractCrystals() (crystals []*pdb.PDB, err error) {
 	}
 
 	return crystals, nil
+}
+
+func (u *UniProt) getSequence() error {
+	url := "https://www.uniprot.org/uniprot/" + u.ID + ".fasta"
+	raw, err := http.Get(url)
+	if err != nil {
+		return fmt.Errorf("get UniProt FASTA seq: %v", err)
+	}
+
+	regexSeq, _ := regexp.Compile(">(?ms).*?$(.*)")
+	matches := regexSeq.FindAllStringSubmatch(string(raw), -1)
+	if len(matches) == 0 {
+		return errors.New("cannot parse FASTA")
+	}
+	seq := strings.ReplaceAll(matches[0][1], " ", "")
+	seq = strings.ReplaceAll(seq, "\n", "")
+
+	u.Sequence = seq
+	return nil
+}
+
+func (u *UniProt) CleanCrystals() {
+	var newCrystals []*pdb.PDB
+	for _, crystal := range u.Crystals {
+		_, uniprotExistsInSIFTS := crystal.SIFTS.UniProtIDs[u.ID]
+		if crystal.SIFTS != nil && // Has SIFTS data
+			uniprotExistsInSIFTS { // Requested UniProt ID in SIFTS
+			newCrystals = append(newCrystals, crystal)
+		}
+	}
+	u.Crystals = newCrystals
 }

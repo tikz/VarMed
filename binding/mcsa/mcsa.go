@@ -2,8 +2,6 @@ package mcsa
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"net/url"
 	"varq/http"
 	"varq/pdb"
@@ -11,7 +9,7 @@ import (
 
 // CatalyticResidues holds the protein's residues that have catalytic activity according to M-CSA.
 type Catalytic struct {
-	Chains map[string]map[int64][]*pdb.Aminoacid
+	UniProtChains map[string]map[int64][]*pdb.Aminoacid
 }
 
 type searchAPIResponse struct {
@@ -54,7 +52,7 @@ func GetCSA(uniprotID string) (*Catalytic, error) {
 
 	raw, err := http.Get(url)
 	if err != nil {
-		return nil, err
+		return nil, nil // TODO: handle 404
 	}
 
 	response := searchAPIResponse{}
@@ -64,22 +62,19 @@ func GetCSA(uniprotID string) (*Catalytic, error) {
 	}
 
 	if response.Count == 0 {
-		return nil, errors.New("CSA entry not found")
+		return nil, nil
 	}
 
 	chains := make(map[string]map[int64][]*pdb.Aminoacid)
-	cs := Catalytic{Chains: chains}
+	cs := Catalytic{UniProtChains: chains}
 
 	for _, res := range response.Results[0].Residues {
 		for _, resC := range res.ResidueChains {
 			if _, ok := chains[resC.ChainName]; !ok {
 				chains[resC.ChainName] = make(map[int64][]*pdb.Aminoacid)
 			}
-			aa, err := pdb.NewAminoacid(resC.AuthResid, resC.Code)
-			if err != nil {
-				return nil, fmt.Errorf("creating chain: %v", err)
-			}
-			chains[resC.ChainName][resC.AuthResid] = append(chains[resC.ChainName][resC.AuthResid], aa)
+			aa := pdb.NewAminoacid(resC.Resid, resC.Code)
+			chains[resC.ChainName][resC.Resid] = append(chains[resC.ChainName][resC.Resid], aa)
 		}
 	}
 

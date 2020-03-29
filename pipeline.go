@@ -25,9 +25,9 @@ type Analysis struct {
 // pipelinePDBWorker fetches a single PDB crystal file.
 func pipelinePDBWorker(pdbChan <-chan *pdb.PDB, analysisChan chan<- *Analysis) {
 	for crystal := range pdbChan {
-		err := crystal.Fetch()
-		if err != nil {
-			analysisChan <- &Analysis{PDB: crystal, Error: fmt.Errorf("PDB %s: %v", crystal.ID, err)}
+		crystal.Fetch()
+		if crystal.Error != nil {
+			analysisChan <- &Analysis{PDB: crystal, Error: fmt.Errorf("PDB %s: %v", crystal.ID, crystal.Error)}
 			continue
 		}
 
@@ -37,6 +37,7 @@ func pipelinePDBWorker(pdbChan <-chan *pdb.PDB, analysisChan chan<- *Analysis) {
 
 // analysePDB runs each available analysis in parallel for a single structure.
 func analysePDB(analysis *Analysis) *Analysis {
+	return analysis // TODO: remove
 	// Create temp PDB on filesystem for analysis with external tools
 	analysis.PDB.LocalFilename = "varq_" + analysis.PDB.ID
 	analysis.PDB.LocalPath = "/tmp/" + analysis.PDB.LocalFilename + ".pdb"
@@ -105,9 +106,10 @@ func RunPipeline(pdbs []*pdb.PDB) (analyses []*Analysis, err error) {
 	for a := 1; a <= length; a++ {
 		analysis := <-analysisChan
 		if analysis.Error != nil {
-			return nil, analysis.Error
+			log.Printf("ignoring crystal: %v", analysis.Error)
+		} else {
+			analyses = append(analyses, analysis)
 		}
-		analyses = append(analyses, analysis)
 	}
 
 	return analyses, nil
@@ -126,6 +128,32 @@ func RunPipelineForUniProt(uniprotID string) ([]*Analysis, error) {
 	if err != nil {
 		return nil, fmt.Errorf("analyzing crystals: %v", err)
 	}
+
+	u.CleanCrystals()
+
+	// for _, crystal := range u.Crystals {
+	// 	if _, ok := crystal.SIFTS.UniProtIDs[u.ID].Chains["A"]; ok {
+	// 		fmt.Println(u.ID, crystal.ID)
+	// 		fmt.Println(crystal.SIFTS.UniProtIDs)
+	// 		fmt.Println("UNIPROT", u.Sequence[crystal.SIFTS.UniProtIDs[u.ID].Chains["A"].UniProtStart-1:crystal.SIFTS.UniProtIDs[u.ID].Chains["A"].UniProtEnd])
+	// 		fmt.Print("SEQRES  ")
+	// 		start := crystal.SIFTS.UniProtIDs[u.ID].Chains["A"].PDBStart - 1
+	// 		for i := start; i < int64(len(crystal.SeqRes["A"])); i++ {
+	// 			fmt.Print(crystal.SeqRes["A"][i].Abbrv1)
+	// 		}
+	// 		fmt.Println()
+	// 		fmt.Print("PDB     ")
+	// 		for i := 1; i < len(crystal.Chains["A"]); i++ {
+	// 			if pos, ok := crystal.Chains["A"][int64(i)-crystal.ChainsOffsets["A"]-1]; ok {
+	// 				fmt.Print(pos.Abbrv1)
+	// 			} else {
+	// 				fmt.Print(" ")
+	// 			}
+	// 		}
+	// 		fmt.Println()
+	// 	}
+
+	// }
 
 	end := time.Since(start)
 	log.Printf("Finished UniProt %s in %.3f secs", u.ID, end.Seconds())

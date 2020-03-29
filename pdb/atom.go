@@ -1,7 +1,7 @@
 package pdb
 
 type Atom struct {
-	// PDB fields
+	// PDB columns for the ATOM tag
 	Number        int64
 	Residue       string
 	Chain         string
