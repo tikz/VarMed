@@ -1,48 +1,52 @@
 package pdb
 
 import (
-	"errors"
 	"fmt"
 	"log"
-	"strconv"
-	"strings"
 	"time"
 	"varq/http"
 )
 
 type PDB struct {
-	UniProtID     string
-	ID            string
-	URL           string
-	PDBURL        string
-	CIFURL        string
-	LocalPath     string
-	LocalFilename string
-	RawPDB        []byte `json:"-"`
-	RawCIF        []byte `json:"-"`
-	Title         string
-	Date          *time.Time
-	Method        string
-	Resolution    float64
-	TotalLength   int64
-	Chains        map[string]map[int64]*Aminoacid `json:"-"`
+	UniProtID        string
+	ID               string
+	URL              string
+	PDBURL           string
+	CIFURL           string
+	LocalPath        string
+	LocalFilename    string
+	RawPDB           []byte `json:"-"`
+	RawCIF           []byte `json:"-"`
+	Title            string
+	Date             *time.Time
+	Method           string
+	Resolution       float64
+	TotalLength      int64
+	Unpseq           string                          // TODO: delete
+	Chains           map[string]map[int64]*Aminoacid `json:"-"` // PDB ATOM chain name and position to Aminoacid pointer.
+	SeqRes           map[string][]*Aminoacid         `json:"-"`
+	SeqResChains     map[string]map[int64]*Aminoacid `json:"-"` // PDB SEQRES chain name and position to Aminoacid pointer (same instance as PDB).
+	UniProtPositions map[int64][]*Aminoacid          `json:"-"` // UniProt primary sequence position to Aminoacid pointers (same instances as PDB).
+	ChainsOffsets    map[string]int64                `json:"-"` // ATOM residue number to SEQRES position offsets.
+	SIFTS            *SIFTS
+	Error            error
 }
 
 // Fetch populates the instance with parsed data retrieved from RCSB
-func (pdb *PDB) Fetch() error {
+func (pdb *PDB) Fetch() {
 	start := time.Now()
 	log.Printf("Downloading PDB and CIF files for %s", pdb.ID)
 	url := "https://www.rcsb.org/structure/" + pdb.ID
 	urlCIF := "https://files.rcsb.org/download/" + pdb.ID + ".cif"
 	rawCIF, err := http.Get(urlCIF)
 	if err != nil {
-		return fmt.Errorf("download CIF file: %v", err)
+		pdb.Error = fmt.Errorf("download CIF file: %v", err)
 	}
 
 	urlPDB := "https://files.rcsb.org/download/" + pdb.ID + ".pdb"
 	rawPDB, err := http.Get(urlPDB)
 	if err != nil {
-		return fmt.Errorf("download PDB file: %v", err)
+		pdb.Error = fmt.Errorf("download PDB file: %v", err)
 	}
 
 	pdb.URL = url
@@ -51,89 +55,29 @@ func (pdb *PDB) Fetch() error {
 	pdb.RawPDB = rawPDB
 	pdb.RawCIF = rawCIF
 
-	err = pdb.ExtractCIFData()
+	err = pdb.GetSIFTSMappings()
 	if err != nil {
-		return fmt.Errorf("extracting CIF data: %v", err)
+		pdb.Error = fmt.Errorf("SIFTS: %v", err)
+	}
+
+	err = pdb.ExtractSeqRes()
+	if err != nil {
+		pdb.Error = fmt.Errorf("extracting SEQRES: %v", err)
 	}
 
 	err = pdb.ExtractChains()
 	if err != nil {
-		return fmt.Errorf("extracting PDB atoms to chains: %v", err)
+		pdb.Error = fmt.Errorf("extracting PDB atoms to chains: %v", err)
 	}
 
-	if pdb.UniProtID == "" {
-		err = pdb.RetrieveUniProtID()
-		if err != nil {
-			return fmt.Errorf("retrieving UniProt ID: %v", err)
-		}
+	err = pdb.ExtractCIFData()
+	if err != nil {
+		pdb.Error = fmt.Errorf("extracting CIF data: %v", err)
 	}
+
+	pdb.calculateChainsOffset()
+	pdb.makeMappings()
 
 	end := time.Since(start)
-	log.Printf("PDB %s loaded in %.3f secs", pdb.ID, end.Seconds())
-
-	return nil
-}
-
-func (pdb *PDB) ExtractChains() error {
-	chains, err := extractPDBChains(pdb.RawPDB)
-	if err != nil {
-		return fmt.Errorf("parsing chains: %v", err)
-	}
-	pdb.Chains = chains
-
-	for _, chain := range pdb.Chains {
-		pdb.TotalLength += int64(len(chain))
-	}
-
-	return nil
-}
-
-func (pdb *PDB) ExtractCIFData() error {
-	title, err := extractCIFLine("title", "_struct.title", pdb.RawCIF)
-	if err != nil {
-		return err
-	}
-
-	method, err := extractCIFLine("method", "_refine.pdbx_refine_id", pdb.RawCIF)
-	if err != nil {
-		return err
-	}
-
-	resolutionStr, err := extractCIFLine("resolution", "_refine.ls_d_res_high", pdb.RawCIF)
-	if err != nil {
-		return err
-	}
-	resolution, err := strconv.ParseFloat(resolutionStr, 64)
-	if err != nil {
-		return err
-	}
-
-	date, err := extractCIFDate(pdb.RawCIF)
-	if err != nil {
-		return err
-	}
-
-	pdb.Title = title
-	pdb.Method = method
-	pdb.Resolution = resolution
-	pdb.Date = date
-
-	return nil
-}
-
-// RetrieveUniProtID retrieves the associated UniProt ID for the PDB, using the UniProt query API.
-func (pdb *PDB) RetrieveUniProtID() error {
-	url := "https://www.uniprot.org/uniprot/?query=database:(type:pdb%20" + pdb.ID + ")&format=list"
-	rawResp, err := http.Get(url)
-	if err != nil {
-		return fmt.Errorf("query API: %v", err)
-	}
-
-	lines := strings.Split(string(rawResp), "\n")
-	if len(lines) < 1 {
-		return errors.New("query API not found")
-	}
-
-	pdb.UniProtID = lines[0]
-	return nil
+	log.Printf("PDB %s obtained in %.3f secs", pdb.ID, end.Seconds())
 }

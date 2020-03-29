@@ -17,7 +17,7 @@ import (
 type Pocket struct {
 	Name      string
 	DrugScore float64
-	Chains    map[string]map[int64]*pdb.Aminoacid
+	PDBChains map[string]map[int64]*pdb.Aminoacid
 }
 
 // Run creates a temp file of the specified PDB structure, runs Fpocket on it and parses the results
@@ -74,7 +74,7 @@ func walkPocketDir(dir string) (pockets []*Pocket, err error) {
 				pocket := &Pocket{
 					Name:      file,
 					DrugScore: drugScore,
-					Chains:    pocketPDB.Chains,
+					PDBChains: pocketPDB.Chains,
 				}
 				pockets = append(pockets, pocket)
 			}

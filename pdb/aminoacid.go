@@ -1,7 +1,6 @@
 package pdb
 
 import (
-	"errors"
 	"strings"
 )
 
@@ -26,7 +25,6 @@ var aas = [...][3]string{
 	[3]string{"Tryptophan", "Trp", "W"},
 	[3]string{"Tyrosine", "Tyr", "Y"},
 	[3]string{"Valine", "Val", "V"},
-	[3]string{"Unknown", "Unk", "X"},
 }
 
 // Aminoacid represents a single aminoacid. Holds all the ways that can be represented as a string.
@@ -39,11 +37,8 @@ type Aminoacid struct {
 }
 
 // NewAminoacid constructs a new aminoacid from a case-insensitive string that can be either full name, one or three letter abbreviation.
-func NewAminoacid(pos int64, input string) (*Aminoacid, error) {
-	r, err := matchName(input)
-	if err != nil {
-		return nil, err
-	}
+func NewAminoacid(pos int64, input string) *Aminoacid {
+	r := matchName(input)
 
 	aminoacid := &Aminoacid{
 		Position: pos,
@@ -52,16 +47,16 @@ func NewAminoacid(pos int64, input string) (*Aminoacid, error) {
 		Abbrv1:   r[2],
 	}
 
-	return aminoacid, err
+	return aminoacid
 }
 
-func matchName(input string) (*[3]string, error) {
+func matchName(input string) *[3]string {
 	s := strings.Title(strings.ToLower(input))
 	for _, aa := range aas {
 		if aa[0] == s || aa[1] == s || aa[2] == s {
-			return &aa, nil
+			return &aa
 		}
 	}
 
-	return nil, errors.New("unknown aminoacid name or abbreviation: " + s)
+	return &[3]string{"Unknown", input, "X"}
 }

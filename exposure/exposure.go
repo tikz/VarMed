@@ -10,9 +10,9 @@ import (
 )
 
 type ExposureAnalysis struct {
-	Chains   map[string]map[int64]*AminoacidExposure
-	Duration time.Duration
-	Error    error
+	PDBChains map[string]map[int64]*AminoacidExposure
+	Duration  time.Duration
+	Error     error
 }
 type AminoacidExposure struct {
 	BFactor   float64
@@ -33,7 +33,7 @@ func RunExposureAnalysis(pdb *pdb.PDB, results chan<- *ExposureAnalysis) {
 		results <- &ExposureAnalysis{Error: fmt.Errorf("running PyMOL: %v", err)}
 	}
 
-	results <- &ExposureAnalysis{Chains: chains, Duration: time.Since(start)}
+	results <- &ExposureAnalysis{PDBChains: chains, Duration: time.Since(start)}
 }
 
 // Run creates a temp file of the specified PDB structure, runs the PyMOL script on it and parses the results
