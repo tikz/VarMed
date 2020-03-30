@@ -26,12 +26,17 @@ type Analysis struct {
 func pipelinePDBWorker(pdbChan <-chan *pdb.PDB, aChan chan<- *Analysis) {
 	for pdb := range pdbChan {
 		analysis := Analysis{PDB: pdb}
+
+		start := time.Now()
+		log.Printf("Loading PDB %s...", pdb.ID)
 		err := pdb.Load()
 		if err != nil {
 			analysis.Error = fmt.Errorf("load PDB %s: %v", pdb.ID, err)
 			aChan <- &analysis
 			continue
 		}
+		end := time.Since(start)
+		log.Printf("PDB %s loaded in %.3f secs", pdb.ID, end.Seconds())
 
 		aChan <- analysePDB(&analysis)
 	}
