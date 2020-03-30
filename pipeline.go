@@ -91,6 +91,7 @@ func analysePDB(a *Analysis) *Analysis {
 	a.Exposure = exposureRes
 	log.Printf("PDB %s exposure analysis done in %.3f secs", a.PDB.ID, exposureRes.Duration.Seconds())
 
+	debugPrintChains(a)
 	return a
 }
 
@@ -114,7 +115,6 @@ func runPipelinePDBs(pdbs []*pdb.PDB) (analyses []*Analysis, err error) {
 			log.Printf("ignoring crystal: %v", analysis.Error)
 		} else {
 			analyses = append(analyses, analysis)
-			debugPrintChains(analysis)
 		}
 	}
 
