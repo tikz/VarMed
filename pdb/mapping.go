@@ -3,25 +3,25 @@ package pdb
 func (pdb *PDB) makeMappings() {
 	pdb.calculateChainsOffset()
 
-	// SEQRES chain and position to crystal residues.
+	// SEQRES chain and position to structure residues.
 	pdb.SeqResChains = make(map[string]map[int64]*Residue)
 
 	for chain, offset := range pdb.SeqResOffsets {
 		pdb.SeqResChains[chain] = make(map[int64]*Residue)
 		minPos := pdb.minChainPos(chain)
 		for pos, res := range pdb.Chains[chain] {
-			pdb.SeqResChains[chain][pos+offset-minPos] = res
+			pdb.SeqResChains[chain][pos-minPos+offset+1] = res
 		}
 	}
 
-	// UniProt canonical sequence position to crystal residues.
+	// UniProt canonical sequence position to structure residues.
 	pdb.UniProtPositions = make(map[int64][]*Residue)
 	chainMapping := pdb.SIFTS.UniProtIDs[pdb.UniProtID].Chains
 	for chain, mapping := range chainMapping {
 		var i int64
-		for i = 0; i < mapping.PDBEnd-mapping.PDBStart; i++ {
-			seqResPos := i + pdb.SeqResOffsets[chain]
-			unpPos := seqResPos + mapping.UniProtStart
+		for i = 0; i <= mapping.PDBEnd-mapping.PDBStart; i++ {
+			seqResPos := i + pdb.SeqResOffsets[chain] + 1
+			unpPos := seqResPos + mapping.UniProtStart - 1
 			if res, ok := pdb.SeqResChains[chain][seqResPos]; ok {
 				pdb.UniProtPositions[unpPos] = append(pdb.UniProtPositions[unpPos], res)
 			}
@@ -30,7 +30,7 @@ func (pdb *PDB) makeMappings() {
 }
 
 // This alignment needs to be done since the residue numbers in ATOM tags doesn't always coincide with SEQRES positions.
-// TODO: see if there is a value available somewhere to skip this.
+// TODO: see if there is a value available somewhere to skip doing this.
 func (pdb *PDB) calculateChainsOffset() {
 	pdb.SeqResOffsets = make(map[string]int64)
 	for chain := range pdb.Chains {
