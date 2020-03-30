@@ -84,10 +84,12 @@ func Run(crystal *pdb.PDB) (map[string]map[int64]*ResidueExposure, error) {
 				if _, ok := exposureChains[chain]; !ok {
 					exposureChains[chain] = make(map[int64]*ResidueExposure)
 				}
-				exposureChains[chain][pos] = &ResidueExposure{
-					BFactor:   bFactor,
-					ExposureP: exposureP,
-					Residue:   crystal.Chains[chain][pos],
+				if crystal.Chains[chain][pos] != nil {
+					exposureChains[chain][pos] = &ResidueExposure{
+						BFactor:   bFactor,
+						ExposureP: exposureP,
+						Residue:   crystal.Chains[chain][pos],
+					}
 				}
 			}
 
@@ -127,6 +129,7 @@ func parseLine(line []string) (chain string, pos int64, bFactor float64, exposur
 func exposedResidues(pdb *pdb.PDB, chains map[string]map[int64]*ResidueExposure) (exposedResidues []*pdb.Residue) {
 	for chainName, chain := range chains {
 		for pos, resExp := range chain {
+			fmt.Println(pdb.ID, chainName, pos)
 			if resExp.ExposureP > 0.5 && resExp.Residue.Abbrv1 != "G" {
 				exposedResidues = append(exposedResidues, pdb.Chains[chainName][pos])
 			}
