@@ -17,4 +17,5 @@ compile: dep
 	GOOS=windows GOARCH=amd64 go build -o bin/varq-windows-64.exe
 
 dep:
+	go get -u golang.org/x/lint/golint
 	go get -v -d ./...
