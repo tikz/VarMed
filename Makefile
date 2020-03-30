@@ -1,3 +1,6 @@
+dep:
+	go get -v -d ./...
+
 build:
 	echo "Building VarQ to bin/varq"
 	go build -o bin/varq -v
