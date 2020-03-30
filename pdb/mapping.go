@@ -1,6 +1,8 @@
 package pdb
 
 func (pdb *PDB) makeMappings() {
+	pdb.calculateChainsOffset()
+
 	// SEQRES chain and position to crystal residues.
 	pdb.SeqResChains = make(map[string]map[int64]*Residue)
 
@@ -56,10 +58,13 @@ func (pdb *PDB) calculateChainsOffset() {
 	}
 }
 
+// Helpers
+
 func (pdb *PDB) chainKeys(chain string) (k []int64) {
 	for pos := range pdb.Chains[chain] {
 		k = append(k, pos)
 	}
+
 	return k
 }
 
@@ -71,6 +76,7 @@ func (pdb *PDB) minChainPos(chain string) int64 {
 			min = pos
 		}
 	}
+
 	return min
 }
 
@@ -82,5 +88,6 @@ func (pdb *PDB) maxChainPos(chain string) int64 {
 			max = pos
 		}
 	}
+
 	return max
 }

@@ -2,63 +2,90 @@ package pdb
 
 import (
 	"fmt"
-	"log"
 	"time"
-	"varq/http"
+	"varq/http" // TOOD: decouple this
 )
 
+// PDB represents a single PDB entry.
 type PDB struct {
-	ID     string
-	URL    string
-	PDBURL string
-	CIFURL string
+	ID     string // PDB ID
+	URL    string // RCSB web page URL
+	PDBURL string // RCSB download URL for the PDB file
+	CIFURL string // RCSB download URL for the CIF file
 
-	Title       string
-	Date        *time.Time
-	Method      string
-	Resolution  float64
-	TotalLength int64
+	Title       string     // publication title
+	Date        *time.Time // publication date
+	Method      string     // experimental method used
+	Resolution  float64    // method resolution
+	TotalLength int64      // total length as sum of residues of all chains in the structure
 
-	UniProtID       string // UniProt accession. If the PDB is a complex of multiple proteins, this defines the chains of interest.
-	UniProtSequence string // UniProt choosen canonical sequence.
+	UniProtID       string // UniProt accession
+	UniProtSequence string // UniProt canonical sequence
 
-	SIFTS            *SIFTS                        // EBI SIFTS data for residue position mapping between UniProt and PDB.
-	Chains           map[string]map[int64]*Residue `json:"-"` // PDB ATOM chain name and position to Residue pointer.
-	SeqRes           map[string][]*Residue         `json:"-"`
-	SeqResChains     map[string]map[int64]*Residue `json:"-"` // PDB SEQRES chain name and position to Residue pointer in structure.
-	SeqResOffsets    map[string]int64              `json:"-"` // PDB ATOM residue number to SEQRES position offsets.
-	UniProtPositions map[int64][]*Residue          `json:"-"` // UniProt sequence position to Residue pointer(s) in structure. Multiple chains can come from same positions in the sequence.
+	SIFTS            *SIFTS                        // EBI SIFTS data for residue position mapping between UniProt and PDB
+	Chains           map[string]map[int64]*Residue // PDB ATOM chain name and position to Residue pointer
+	SeqRes           map[string][]*Residue         // PDB SEQRES chain name to slice of residues
+	SeqResChains     map[string]map[int64]*Residue // PDB SEQRES chain name and PDB ATOM position to residue
+	SeqResOffsets    map[string]int64              // PDB ATOM residue number to SEQRES position offsets
+	UniProtPositions map[int64][]*Residue          // UniProt sequence position to residue(s) (can be of multiple chains) in structure
 
-	RawPDB        []byte `json:"-"`
-	RawCIF        []byte `json:"-"`
-	LocalPath     string
-	LocalFilename string
-
-	Error error
+	RawPDB        []byte // PDB file raw data
+	RawCIF        []byte // CIF file raw data
+	LocalPath     string // local path for the PDB file
+	LocalFilename string // local filename for the PDB file
 }
 
-type Chain struct {
-	UniProtName string
-	PDBName     string
+// NewPDBFromID constructs a new instance from a UniProt accession ID and PDB ID, fetching and parsing the data.
+func NewPDBFromID(pdbID string, uniprotID string) (*PDB, error) {
+	pdb := PDB{ID: pdbID, UniProtID: uniprotID}
 
-	Residues map[int64]*Residue
+	err := pdb.Load()
+	return &pdb, err
 }
 
-// Fetch populates the instance with parsed data retrieved from RCSB
-func (pdb *PDB) Fetch() {
-	start := time.Now()
-	log.Printf("Downloading PDB and CIF files for %s", pdb.ID)
+// NewPDBFromRaw constructs a new instance from raw bytes, and only extracts ATOM records.
+// This is useful for parsing PDB output files from external tools.
+func NewPDBFromRaw(raw []byte) (*PDB, error) {
+	pdb := PDB{RawPDB: raw}
+
+	err := pdb.ExtractPDBChains()
+	if err != nil {
+		return nil, fmt.Errorf("parse: %v", err)
+	}
+
+	return &pdb, nil
+}
+
+// Load fetches and parses the necessary data.
+func (pdb *PDB) Load() error {
+	err := pdb.Fetch()
+	if err != nil {
+		return fmt.Errorf("fetch data: %v", err)
+	}
+
+	err = pdb.Extract()
+	if err != nil {
+		return fmt.Errorf("parse: %v", err)
+	}
+
+	pdb.makeMappings()
+
+	return nil
+}
+
+// Fetch downloads all external data for the entry.
+func (pdb *PDB) Fetch() error {
 	url := "https://www.rcsb.org/structure/" + pdb.ID
 	urlCIF := "https://files.rcsb.org/download/" + pdb.ID + ".cif"
 	rawCIF, err := http.Get(urlCIF)
 	if err != nil {
-		pdb.Error = fmt.Errorf("download CIF file: %v", err)
+		return fmt.Errorf("download CIF file: %v", err)
 	}
 
 	urlPDB := "https://files.rcsb.org/download/" + pdb.ID + ".pdb"
 	rawPDB, err := http.Get(urlPDB)
 	if err != nil {
-		pdb.Error = fmt.Errorf("download PDB file: %v", err)
+		return fmt.Errorf("download PDB file: %v", err)
 	}
 
 	pdb.URL = url
@@ -67,35 +94,30 @@ func (pdb *PDB) Fetch() {
 	pdb.RawPDB = rawPDB
 	pdb.RawCIF = rawCIF
 
-	err = pdb.GetSIFTSMappings()
+	err = pdb.getSIFTSMappings()
 	if err != nil {
-		pdb.Error = fmt.Errorf("SIFTS: %v", err)
-		return
+		return fmt.Errorf("SIFTS: %v", err)
 	}
 
-	err = pdb.ExtractSeqRes()
+	return nil
+}
+
+// Extract parses data from the raw PDB, raw CIF, SIFTS, and populates the entry.
+func (pdb *PDB) Extract() error {
+	err := pdb.ExtractSeqRes()
 	if err != nil {
-		pdb.Error = fmt.Errorf("extracting SEQRES: %v", err)
-		return
+		return fmt.Errorf("extract SEQRES: %v", err)
 	}
 
-	err = pdb.ExtractChains()
+	err = pdb.ExtractPDBChains()
 	if err != nil {
-		pdb.Error = fmt.Errorf("extracting PDB atoms to chains: %v", err)
-		return
+		return fmt.Errorf("extract PDB atoms to chains: %v", err)
 	}
 
 	err = pdb.ExtractCIFData()
 	if err != nil {
-		pdb.Error = fmt.Errorf("extracting CIF data: %v", err)
-		return
+		return fmt.Errorf("extract CIF data: %v", err)
 	}
 
-	pdb.calculateChainsOffset()
-	pdb.makeMappings()
-
-	// pdb.debugPrintChains()
-
-	end := time.Since(start)
-	log.Printf("PDB %s obtained in %.3f secs", pdb.ID, end.Seconds())
+	return nil
 }

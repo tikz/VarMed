@@ -27,7 +27,7 @@ var residueNames = [...][3]string{
 	[3]string{"Valine", "Val", "V"},
 }
 
-// Residue holds the PDB atoms and all the ways that can be represented as a string.
+// Residue represents a single residue from the PDB structure.
 type Residue struct {
 	Chain    string
 	Position int64
@@ -37,28 +37,32 @@ type Residue struct {
 	Atoms    []*Atom
 }
 
-// NewResidue constructs a new residue from a case-insensitive string that can be either full name, one or three letter abbreviation.
+// NewResidue constructs a new residue given a chain, position and aminoacid name.
+// The name is case-insensitive and can be either a full aminoacid name, one or three letter abbreviation.
 func NewResidue(chain string, pos int64, input string) *Residue {
-	r := matchName(input)
+	name, abbrv3, abbrv1 := matchName(input)
 
 	res := &Residue{
 		Chain:    chain,
 		Position: pos,
-		Name:     r[0],
-		Abbrv3:   r[1],
-		Abbrv1:   r[2],
+		Name:     name,
+		Abbrv3:   abbrv3,
+		Abbrv1:   abbrv1,
 	}
 
 	return res
 }
 
-func matchName(input string) *[3]string {
+// matchName receives a residue name and returns a 3-sized array of all the possible representations as a string.
+func matchName(input string) (string, string, string) {
 	s := strings.Title(strings.ToLower(input))
 	for _, res := range residueNames {
-		if res[0] == s || res[1] == s || res[2] == s {
-			return &res
+		for _, n := range res {
+			if n == s {
+				return res[0], res[1], res[2]
+			}
 		}
 	}
 
-	return &[3]string{"Unknown", input, "X"}
+	return input, "Unk", "X"
 }
