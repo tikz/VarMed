@@ -9,7 +9,7 @@ import (
 	"varq/pdb"
 )
 
-type ExposureAnalysis struct {
+type Step struct {
 	PDBChains       map[string]map[int64]*ResidueExposure
 	ExposedResidues []*pdb.Residue
 	Duration        time.Duration
@@ -26,16 +26,16 @@ type PyMOLResults struct {
 	Lines []string
 }
 
-func RunExposureAnalysis(pdb *pdb.PDB, results chan<- *ExposureAnalysis) {
+func RunExposureStep(pdb *pdb.PDB, results chan<- *Step) {
 	start := time.Now()
 	Run(pdb)
 	chains, err := Run(pdb)
 	if err != nil {
-		results <- &ExposureAnalysis{Error: fmt.Errorf("running PyMOL: %v", err)}
+		results <- &Step{Error: fmt.Errorf("running PyMOL: %v", err)}
 	}
 
 	exposed := exposedResidues(pdb, chains)
-	results <- &ExposureAnalysis{PDBChains: chains, ExposedResidues: exposed, Duration: time.Since(start)}
+	results <- &Step{PDBChains: chains, ExposedResidues: exposed, Duration: time.Since(start)}
 }
 
 // Run creates a temp file of the specified PDB structure, runs the PyMOL script on it and parses the results

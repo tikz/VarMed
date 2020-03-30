@@ -7,7 +7,7 @@ import (
 )
 
 // InteractionAnalysis holds the collected data in the interaction analysis step
-type InteractionAnalysis struct {
+type Step struct {
 	ChainsInteractions []*ChainsPair
 	Residues           []*pdb.Residue
 	Duration           time.Duration
@@ -29,10 +29,10 @@ type ResiduesPair struct {
 }
 
 // RunInteractionAnalysis starts the interaction analysis step
-func RunInteractionAnalysis(p *pdb.PDB, results chan<- *InteractionAnalysis) {
+func RunInteractionStep(p *pdb.PDB, results chan<- *Step) {
 	start := time.Now()
 	interactions := calculateChainsInteraction(p.Chains)
-	results <- &InteractionAnalysis{ChainsInteractions: interactions,
+	results <- &Step{ChainsInteractions: interactions,
 		Residues: getInteractionResidues(interactions),
 		Duration: time.Since(start)}
 }
