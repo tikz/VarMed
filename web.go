@@ -32,24 +32,7 @@ func UniProtEndpoint(w http.ResponseWriter, r *http.Request) {
 	ID := vars["ID"]
 	log.Println("New request from", r.RemoteAddr, "- UniProt", ID)
 
-	p, err := RunPipelineForUniProt(ID)
-	if err != nil {
-		w.Write(errorResponse(err.Error()))
-		return
-	}
-
-	out, _ := json.Marshal(p)
-	w.Write(out)
-}
-
-// PDBEndpoint is the function for the /uniprot/{id} endpoint
-// Shows parsed and calculated data for a given PDB for debug purposes.
-func PDBEndpoint(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	ID := vars["ID"]
-	log.Println("New request from", r.RemoteAddr, "- PDB", ID)
-
-	p, err := RunPipelineForPDBs([]string{ID})
+	p, err := RunPipeline(ID, []string{})
 	if err != nil {
 		w.Write(errorResponse(err.Error()))
 		return
@@ -66,12 +49,12 @@ func statusEndpoint(w http.ResponseWriter, r *http.Request) {
 	out, _ := json.Marshal(s)
 	w.Write(out)
 }
+
 func httpServe() {
 	// REST API entrypoints
 	r := mux.NewRouter()
 	r.HandleFunc("/status", statusEndpoint)
 	r.HandleFunc("/uniprot/{ID}", UniProtEndpoint)
-	r.HandleFunc("/pdb/{ID}", PDBEndpoint)
 	http.Handle("/", r)
 
 	log.Printf("Starting VarQ web server: http://127.0.0.1:%s/", cfg.HTTPServer.Port)

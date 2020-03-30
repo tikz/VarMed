@@ -1,9 +1,7 @@
 package pdb
 
-import "fmt"
-
 func (pdb *PDB) makeMappings() {
-	// SEQRES chain and pos to residues
+	// SEQRES chain and position to crystal residues.
 	pdb.SeqResChains = make(map[string]map[int64]*Residue)
 
 	for chain, offset := range pdb.SeqResOffsets {
@@ -14,19 +12,19 @@ func (pdb *PDB) makeMappings() {
 		}
 	}
 
-	// UniProt canonical sequence to residues
+	// UniProt canonical sequence position to crystal residues.
 	pdb.UniProtPositions = make(map[int64][]*Residue)
-	fmt.Println(pdb.UniProtID, pdb.ID)
 	chainMapping := pdb.SIFTS.UniProtIDs[pdb.UniProtID].Chains
 	for chain, mapping := range chainMapping {
-		for i := mapping.UniProtStart; i <= mapping.UniProtEnd; i++ {
-			if res, ok := pdb.SeqResChains[chain][mapping.PDBStart+i-2]; ok {
-				pdb.UniProtPositions[i] = append(pdb.UniProtPositions[i], res)
+		var i int64
+		for i = 0; i < mapping.PDBEnd-mapping.PDBStart; i++ {
+			seqResPos := i + pdb.SeqResOffsets[chain]
+			unpPos := seqResPos + mapping.UniProtStart
+			if res, ok := pdb.SeqResChains[chain][seqResPos]; ok {
+				pdb.UniProtPositions[unpPos] = append(pdb.UniProtPositions[unpPos], res)
 			}
 		}
 	}
-
-	pdb.debugAlignment()
 }
 
 // This alignment needs to be done since the residue numbers in ATOM tags doesn't always coincide with SEQRES positions.
@@ -85,42 +83,4 @@ func (pdb *PDB) maxChainPos(chain string) int64 {
 		}
 	}
 	return max
-}
-
-func (pdb *PDB) debugAlignment() {
-	for chain, mapping := range pdb.SIFTS.UniProtIDs[pdb.UniProtID].Chains {
-		residues := pdb.SeqRes[chain]
-		unpStart := int(mapping.UniProtStart)
-		pdbStart := int(mapping.PDBStart)
-		fmt.Println("-----")
-		fmt.Println(pdb.ID, "Chain", chain, "-", pdb.UniProtID)
-		fmt.Print(">UNIPROT     ")
-		for i := 1; i < pdbStart; i++ {
-			fmt.Print(" ")
-		}
-		fmt.Print(pdb.UniProtSequence)
-		fmt.Println()
-		fmt.Print(">SEQRES      ")
-		for i := 1; i < unpStart; i++ {
-			fmt.Print(" ")
-		}
-		for _, res := range residues {
-			fmt.Printf(res.Abbrv1)
-		}
-		fmt.Println()
-		fmt.Print(">CRYSTAL     ")
-		for i := 1; i < unpStart; i++ {
-			fmt.Print(" ")
-		}
-		for i := range residues {
-			res, ok := pdb.SeqResChains[chain][int64(i)]
-			if ok {
-				fmt.Print(res.Abbrv1)
-			} else {
-				fmt.Print(" ")
-			}
-		}
-		fmt.Println()
-	}
-	fmt.Println("================")
 }

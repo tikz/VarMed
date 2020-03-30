@@ -94,6 +94,8 @@ func (pdb *PDB) Fetch() {
 	pdb.calculateChainsOffset()
 	pdb.makeMappings()
 
+	// pdb.debugPrintChains()
+
 	end := time.Since(start)
 	log.Printf("PDB %s obtained in %.3f secs", pdb.ID, end.Seconds())
 }

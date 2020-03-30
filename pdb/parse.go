@@ -22,7 +22,7 @@ func (pdb *PDB) ExtractSeqRes() error {
 		resSplit := strings.Split(match[3], " ")
 		for i, resStr := range resSplit {
 			if resStr != "" {
-				res := NewResidue(int64(i), resStr)
+				res := NewResidue(chain, int64(i), resStr)
 				pdb.SeqRes[chain] = append(pdb.SeqRes[chain], res)
 			}
 		}
@@ -127,7 +127,7 @@ func extractPDBChains(raw []byte) (map[string]map[int64]*Residue, error) {
 			chains[atom.Chain] = make(map[int64]*Residue)
 		}
 		if !posOk {
-			res = NewResidue(atom.ResidueNumber, atom.Residue)
+			res = NewResidue(atom.Chain, atom.ResidueNumber, atom.Residue)
 			res.Atoms = []*Atom{atom}
 			chains[atom.Chain][atom.ResidueNumber] = res
 		} else {

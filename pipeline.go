@@ -37,7 +37,6 @@ func pipelinePDBWorker(pdbChan <-chan *pdb.PDB, analysisChan chan<- *Analysis) {
 
 // analysePDB runs each available analysis in parallel for a single structure.
 func analysePDB(analysis *Analysis) *Analysis {
-	return analysis // TODO: remove
 	// Create temp PDB on filesystem for analysis with external tools
 	analysis.PDB.LocalFilename = "varq_" + analysis.PDB.ID
 	analysis.PDB.LocalPath = "/tmp/" + analysis.PDB.LocalFilename + ".pdb"
@@ -54,11 +53,11 @@ func analysePDB(analysis *Analysis) *Analysis {
 
 	bindingChan := make(chan *binding.BindingAnalysis)
 	interactionChan := make(chan *interaction.InteractionAnalysis)
-	exposureChan := make(chan *exposure.ExposureAnalysis)
+	// exposureChan := make(chan *exposure.ExposureAnalysis)
 
 	go binding.RunBindingAnalysis(analysis.PDB, bindingChan)
 	go interaction.RunInteractionAnalysis(analysis.PDB, interactionChan)
-	go exposure.RunExposureAnalysis(analysis.PDB, exposureChan)
+	// go exposure.RunExposureAnalysis(analysis.PDB, exposureChan)
 
 	// TODO: Maybe refactor these repeated patterns
 	bindingRes := <-bindingChan
@@ -77,18 +76,27 @@ func analysePDB(analysis *Analysis) *Analysis {
 	analysis.Interaction = interactionRes
 	log.Printf("PDB %s interaction analysis done in %.3f secs", analysis.PDB.ID, interactionRes.Duration.Seconds())
 
-	exposureRes := <-exposureChan
-	if exposureRes.Error != nil {
-		analysis.Error = fmt.Errorf("exposure analysis: %v", exposureRes.Error)
-		return analysis
-	}
-	analysis.Exposure = exposureRes
-	log.Printf("PDB %s exposure analysis done in %.3f secs", analysis.PDB.ID, exposureRes.Duration.Seconds())
+	// exposureRes := <-exposureChan
+	// if exposureRes.Error != nil {
+	// 	analysis.Error = fmt.Errorf("exposure analysis: %v", exposureRes.Error)
+	// 	return analysis
+	// }
+	// analysis.Exposure = exposureRes
+	// log.Printf("PDB %s exposure analysis done in %.3f secs", analysis.PDB.ID, exposureRes.Duration.Seconds())
 
+	// for _, pocket := range analysis.Binding.Pockets {
+	// 	for _, res := range pocket.Residues {
+	// 		fmt.Println(res.Abbrv1, res)
+	// 	}
+	// }
+
+	// for _, res := range analysis.Binding.Catalytic.Residues {
+	// 	fmt.Println(res)
+	// }
 	return analysis
 }
 
-func RunPipeline(pdbs []*pdb.PDB) (analyses []*Analysis, err error) {
+func RunPipelineCrystals(pdbs []*pdb.PDB) (analyses []*Analysis, err error) {
 	length := len(pdbs)
 	pdbChan := make(chan *pdb.PDB, length)
 	analysisChan := make(chan *Analysis, length)
@@ -109,14 +117,15 @@ func RunPipeline(pdbs []*pdb.PDB) (analyses []*Analysis, err error) {
 			log.Printf("ignoring crystal: %v", analysis.Error)
 		} else {
 			analyses = append(analyses, analysis)
+			debugPrintChains(analysis)
 		}
 	}
 
 	return analyses, nil
 }
 
-// RunPipelineForUniProt grabs and analyses all structures from a given UniProt ID.
-func RunPipelineForUniProt(uniprotID string) ([]*Analysis, error) {
+// RunPipeline grabs and analyses all structures from a given UniProt ID.
+func RunPipeline(uniprotID string, filterPDBIDs []string) ([]*Analysis, error) {
 	start := time.Now()
 
 	u, err := uniprot.NewUniProt(uniprotID)
@@ -124,12 +133,14 @@ func RunPipelineForUniProt(uniprotID string) ([]*Analysis, error) {
 		return nil, fmt.Errorf("run pipeline: %v", err)
 	}
 
-	analyses, err := RunPipeline(u.Crystals)
+	if len(filterPDBIDs) > 0 {
+		u.FilterCrystals(filterPDBIDs)
+	}
+
+	analyses, err := RunPipelineCrystals(u.Crystals)
 	if err != nil {
 		return nil, fmt.Errorf("analyzing crystals: %v", err)
 	}
-
-	u.CleanCrystals()
 
 	// for _, crystal := range u.Crystals {
 	// 	if _, ok := crystal.SIFTS.UniProtIDs[u.ID].Chains["A"]; ok {
@@ -157,24 +168,5 @@ func RunPipelineForUniProt(uniprotID string) ([]*Analysis, error) {
 
 	end := time.Since(start)
 	log.Printf("Finished UniProt %s in %.3f secs", u.ID, end.Seconds())
-	return analyses, nil
-}
-
-// RunPipelineForPDBs grabs and analyses structures from a given slice of PDB IDs.
-func RunPipelineForPDBs(PDBIDs []string) ([]*Analysis, error) {
-	start := time.Now()
-
-	var crystals []*pdb.PDB
-	for _, ID := range PDBIDs {
-		crystals = append(crystals, &pdb.PDB{ID: ID})
-	}
-
-	analyses, err := RunPipeline(crystals)
-	if err != nil {
-		return nil, fmt.Errorf("analyzing crystals: %v", err)
-	}
-
-	end := time.Since(start)
-	log.Printf("Finished PDBs %s in %.3f secs", PDBIDs, end.Seconds())
 	return analyses, nil
 }
