@@ -62,7 +62,6 @@ func debugPrintChainsMarkedResidues(analysisName string, pdb *pdb.PDB, aRes []*p
 			fmt.Printf(res.Abbrv1)
 		}
 		fmt.Println()
-		fmt.Println(unpStart)
 		fmt.Print(">PDB         ")
 		for i := 1; i < unpStart; i++ {
 			fmt.Print(" ")

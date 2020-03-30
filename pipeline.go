@@ -100,7 +100,7 @@ func runPipelinePDBs(pdbs []*pdb.PDB) (analyses []*Analysis, err error) {
 	pdbChan := make(chan *pdb.PDB, length)
 	analysisChan := make(chan *Analysis, length)
 
-	for w := 1; w <= 20; w++ {
+	for w := 1; w <= cfg.VarQ.Pipeline.StructureWorkers; w++ {
 		go pipelinePDBWorker(pdbChan, analysisChan)
 	}
 
