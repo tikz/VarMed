@@ -12,8 +12,15 @@ var Cfg *config.Config
 var ErrHTTPNotOk = errors.New("HTTP response with status code not 200 OK")
 
 func Get(url string) ([]byte, error) {
+	timeout := 120
+	userAgent := "Test"
+	if Cfg != nil {
+		timeout = Cfg.HTTPClient.Timeout
+		userAgent = Cfg.HTTPClient.UserAgent
+	}
+
 	client := http.Client{
-		Timeout: time.Duration(Cfg.HTTPClient.Timeout) * time.Second,
+		Timeout: time.Duration(timeout) * time.Second,
 	}
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
@@ -21,7 +28,7 @@ func Get(url string) ([]byte, error) {
 		return nil, err
 	}
 
-	req.Header.Set("User-Agent", Cfg.HTTPClient.UserAgent)
+	req.Header.Set("User-Agent", userAgent)
 
 	res, err := client.Do(req)
 	if err != nil {
