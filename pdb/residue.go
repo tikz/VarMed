@@ -29,7 +29,8 @@ var residueNames = [...][3]string{
 
 // Residue holds the PDB atoms and all the ways that can be represented as a string.
 type Residue struct {
-	Position int64 // TODO: is it useful to have it repeated here?
+	Chain    string
+	Position int64
 	Name     string
 	Abbrv1   string
 	Abbrv3   string
@@ -37,10 +38,11 @@ type Residue struct {
 }
 
 // NewResidue constructs a new residue from a case-insensitive string that can be either full name, one or three letter abbreviation.
-func NewResidue(pos int64, input string) *Residue {
+func NewResidue(chain string, pos int64, input string) *Residue {
 	r := matchName(input)
 
 	res := &Residue{
+		Chain:    chain,
 		Position: pos,
 		Name:     r[0],
 		Abbrv3:   r[1],

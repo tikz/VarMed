@@ -17,7 +17,7 @@ import (
 type Pocket struct {
 	Name      string
 	DrugScore float64
-	PDBChains map[string]map[int64]*pdb.Residue
+	Residues  []*pdb.Residue // Pointers to original residues in the requested structure.
 }
 
 // Run creates a temp file of the specified PDB structure, runs Fpocket on it and parses the results
@@ -41,7 +41,7 @@ func Run(crystal *pdb.PDB) (pockets []*Pocket, err error) {
 
 	// Walk created folder containing pocket analysis files
 	dir := outPath + "/pockets"
-	pockets, err = walkPocketDir(dir)
+	pockets, err = walkPocketDir(crystal, dir)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func Run(crystal *pdb.PDB) (pockets []*Pocket, err error) {
 	return pockets, nil
 }
 
-func walkPocketDir(dir string) (pockets []*Pocket, err error) {
+func walkPocketDir(crystal *pdb.PDB, dir string) (pockets []*Pocket, err error) {
 	err = filepath.Walk(dir, func(file string, info os.FileInfo, err error) error {
 		// For each Fpocket result PDB file
 		if strings.Contains(file, "_atm.pdb") {
@@ -71,10 +71,18 @@ func walkPocketDir(dir string) (pockets []*Pocket, err error) {
 				if err != nil {
 					return err
 				}
+
+				var pocketResidues []*pdb.Residue
+				for chain, chainPos := range pocketPDB.Chains {
+					for pos := range chainPos {
+						pocketResidues = append(pocketResidues, crystal.Chains[chain][pos])
+					}
+				}
+
 				pocket := &Pocket{
 					Name:      file,
 					DrugScore: drugScore,
-					PDBChains: pocketPDB.Chains,
+					Residues:  pocketResidues,
 				}
 				pockets = append(pockets, pocket)
 			}

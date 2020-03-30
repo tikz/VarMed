@@ -17,26 +17,14 @@ func (i *arrayFlags) Set(value string) error {
 	return nil
 }
 
-func cliRun(uniprotFlags arrayFlags, pdbFlags arrayFlags) {
+func cliRun(uniprotID string, pdbFlags arrayFlags) {
 	var analyses []*Analysis
 
-	if len(pdbFlags) > 0 {
-		a, err := RunPipelineForPDBs(pdbFlags)
-		if err != nil {
-			log.Fatal(err)
-		}
-		analyses = a
+	a, err := RunPipeline(uniprotID, pdbFlags)
+	if err != nil {
+		log.Fatal(err)
 	}
-
-	if len(uniprotFlags) > 0 {
-		for _, uniprotID := range uniprotFlags {
-			a, err := RunPipelineForUniProt(uniprotID)
-			if err != nil {
-				log.Fatal(err)
-			}
-			analyses = append(analyses, a...)
-		}
-	}
+	analyses = a
 
 	dumpJSON(analyses)
 }

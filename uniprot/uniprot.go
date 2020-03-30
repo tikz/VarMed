@@ -107,14 +107,15 @@ func (u *UniProt) getSequence() error {
 	return nil
 }
 
-func (u *UniProt) CleanCrystals() {
+func (u *UniProt) FilterCrystals(PDBIDs []string) {
 	var newCrystals []*pdb.PDB
-	for _, crystal := range u.Crystals {
-		_, uniprotExistsInSIFTS := crystal.SIFTS.UniProtIDs[u.ID]
-		if crystal.SIFTS != nil && // Has SIFTS data
-			uniprotExistsInSIFTS { // Requested UniProt ID in SIFTS
-			newCrystals = append(newCrystals, crystal)
+	for _, filterID := range PDBIDs {
+		for _, crystal := range u.Crystals {
+			if strings.ToLower(filterID) == strings.ToLower(crystal.ID) {
+				newCrystals = append(newCrystals, crystal)
+			}
 		}
 	}
+
 	u.Crystals = newCrystals
 }

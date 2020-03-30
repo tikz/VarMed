@@ -20,14 +20,13 @@ func init() {
 }
 
 func main() {
-	uniprotsFlag := arrayFlags{}
 	pdbsFlag := arrayFlags{}
-	flag.Var(&uniprotsFlag, "u", "UniProt ID to analyse. Can pass multiple flags.")
-	flag.Var(&pdbsFlag, "p", "PDB ID to analyse. Can pass multiple flags.")
+	uniprotID := flag.String("u", "", "UniProt accession.")
+	flag.Var(&pdbsFlag, "p", "PDB ID(s) to analyse, can repeat this flag.")
 	flag.Parse()
 
-	if len(uniprotsFlag) > 0 || len(pdbsFlag) > 0 {
-		cliRun(uniprotsFlag, pdbsFlag)
+	if len(*uniprotID) > 0 {
+		cliRun(*uniprotID, pdbsFlag)
 	} else {
 		httpServe()
 	}

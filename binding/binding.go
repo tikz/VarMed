@@ -24,7 +24,7 @@ func RunBindingAnalysis(pdb *pdb.PDB, results chan<- *BindingAnalysis) {
 		results <- &BindingAnalysis{Error: fmt.Errorf("running Fpocket: %v", err)}
 	}
 
-	csa, err := mcsa.GetCSA(pdb.UniProtID)
+	csa, err := mcsa.GetCSA(pdb)
 	if err != nil {
 		results <- &BindingAnalysis{Error: fmt.Errorf("M-CSA: %v", err)}
 	}
