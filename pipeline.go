@@ -22,20 +22,13 @@ type Analysis struct {
 	Error       error `json:"-"`
 }
 
-// pipelinePDBWorker fetches a single PDB crystal file.
+// pipelinePDBWorker fetches and loads a single PDB file.
 func pipelinePDBWorker(pdbChan <-chan *pdb.PDB, aChan chan<- *Analysis) {
-	for crystal := range pdbChan {
-		analysis := Analysis{PDB: crystal}
-		err := crystal.Fetch()
+	for pdb := range pdbChan {
+		analysis := Analysis{PDB: pdb}
+		err := pdb.Load()
 		if err != nil {
-			analysis.Error = fmt.Errorf("fetch PDB %s: %v", crystal.ID, err)
-			aChan <- &analysis
-			continue
-		}
-
-		err = crystal.Extract()
-		if err != nil {
-			analysis.Error = fmt.Errorf("extract PDB %s: %v", crystal.ID, err)
+			analysis.Error = fmt.Errorf("load PDB %s: %v", pdb.ID, err)
 			aChan <- &analysis
 			continue
 		}
@@ -101,7 +94,6 @@ func runPipelinePDBs(pdbs []*pdb.PDB) (analyses []*Analysis, err error) {
 	pdbChan := make(chan *pdb.PDB, length)
 	analysisChan := make(chan *Analysis, length)
 
-	// Launch crystal workers
 	for w := 1; w <= 20; w++ {
 		go pipelinePDBWorker(pdbChan, analysisChan)
 	}
