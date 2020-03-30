@@ -61,14 +61,14 @@ func (u *UniProt) FilterPDBs(PDBIDs []string) {
 
 // extract launches all the parsing to be done in the TXT response.
 func (u *UniProt) extract() error {
-	err := u.extractPDBs()
-	if err != nil {
-		return fmt.Errorf("extracting crystals from UniProt TXT: %v", err)
-	}
-
-	err = u.extractSequence()
+	err := u.extractSequence()
 	if err != nil {
 		return fmt.Errorf("get seq: %v", err)
+	}
+
+	err = u.extractPDBs()
+	if err != nil {
+		return fmt.Errorf("extracting crystals from UniProt TXT: %v", err)
 	}
 
 	return nil
