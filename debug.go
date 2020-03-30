@@ -22,7 +22,11 @@ func debugPrintChains(a *Analysis) {
 	}
 
 	if len(a.Interaction.Residues) > 0 {
-		debugPrintChainsMarkedResidues("Interface residues <5 A", a.PDB, a.Interaction.Residues)
+		debugPrintChainsMarkedResidues("Interface residues by distance", a.PDB, a.Interaction.Residues)
+	}
+
+	if len(a.Exposure.ExposedResidues) > 0 {
+		debugPrintChainsMarkedResidues("Exposed residues", a.PDB, a.Exposure.ExposedResidues)
 	}
 
 }

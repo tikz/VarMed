@@ -10,9 +10,10 @@ import (
 )
 
 type ExposureAnalysis struct {
-	PDBChains map[string]map[int64]*ResidueExposure
-	Duration  time.Duration
-	Error     error
+	PDBChains       map[string]map[int64]*ResidueExposure
+	ExposedResidues []*pdb.Residue
+	Duration        time.Duration
+	Error           error
 }
 type ResidueExposure struct {
 	BFactor   float64
@@ -33,7 +34,8 @@ func RunExposureAnalysis(pdb *pdb.PDB, results chan<- *ExposureAnalysis) {
 		results <- &ExposureAnalysis{Error: fmt.Errorf("running PyMOL: %v", err)}
 	}
 
-	results <- &ExposureAnalysis{PDBChains: chains, Duration: time.Since(start)}
+	exposed := exposedResidues(pdb, chains)
+	results <- &ExposureAnalysis{PDBChains: chains, ExposedResidues: exposed, Duration: time.Since(start)}
 }
 
 // Run creates a temp file of the specified PDB structure, runs the PyMOL script on it and parses the results
@@ -120,4 +122,15 @@ func parseLine(line []string) (chain string, pos int64, bFactor float64, exposur
 	exposureP, err = strconv.ParseFloat(line[3], 64)
 
 	return chain, pos, bFactor, exposureP, err
+}
+
+func exposedResidues(pdb *pdb.PDB, chains map[string]map[int64]*ResidueExposure) (exposedResidues []*pdb.Residue) {
+	for chainName, chain := range chains {
+		for pos, resExp := range chain {
+			if resExp.ExposureP > 0.5 && resExp.Residue.Abbrv1 != "G" {
+				exposedResidues = append(exposedResidues, pdb.Chains[chainName][pos])
+			}
+		}
+	}
+	return exposedResidues
 }

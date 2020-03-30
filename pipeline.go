@@ -53,11 +53,11 @@ func analysePDB(analysis *Analysis) *Analysis {
 
 	bindingChan := make(chan *binding.BindingAnalysis)
 	interactionChan := make(chan *interaction.InteractionAnalysis)
-	// exposureChan := make(chan *exposure.ExposureAnalysis)
+	exposureChan := make(chan *exposure.ExposureAnalysis)
 
 	go binding.RunBindingAnalysis(analysis.PDB, bindingChan)
 	go interaction.RunInteractionAnalysis(analysis.PDB, interactionChan)
-	// go exposure.RunExposureAnalysis(analysis.PDB, exposureChan)
+	go exposure.RunExposureAnalysis(analysis.PDB, exposureChan)
 
 	// TODO: Maybe refactor these repeated patterns
 	bindingRes := <-bindingChan
@@ -76,13 +76,13 @@ func analysePDB(analysis *Analysis) *Analysis {
 	analysis.Interaction = interactionRes
 	log.Printf("PDB %s interaction analysis done in %.3f secs", analysis.PDB.ID, interactionRes.Duration.Seconds())
 
-	// exposureRes := <-exposureChan
-	// if exposureRes.Error != nil {
-	// 	analysis.Error = fmt.Errorf("exposure analysis: %v", exposureRes.Error)
-	// 	return analysis
-	// }
-	// analysis.Exposure = exposureRes
-	// log.Printf("PDB %s exposure analysis done in %.3f secs", analysis.PDB.ID, exposureRes.Duration.Seconds())
+	exposureRes := <-exposureChan
+	if exposureRes.Error != nil {
+		analysis.Error = fmt.Errorf("exposure analysis: %v", exposureRes.Error)
+		return analysis
+	}
+	analysis.Exposure = exposureRes
+	log.Printf("PDB %s exposure analysis done in %.3f secs", analysis.PDB.ID, exposureRes.Duration.Seconds())
 
 	// for _, pocket := range analysis.Binding.Pockets {
 	// 	for _, res := range pocket.Residues {
