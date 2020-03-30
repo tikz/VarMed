@@ -13,4 +13,10 @@ database:
   password: ""
 
 varq:
-  fetch-workers: 16
+  job-workers: 3
+  pipeline:
+    structure-workers: 16
+    enable-steps:
+      binding: true
+      exposure: true
+      interaction: true

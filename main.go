@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"varq/config"
+	"varq/http"
 )
 
 var (
@@ -17,6 +18,7 @@ func init() {
 		log.Fatalf("Cannot open and parse config.yaml: %v", err)
 	}
 	cfg = c
+	http.Cfg = c
 }
 
 func main() {

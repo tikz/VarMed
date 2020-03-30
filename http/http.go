@@ -5,13 +5,15 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
+	"varq/config"
 )
 
+var Cfg *config.Config
 var ErrHTTPNotOk = errors.New("HTTP response with status code not 200 OK")
 
 func Get(url string) ([]byte, error) {
 	client := http.Client{
-		Timeout: time.Duration(120) * time.Second,
+		Timeout: time.Duration(Cfg.HTTPClient.Timeout) * time.Second,
 	}
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
@@ -19,7 +21,7 @@ func Get(url string) ([]byte, error) {
 		return nil, err
 	}
 
-	req.Header.Set("User-Agent", "test")
+	req.Header.Set("User-Agent", Cfg.HTTPClient.UserAgent)
 
 	res, err := client.Do(req)
 	if err != nil {

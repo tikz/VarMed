@@ -24,6 +24,18 @@ type Config struct {
 		Username string `yaml:"username"`
 		Password string `yaml:"password"`
 	} `yaml:"database"`
+
+	VarQ struct {
+		JobWorkers int `yaml:"job-workers"`
+		Pipeline   struct {
+			StructureWorkers int `yaml:"structure-workers"`
+			EnableSteps      struct {
+				Binding     bool `yaml:"binding"`
+				Exposure    bool `yaml:"exposure"`
+				Interaction bool `yaml:"interaction"`
+			} `yaml:"enable-steps"`
+		} `yaml:"pipeline"`
+	} `yaml:"varq"`
 }
 
 // LoadFile opens and parses the YAML config file
