@@ -4,3 +4,4 @@ varq
 /*.pdb
 *.pyc
 __pycache__
+bin/

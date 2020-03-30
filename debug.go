@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"varq/pdb"
 
-	. "github.com/logrusorgru/aurora"
+	"github.com/logrusorgru/aurora"
 )
 
 func debugPrintChains(a *Analysis) {
@@ -42,7 +42,7 @@ func residueExists(res *pdb.Residue, resList []*pdb.Residue) bool {
 
 func debugPrintChainsMarkedResidues(analysisName string, pdb *pdb.PDB, aRes []*pdb.Residue) {
 	fmt.Println("==============================================================================")
-	fmt.Println(BgBlack(Bold(Cyan(analysisName))))
+	fmt.Println(aurora.BgBlack(aurora.Bold(aurora.Cyan(analysisName))))
 	for chain, mapping := range pdb.SIFTS.UniProtIDs[pdb.UniProtID].Chains {
 		residues := pdb.SeqRes[chain]
 		unpStart := int(mapping.UniProtStart)
@@ -70,7 +70,7 @@ func debugPrintChainsMarkedResidues(analysisName string, pdb *pdb.PDB, aRes []*p
 			res, ok := pdb.SeqResChains[chain][int64(i)]
 			if ok {
 				if residueExists(res, aRes) {
-					fmt.Print(BgRed(Bold(Yellow(res.Abbrv1))))
+					fmt.Print(aurora.BgRed(aurora.Bold(aurora.Yellow(res.Abbrv1))))
 				} else {
 					fmt.Print(res.Abbrv1)
 				}
