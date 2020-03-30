@@ -10,14 +10,17 @@ import (
 
 // Reference: https://www.ebi.ac.uk/pdbe/api/doc/sifts.html
 
+// SIFTS represents a valid response from the SIFTS mapping project.
 type SIFTS struct {
 	UniProtIDs map[string]*SIFTSUniProt
 }
 
+// SIFTSUniProt represents the available UniProt sequence mappings for protein chains.
 type SIFTSUniProt struct {
 	Chains map[string]*SIFTSMapping
 }
 
+// SIFTSMapping represents the position offsets between UniProt and PDB for a specific chain.
 type SIFTSMapping struct {
 	UniProtStart int64
 	UniProtEnd   int64
@@ -25,29 +28,30 @@ type SIFTSMapping struct {
 	PDBEnd       int64
 }
 
-// JSON response unmarshaling structs
+// Private structs for JSON unmarshaling
 
-type ResponseUniProtAccession struct {
+type responseUniProtAccession struct {
 	Identifier string            `json:"identifier"`
-	Mappings   []ResponseMapping `json:"mappings"`
+	Mappings   []responseMapping `json:"mappings"`
 	Name       string            `json:"name"`
 }
 
-type ResponseMapping struct {
-	Start        ResponsePos `json:"start"`
+type responseMapping struct {
+	Start        responsePos `json:"start"`
 	EntityID     int64       `json:"entity_id"`
-	End          ResponsePos `json:"end"`
+	End          responsePos `json:"end"`
 	UnpStart     int64       `json:"unp_start"`
 	UnpEnd       int64       `json:"unp_end"`
 	ChainID      string      `json:"chain_id"`
 	StructAsymID string      `json:"struct_asym_id"`
 }
 
-type ResponsePos struct {
+type responsePos struct {
 	ResidueNumber int64 `json:"residue_number"`
 }
 
-func (pdb *PDB) GetSIFTSMappings() error {
+// getSIFTSMappings retrieves the UniProt<->PDB position mappings from the SIFTS project.
+func (pdb *PDB) getSIFTSMappings() error {
 	pdbID := strings.ToLower(pdb.ID)
 	raw, _ := http.Get("https://www.ebi.ac.uk/pdbe/api/mappings/uniprot_segments/" + pdbID)
 	pdbs := make(map[string]json.RawMessage)
@@ -62,7 +66,7 @@ func (pdb *PDB) GetSIFTSMappings() error {
 		return fmt.Errorf("unmarshal databases keys: %v", err)
 	}
 
-	accessions := make(map[string]*ResponseUniProtAccession)
+	accessions := make(map[string]*responseUniProtAccession)
 	err = json.Unmarshal(databases["UniProt"], &accessions)
 	if err != nil {
 		return fmt.Errorf("unmarshal UniProt key: %v", err)

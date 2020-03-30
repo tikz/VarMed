@@ -9,8 +9,9 @@ import (
 	"time"
 )
 
+// ExtractSeqRes parses the raw PDB for SEQRES records containing the primary sequence.
 func (pdb *PDB) ExtractSeqRes() error {
-	regex, _ := regexp.Compile("SEQRES[ ]*.*?[ ]+(.*?)[ ]+([0-9]*)[ ]*([A-Z ]*)") // https://regex101.com/r/9vwbyc/1
+	regex, _ := regexp.Compile("SEQRES[ ]*.*?[ ]+(.*?)[ ]+([0-9]*)[ ]*([A-Z ]*)")
 	matches := regex.FindAllStringSubmatch(string(pdb.RawPDB), -1)
 	if len(matches) == 0 {
 		return errors.New("SEQRES not found")
@@ -31,11 +32,37 @@ func (pdb *PDB) ExtractSeqRes() error {
 	return nil
 }
 
-func (pdb *PDB) ExtractChains() error {
-	chains, err := extractPDBChains(pdb.RawPDB)
+// ExtractPDBChains parses the residue chains from raw PDB contents.
+func (pdb *PDB) ExtractPDBChains() error {
+	atoms, err := extractPDBAtoms(pdb.RawPDB)
 	if err != nil {
-		return fmt.Errorf("parsing chains: %v", err)
+		return fmt.Errorf("parse PDB atoms: %v", err)
 	}
+	if len(atoms) == 0 {
+		return errors.New("empty atoms slice")
+	}
+
+	chains := make(map[string]map[int64]*Residue)
+
+	var res *Residue
+	for _, atom := range atoms {
+		chain, chainOk := chains[atom.Chain]
+		pos, posOk := chain[atom.ResidueNumber]
+
+		if !chainOk {
+			chains[atom.Chain] = make(map[int64]*Residue)
+		}
+		if !posOk {
+			res = NewResidue(atom.Chain, atom.ResidueNumber, atom.Residue)
+			res.Atoms = []*Atom{atom}
+			chains[atom.Chain][atom.ResidueNumber] = res
+		} else {
+			pos.Atoms = append(pos.Atoms, atom)
+		}
+
+		atom.Aminoacid = res // parent ref
+	}
+
 	pdb.Chains = chains
 
 	for _, chain := range pdb.Chains {
@@ -45,6 +72,7 @@ func (pdb *PDB) ExtractChains() error {
 	return nil
 }
 
+// ExtractCIFData parses the associated CIF file for the PDB entry.
 func (pdb *PDB) ExtractCIFData() error {
 	title, err := extractCIFLine("title", "_struct.title", pdb.RawCIF)
 	if err != nil {
@@ -78,12 +106,11 @@ func (pdb *PDB) ExtractCIFData() error {
 	return nil
 }
 
-// extractPDBAtoms extracts the atoms from raw PDB contents
 func extractPDBAtoms(raw []byte) ([]*Atom, error) {
 	var atoms []*Atom
 
-	regex, _ := regexp.Compile("(?m)^ATOM.*$")
-	matches := regex.FindAllString(string(raw), -1)
+	r, _ := regexp.Compile("(?m)^ATOM.*$")
+	matches := r.FindAllString(string(raw), -1)
 	if len(matches) == 0 {
 		return atoms, errors.New("atoms not found")
 	}
@@ -91,7 +118,7 @@ func extractPDBAtoms(raw []byte) ([]*Atom, error) {
 	for _, match := range matches {
 		var atom Atom
 
-		// Positions reference: https://www.cgl.ucsf.edu/chimera/docs/UsersGuide/tutorials/pdbintro.html
+		// Column positions reference: https://www.cgl.ucsf.edu/chimera/docs/UsersGuide/tutorials/pdbintro.html
 		atom.Number, _ = strconv.ParseInt(strings.TrimSpace(match[6:11]), 10, 64)
 		atom.Residue = match[17:20]
 		atom.Chain = match[21:22]
@@ -106,48 +133,13 @@ func extractPDBAtoms(raw []byte) ([]*Atom, error) {
 	return atoms, nil
 }
 
-// extractPDBChains extracts the residue chains from a slice of atoms
-func extractPDBChains(raw []byte) (map[string]map[int64]*Residue, error) {
-	atoms, err := extractPDBAtoms(raw)
-	if err != nil {
-		return nil, fmt.Errorf("parsing PDB atoms: %v", err)
-	}
-	if len(atoms) == 0 {
-		return nil, errors.New("empty atoms slice")
-	}
-
-	chains := make(map[string]map[int64]*Residue)
-
-	var res *Residue
-	for _, atom := range atoms {
-		chain, chainOk := chains[atom.Chain]
-		pos, posOk := chain[atom.ResidueNumber]
-
-		if !chainOk {
-			chains[atom.Chain] = make(map[int64]*Residue)
-		}
-		if !posOk {
-			res = NewResidue(atom.Chain, atom.ResidueNumber, atom.Residue)
-			res.Atoms = []*Atom{atom}
-			chains[atom.Chain][atom.ResidueNumber] = res
-		} else {
-			pos.Atoms = append(pos.Atoms, atom)
-		}
-		// Parent ref
-		atom.Aminoacid = res
-	}
-
-	return chains, nil
-}
-
-// CIF contains additional data that in PDB files is included under the REMARK tag, which is not standarized and hard to parse.
-
 func extractCIFLine(name string, pattern string, raw []byte) (string, error) {
-	regex, _ := regexp.Compile("(?s)" + pattern + "[ ]*(.*?)_")
-	matches := regex.FindAllStringSubmatch(string(raw), -1)
+	r, _ := regexp.Compile("(?s)" + pattern + "[ ]*(.*?)_")
+	matches := r.FindAllStringSubmatch(string(raw), -1)
 	if len(matches) == 0 {
 		return "", errors.New("CIF " + name + " not found")
 	}
+
 	match := matches[0][1]
 	match = strings.TrimSpace(match)
 	match = strings.Replace(match, "'", "", -1)
@@ -155,10 +147,10 @@ func extractCIFLine(name string, pattern string, raw []byte) (string, error) {
 	return match, nil
 }
 
-// extractCIFDate extracts the main publication date from the CIF file
+// extractCIFDate parses the main publication date from the CIF file.
 func extractCIFDate(raw []byte) (*time.Time, error) {
-	regex, _ := regexp.Compile("_pdbx_database_status.recvd_initial_deposition_date[ ]*([0-9]*-[0-9]*-[0-9]*)")
-	matches := regex.FindAllStringSubmatch(string(raw), -1)
+	r, _ := regexp.Compile("_pdbx_database_status.recvd_initial_deposition_date[ ]*([0-9]*-[0-9]*-[0-9]*)")
+	matches := r.FindAllStringSubmatch(string(raw), -1)
 	if len(matches) == 0 {
 		return nil, errors.New("CIF date not found")
 	}
@@ -167,5 +159,6 @@ func extractCIFDate(raw []byte) (*time.Time, error) {
 	if err != nil {
 		return nil, fmt.Errorf("parse CIF date: %v", err)
 	}
+
 	return &t, nil
 }
