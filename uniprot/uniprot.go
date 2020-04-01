@@ -101,7 +101,7 @@ func (u *UniProt) extractPDBs() error {
 
 // extractSequence parses the TXT for the canonical sequence.
 func (u *UniProt) extractSequence() error {
-	r, _ := regexp.Compile("(?ms)SQ.*?$(.*?)//") // https://regex101.com/r/ZTOYaJ/1
+	r, _ := regexp.Compile("(?ms)^SQ.*?$(.*?)//") // https://regex101.com/r/ZTOYaJ/1
 	matches := r.FindAllStringSubmatch(string(u.Raw), -1)
 
 	if len(matches) == 0 {
