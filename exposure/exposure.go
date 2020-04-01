@@ -103,7 +103,7 @@ func pymolWorker(path string, jobs <-chan [2]int, results chan<- *PyMOLResults) 
 	for j := range jobs {
 		start := strconv.Itoa(j[0])
 		end := strconv.Itoa(j[1])
-		out, _ := exec.Command("python3", "exposure/run_pymol.py", path, start, end).CombinedOutput()
+		out, _ := exec.Command("../pymol/bin/python3", "exposure/run_pymol.py", path, start, end).CombinedOutput()
 
 		res := PyMOLResults{Error: nil, Lines: strings.Split(string(out), "\n")}
 		results <- &res
