@@ -13,14 +13,6 @@ func debugPrintChains(a *Analysis) {
 		pocketResidues = append(pocketResidues, pocket.Residues...)
 	}
 
-	if len(pocketResidues) > 0 {
-		debugPrintChainsMarkedResidues("Fpocket", a.PDB, pocketResidues, nil)
-	}
-
-	if a.Binding.Catalytic != nil {
-		debugPrintChainsMarkedResidues("M-CSA", a.PDB, a.Binding.Catalytic.Residues, nil)
-	}
-
 	if len(a.Interaction.Residues) > 0 {
 		debugPrintChainsMarkedResidues("Interface residues by distance", a.PDB, a.Interaction.Residues, nil)
 	}
@@ -29,6 +21,14 @@ func debugPrintChains(a *Analysis) {
 		if len(a.Exposure.ExposedResidues) > 0 {
 			debugPrintChainsMarkedResidues("Exposed residues", a.PDB, a.Exposure.ExposedResidues, nil)
 		}
+	}
+
+	if len(pocketResidues) > 0 {
+		debugPrintChainsMarkedResidues("Fpocket", a.PDB, pocketResidues, nil)
+	}
+
+	if a.Binding.Catalytic != nil {
+		debugPrintChainsMarkedResidues("M-CSA", a.PDB, a.Binding.Catalytic.Residues, nil)
 	}
 
 	if len(a.PDB.BindingSite) > 0 {
@@ -61,6 +61,7 @@ func debugPrintChains(a *Analysis) {
 	}
 	debugPrintChainsMarkedResidues("Pfam", a.PDB, famRes, e)
 
+	fmt.Println()
 }
 
 func residueExists(res *pdb.Residue, resList []*pdb.Residue) bool {
