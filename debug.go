@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"varq/pdb"
 
 	"github.com/logrusorgru/aurora"
@@ -40,7 +41,11 @@ func debugPrintChains(a *Analysis) {
 		}
 		e := func() {
 			for site, desc := range a.PDB.BindingSiteDesc {
-				fmt.Print(aurora.BrightGreen(site), ": ", desc, " | ")
+				var residues []string
+				for _, res := range a.PDB.BindingSite[site] {
+					residues = append(residues, res.Chain+"-"+res.Abbrv3+strconv.FormatInt(res.Position, 10))
+				}
+				fmt.Print(aurora.BrightGreen(site), " (", aurora.Red(strings.Join(residues, " ")), "): ", desc, " | ")
 			}
 			fmt.Println()
 		}
