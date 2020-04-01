@@ -11,12 +11,18 @@ import (
 
 func debugPrintChains(a *Analysis) {
 	var pocketResidues []*pdb.Residue
-	for _, pocket := range a.Binding.Pockets {
-		pocketResidues = append(pocketResidues, pocket.Residues...)
+
+	if a.Binding != nil {
+		for _, pocket := range a.Binding.Pockets {
+			pocketResidues = append(pocketResidues, pocket.Residues...)
+		}
+
 	}
 
-	if len(a.Interaction.Residues) > 0 {
-		debugPrintChainsMarkedResidues("Interface residues by distance", a.PDB, a.Interaction.Residues, nil)
+	if a.Interaction != nil {
+		if len(a.Interaction.Residues) > 0 {
+			debugPrintChainsMarkedResidues("Interface residues by distance", a.PDB, a.Interaction.Residues, nil)
+		}
 	}
 
 	if a.Exposure != nil {
@@ -29,8 +35,10 @@ func debugPrintChains(a *Analysis) {
 		debugPrintChainsMarkedResidues("Fpocket", a.PDB, pocketResidues, nil)
 	}
 
-	if a.Binding.Catalytic != nil {
-		debugPrintChainsMarkedResidues("M-CSA", a.PDB, a.Binding.Catalytic.Residues, nil)
+	if a.Binding != nil {
+		if a.Binding.Catalytic != nil {
+			debugPrintChainsMarkedResidues("M-CSA", a.PDB, a.Binding.Catalytic.Residues, nil)
+		}
 	}
 
 	if len(a.PDB.BindingSite) > 0 {
