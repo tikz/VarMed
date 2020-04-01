@@ -26,7 +26,7 @@ type PDB struct {
 	HetAtoms []*Atom // HETATM records in the structure
 
 	// Position mapping
-	SIFTS            *SIFTS                        // EBI SIFTS data for residue position mapping between UniProt and PDB
+	SIFTS            *SIFTS                        // EBI SIFTS data for residue position mapping
 	Chains           map[string]map[int64]*Residue // PDB ATOM chain name and position to Residue pointer
 	SeqRes           map[string][]*Residue         // PDB SEQRES chain name to residues
 	SeqResChains     map[string]map[int64]*Residue // PDB SEQRES chain name and PDB ATOM position to residue
