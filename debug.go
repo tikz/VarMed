@@ -50,7 +50,7 @@ func debugPrintChains(a *Analysis) {
 	var famRes []*pdb.Residue
 	for _, fam := range a.PDB.SIFTS.Pfam {
 		for _, m := range fam.Mappings {
-			for i := m.PDBStart.ResidueNumber; i < m.PDBEnd.ResidueNumber; i++ {
+			for i := m.PDBStart.ResidueNumber; i <= m.PDBEnd.ResidueNumber; i++ {
 				famRes = append(famRes, a.PDB.SeqResChains[m.ChainID][i])
 			}
 		}
