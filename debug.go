@@ -29,6 +29,18 @@ func debugPrintChains(a *Analysis) {
 		debugPrintChainsMarkedResidues("Exposed residues", a.PDB, a.Exposure.ExposedResidues)
 	}
 
+	if len(a.PDB.BindingSite) > 0 {
+		var residues []*pdb.Residue
+
+		for _, rs := range a.PDB.BindingSite {
+			residues = append(residues, rs...)
+		}
+		debugPrintChainsMarkedResidues("PDB SITE records", a.PDB, residues)
+		for site, desc := range a.PDB.BindingSiteDesc {
+			fmt.Println("SITE", aurora.Red(site), "-", desc)
+		}
+	}
+
 }
 
 func residueExists(res *pdb.Residue, resList []*pdb.Residue) bool {
