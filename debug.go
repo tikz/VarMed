@@ -93,14 +93,14 @@ func debugPrintChainsMarkedResidues(analysisName string, pdb *pdb.PDB, aRes []*p
 		}
 		fmt.Print(pdb.UniProtSequence)
 		fmt.Println()
-		fmt.Print(">SEQRES      ")
-		for i := 0; i < unpStart; i++ {
-			fmt.Print(" ")
-		}
-		for _, res := range residues {
-			fmt.Printf(res.Abbrv1)
-		}
-		fmt.Println()
+		// fmt.Print(">SEQRES      ")
+		// for i := 0; i < unpStart; i++ {
+		// 	fmt.Print(" ")
+		// }
+		// for _, res := range residues {
+		// 	fmt.Printf(res.Abbrv1)
+		// }
+		// fmt.Println()
 		fmt.Print(">PDB         ")
 		for i := 1; i < unpStart; i++ {
 			fmt.Print(" ")
