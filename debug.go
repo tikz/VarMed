@@ -14,20 +14,20 @@ func debugPrintChains(a *Analysis) {
 	}
 
 	if len(pocketResidues) > 0 {
-		debugPrintChainsMarkedResidues("Fpocket", a.PDB, pocketResidues)
+		debugPrintChainsMarkedResidues("Fpocket", a.PDB, pocketResidues, nil)
 	}
 
 	if a.Binding.Catalytic != nil {
-		debugPrintChainsMarkedResidues("M-CSA", a.PDB, a.Binding.Catalytic.Residues)
+		debugPrintChainsMarkedResidues("M-CSA", a.PDB, a.Binding.Catalytic.Residues, nil)
 	}
 
 	if len(a.Interaction.Residues) > 0 {
-		debugPrintChainsMarkedResidues("Interface residues by distance", a.PDB, a.Interaction.Residues)
+		debugPrintChainsMarkedResidues("Interface residues by distance", a.PDB, a.Interaction.Residues, nil)
 	}
 
 	if a.Exposure != nil {
 		if len(a.Exposure.ExposedResidues) > 0 {
-			debugPrintChainsMarkedResidues("Exposed residues", a.PDB, a.Exposure.ExposedResidues)
+			debugPrintChainsMarkedResidues("Exposed residues", a.PDB, a.Exposure.ExposedResidues, nil)
 		}
 	}
 
@@ -37,11 +37,29 @@ func debugPrintChains(a *Analysis) {
 		for _, rs := range a.PDB.BindingSite {
 			residues = append(residues, rs...)
 		}
-		debugPrintChainsMarkedResidues("PDB SITE records", a.PDB, residues)
-		for site, desc := range a.PDB.BindingSiteDesc {
-			fmt.Println("SITE", aurora.Red(site), "-", desc)
+		e := func() {
+			for site, desc := range a.PDB.BindingSiteDesc {
+				fmt.Print(aurora.BrightGreen(site), ": ", desc, " | ")
+			}
+			fmt.Println()
+		}
+		debugPrintChainsMarkedResidues("PDB SITE records", a.PDB, residues, e)
+	}
+
+	var famRes []*pdb.Residue
+	for _, fam := range a.PDB.SIFTS.Pfam {
+		for _, m := range fam.Mappings {
+			for i := m.PDBStart.ResidueNumber; i < m.PDBEnd.ResidueNumber; i++ {
+				famRes = append(famRes, a.PDB.SeqResChains[m.ChainID][i])
+			}
 		}
 	}
+	e := func() {
+		for id, fam := range a.PDB.SIFTS.Pfam {
+			fmt.Println(aurora.BrightGreen(id), aurora.BrightGreen(fam.Name), "-", fam.Description)
+		}
+	}
+	debugPrintChainsMarkedResidues("Pfam", a.PDB, famRes, e)
 
 }
 
@@ -54,13 +72,19 @@ func residueExists(res *pdb.Residue, resList []*pdb.Residue) bool {
 	return false
 }
 
-func debugPrintChainsMarkedResidues(analysisName string, pdb *pdb.PDB, aRes []*pdb.Residue) {
+func debugPrintChainsMarkedResidues(analysisName string, pdb *pdb.PDB, aRes []*pdb.Residue, extra func()) {
 	fmt.Println("==============================================================================")
 	fmt.Println(aurora.BgBlack(aurora.Bold(aurora.Cyan(analysisName))))
+
+	if extra != nil {
+		fmt.Println("-----------------------------------------")
+		extra()
+	}
+
 	for _, mapping := range pdb.SIFTS.UniProt[pdb.UniProtID].Mappings {
 		residues := pdb.SeqRes[mapping.ChainID]
 		unpStart := int(mapping.UnpStart)
-		pdbStart := int(mapping.UnpEnd)
+		pdbStart := int(mapping.PDBStart.ResidueNumber)
 		fmt.Println("---------", pdb.ID, "Chain", mapping.ChainID, "-", pdb.UniProtID, "---------")
 		fmt.Print(">UNIPROT     ")
 		for i := 0; i < pdbStart; i++ {
@@ -94,5 +118,5 @@ func debugPrintChainsMarkedResidues(analysisName string, pdb *pdb.PDB, aRes []*p
 		}
 		fmt.Println()
 	}
-	fmt.Println("==============================================================================")
+	// fmt.Println("==============================================================================")
 }
