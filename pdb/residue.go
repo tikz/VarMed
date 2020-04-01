@@ -1,6 +1,9 @@
 package pdb
 
 import (
+	"errors"
+	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -65,4 +68,84 @@ func matchName(input string) (string, string, string) {
 	}
 
 	return input, "Unk", "X"
+}
+
+// ExtractSeqRes parses the raw PDB for SEQRES records containing the primary sequence.
+func (pdb *PDB) ExtractSeqRes() error {
+	regex, _ := regexp.Compile("SEQRES[ ]*.*?[ ]+(.*?)[ ]+([0-9]*)[ ]*([A-Z ]*)")
+	matches := regex.FindAllStringSubmatch(string(pdb.RawPDB), -1)
+	if len(matches) == 0 {
+		return errors.New("SEQRES not found")
+	}
+
+	pdb.SeqRes = make(map[string][]*Residue)
+	for _, match := range matches {
+		chain := match[1]
+		resSplit := strings.Split(match[3], " ")
+		for i, resStr := range resSplit {
+			if resStr != "" {
+				res := NewResidue(chain, int64(i), resStr)
+				pdb.SeqRes[chain] = append(pdb.SeqRes[chain], res)
+			}
+		}
+	}
+
+	return nil
+}
+
+// ExtractResidues extracts data from the ATOM and HETATM records and parses them accordingly.
+func (pdb *PDB) ExtractResidues() error {
+	atoms, err := pdb.extractPDBATMRecords("ATOM")
+	if err != nil {
+		return fmt.Errorf("extract ATOM records: %v", err)
+	}
+
+	hetatms, _ := pdb.extractPDBATMRecords("HETATM")
+
+	pdb.Atoms = atoms
+	pdb.HetAtoms = hetatms
+
+	err = pdb.ExtractPDBChains()
+	if err != nil {
+		return fmt.Errorf("extract PDB chains: %v", err)
+	}
+
+	return nil
+}
+
+// ExtractPDBChains parses the residue chains from raw PDB contents.
+func (pdb *PDB) ExtractPDBChains() error {
+	atoms := pdb.Atoms
+	if len(atoms) == 0 {
+		return errors.New("empty atoms list")
+	}
+
+	chains := make(map[string]map[int64]*Residue)
+
+	var res *Residue
+	for _, atom := range atoms {
+		chain, chainOk := chains[atom.Chain]
+		pos, posOk := chain[atom.ResidueNumber]
+
+		if !chainOk {
+			chains[atom.Chain] = make(map[int64]*Residue)
+		}
+		if !posOk {
+			res = NewResidue(atom.Chain, atom.ResidueNumber, atom.Residue)
+			res.Atoms = []*Atom{atom}
+			chains[atom.Chain][atom.ResidueNumber] = res
+		} else {
+			pos.Atoms = append(pos.Atoms, atom)
+		}
+
+		atom.Aminoacid = res // parent ref
+	}
+
+	pdb.Chains = chains
+
+	for _, chain := range pdb.Chains {
+		pdb.TotalLength += int64(len(chain))
+	}
+
+	return nil
 }

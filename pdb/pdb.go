@@ -22,12 +22,23 @@ type PDB struct {
 	UniProtID       string // UniProt accession
 	UniProtSequence string // UniProt canonical sequence
 
+	Atoms    []*Atom // ATOM records in the structure
+	HetAtoms []*Atom // HETATM records in the structure
+
+	// Position mapping
 	SIFTS            *SIFTS                        // EBI SIFTS data for residue position mapping between UniProt and PDB
 	Chains           map[string]map[int64]*Residue // PDB ATOM chain name and position to Residue pointer
-	SeqRes           map[string][]*Residue         // PDB SEQRES chain name to slice of residues
+	SeqRes           map[string][]*Residue         // PDB SEQRES chain name to residues
 	SeqResChains     map[string]map[int64]*Residue // PDB SEQRES chain name and PDB ATOM position to residue
 	SeqResOffsets    map[string]int64              // PDB ATOM residue number to SEQRES position offsets
-	UniProtPositions map[int64][]*Residue          // UniProt sequence position to residue(s) (can be of multiple chains) in structure
+	UniProtPositions map[int64][]*Residue          // UniProt sequence position to residue(s) (multiple chains) in structure
+
+	// Extra data
+	// SITE records
+	BindingSite map[string][]*Residue // binding site identifier to residues compromising it
+
+	// REMARK 800 site descriptions
+	BindingSiteDesc map[string]string // binding site identifier to description
 
 	RawPDB        []byte // PDB file raw data
 	RawCIF        []byte // CIF file raw data
@@ -48,7 +59,7 @@ func NewPDBFromID(pdbID string, uniprotID string) (*PDB, error) {
 func NewPDBFromRaw(raw []byte) (*PDB, error) {
 	pdb := PDB{RawPDB: raw}
 
-	err := pdb.ExtractPDBChains()
+	err := pdb.ExtractResidues()
 	if err != nil {
 		return nil, fmt.Errorf("parse: %v", err)
 	}
@@ -70,6 +81,7 @@ func (pdb *PDB) Load() error {
 
 	pdb.makeMappings()
 
+	pdb.extractSites()
 	return nil
 }
 
@@ -109,9 +121,9 @@ func (pdb *PDB) Extract() error {
 		return fmt.Errorf("extract SEQRES: %v", err)
 	}
 
-	err = pdb.ExtractPDBChains()
+	err = pdb.ExtractResidues()
 	if err != nil {
-		return fmt.Errorf("extract PDB atoms to chains: %v", err)
+		return fmt.Errorf("extract PDB residues: %v", err)
 	}
 
 	err = pdb.ExtractCIFData()
