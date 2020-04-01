@@ -88,16 +88,18 @@ func debugPrintChainsMarkedResidues(analysisName string, pdb *pdb.PDB, aRes []*p
 		unpStart := int(mapping.UnpStart)
 		pdbStart := int(mapping.PDBStart.ResidueNumber)
 		fmt.Println("---------", pdb.ID, "Chain", mapping.ChainID, "-", pdb.UniProtID, "---------")
-
 		// Ruler
 		fmt.Print("             ")
 		for i := 0; i < pdbStart; i++ {
 			fmt.Print(" ")
 		}
 		fmt.Print(aurora.Underline("1"), "        ")
-		for i := 10; i < len(pdb.UniProtSequence)-20; i = i + 10 {
+		for i := 10; i < len(pdb.UniProtSequence); i = i + 10 {
 			n := strconv.Itoa(i)
-			fmt.Print(aurora.Bold(aurora.Underline(n[:1])), n[1:], "         ")
+			fmt.Print(aurora.Bold(aurora.Underline(n[:1])), n[1:])
+			for s := 0; s < 10-len(n); s++ {
+				fmt.Print(" ")
+			}
 		}
 		fmt.Println()
 
