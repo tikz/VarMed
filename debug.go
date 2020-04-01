@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"varq/pdb"
 
 	"github.com/logrusorgru/aurora"
@@ -87,6 +88,19 @@ func debugPrintChainsMarkedResidues(analysisName string, pdb *pdb.PDB, aRes []*p
 		unpStart := int(mapping.UnpStart)
 		pdbStart := int(mapping.PDBStart.ResidueNumber)
 		fmt.Println("---------", pdb.ID, "Chain", mapping.ChainID, "-", pdb.UniProtID, "---------")
+
+		// Ruler
+		fmt.Print("             ")
+		for i := 0; i < pdbStart; i++ {
+			fmt.Print(" ")
+		}
+		fmt.Print(aurora.Underline("1"), "        ")
+		for i := 10; i < len(pdb.UniProtSequence)-20; i = i + 10 {
+			n := strconv.Itoa(i)
+			fmt.Print(aurora.Bold(aurora.Underline(n[:1])), n[1:], "         ")
+		}
+		fmt.Println()
+
 		fmt.Print(">UNIPROT     ")
 		for i := 0; i < pdbStart; i++ {
 			fmt.Print(" ")
@@ -110,6 +124,7 @@ func debugPrintChainsMarkedResidues(analysisName string, pdb *pdb.PDB, aRes []*p
 			if ok {
 				if residueExists(res, aRes) {
 					fmt.Print(aurora.BgRed(aurora.Bold(aurora.Yellow(res.Abbrv1))))
+					fmt.Print()
 				} else {
 					fmt.Print(res.Abbrv1)
 				}
