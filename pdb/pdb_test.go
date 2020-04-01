@@ -154,8 +154,8 @@ func TestMappings(t *testing.T) {
 
 	testChain := "B"
 	chainSIFT, _ := pdb.SIFTS.GetChainMapping(pdb.UniProtID, testChain)
-	pdbStart := chainSIFT.Start.ResidueNumber
-	pdbEnd := chainSIFT.End.ResidueNumber
+	pdbStart := chainSIFT.PDBStart.ResidueNumber
+	pdbEnd := chainSIFT.PDBEnd.ResidueNumber
 	unpStart := chainSIFT.UnpStart
 	unpEnd := chainSIFT.UnpEnd
 

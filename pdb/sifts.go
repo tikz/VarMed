@@ -16,8 +16,7 @@ type SIFTS struct {
 	UniProt map[string]*Accession `json:"UniProt"`
 }
 
-// Private structs for JSON unmarshaling
-
+// Family represents a Pfam family.
 type Family struct {
 	Identifier  string
 	Description string
@@ -25,22 +24,25 @@ type Family struct {
 	Mappings    []*Mapping
 }
 
+// Accession represents an UniProt accession.
 type Accession struct {
 	Identifier string     `json:"identifier"`
 	Mappings   []*Mapping `json:"mappings"`
 	Name       string     `json:"name"`
 }
 
+// Mapping represents position mappings between the database entry and the specific PDB.
 type Mapping struct {
-	Start        *Position `json:"start"`
+	PDBStart     *Position `json:"start"`
 	EntityID     int64     `json:"entity_id"`
-	End          *Position `json:"end"`
+	PDBEnd       *Position `json:"end"`
 	UnpStart     int64     `json:"unp_start"`
 	UnpEnd       int64     `json:"unp_end"`
 	ChainID      string    `json:"chain_id"`
 	StructAsymID string    `json:"struct_asym_id"`
 }
 
+// Position represents the start or end position of a PDB.
 type Position struct {
 	ResidueNumber int64 `json:"residue_number"`
 }
