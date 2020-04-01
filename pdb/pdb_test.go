@@ -153,11 +153,11 @@ func TestMappings(t *testing.T) {
 	pdb.makeMappings()
 
 	testChain := "B"
-	chainSIFT := pdb.SIFTS.UniProtIDs[pdb.UniProtID].Chains[testChain]
-	pdbStart := chainSIFT.PDBStart
-	pdbEnd := chainSIFT.PDBEnd
-	unpStart := chainSIFT.UniProtStart
-	unpEnd := chainSIFT.UniProtEnd
+	chainSIFT, _ := pdb.SIFTS.GetChainMapping(pdb.UniProtID, testChain)
+	pdbStart := chainSIFT.Start.ResidueNumber
+	pdbEnd := chainSIFT.End.ResidueNumber
+	unpStart := chainSIFT.UnpStart
+	unpEnd := chainSIFT.UnpEnd
 
 	if unpStart != 25 || unpEnd != 54 || pdbStart != 1 || pdbEnd != 30 {
 		t.Errorf("received unexpected mapping positions")
@@ -173,8 +173,8 @@ func TestMappings(t *testing.T) {
 	}
 
 	testChain = "B"
-	chainSIFT = pdb.SIFTS.UniProtIDs[pdb.UniProtID].Chains[testChain]
-	unpStart = chainSIFT.UniProtStart
+	chainSIFT, _ = pdb.SIFTS.GetChainMapping(pdb.UniProtID, testChain)
+	unpStart = chainSIFT.UnpStart
 	var i int64
 	for i = 1; i <= 30; i++ {
 		if pdb.Chains[testChain][i] != pdb.SeqResChains[testChain][i] {
@@ -189,8 +189,8 @@ func TestMappings(t *testing.T) {
 	}
 
 	testChain = "C"
-	chainSIFT = pdb.SIFTS.UniProtIDs[pdb.UniProtID].Chains[testChain]
-	unpStart = chainSIFT.UniProtStart
+	chainSIFT, _ = pdb.SIFTS.GetChainMapping(pdb.UniProtID, testChain)
+	unpStart = chainSIFT.UnpStart
 	for i = 1; i <= 21; i++ {
 		if pdb.Chains[testChain][i] != pdb.SeqResChains[testChain][i] {
 			t.Errorf("chain %s: misalignment between chain and SEQRES at pos %d", testChain, i)

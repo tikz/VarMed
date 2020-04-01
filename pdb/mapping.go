@@ -16,13 +16,13 @@ func (pdb *PDB) makeMappings() {
 
 	// UniProt canonical sequence position to structure residues.
 	pdb.UniProtPositions = make(map[int64][]*Residue)
-	chainMapping := pdb.SIFTS.UniProtIDs[pdb.UniProtID].Chains
-	for chain, mapping := range chainMapping {
+	chainMappings := pdb.SIFTS.UniProt[pdb.UniProtID].Mappings
+	for _, m := range chainMappings {
 		var i int64
-		for i = 0; i <= mapping.PDBEnd-mapping.PDBStart; i++ {
-			seqResPos := i + pdb.SeqResOffsets[chain] + 1
-			unpPos := seqResPos + mapping.UniProtStart - 1
-			if res, ok := pdb.SeqResChains[chain][seqResPos]; ok {
+		for i = 0; i <= m.End.ResidueNumber-m.Start.ResidueNumber; i++ {
+			seqResPos := i + pdb.SeqResOffsets[m.ChainID] + 1
+			unpPos := seqResPos + m.UnpStart - 1
+			if res, ok := pdb.SeqResChains[m.ChainID][seqResPos]; ok {
 				pdb.UniProtPositions[unpPos] = append(pdb.UniProtPositions[unpPos], res)
 			}
 		}

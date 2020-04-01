@@ -57,11 +57,11 @@ func residueExists(res *pdb.Residue, resList []*pdb.Residue) bool {
 func debugPrintChainsMarkedResidues(analysisName string, pdb *pdb.PDB, aRes []*pdb.Residue) {
 	fmt.Println("==============================================================================")
 	fmt.Println(aurora.BgBlack(aurora.Bold(aurora.Cyan(analysisName))))
-	for chain, mapping := range pdb.SIFTS.UniProtIDs[pdb.UniProtID].Chains {
-		residues := pdb.SeqRes[chain]
-		unpStart := int(mapping.UniProtStart)
-		pdbStart := int(mapping.PDBStart)
-		fmt.Println("---------", pdb.ID, "Chain", chain, "-", pdb.UniProtID, "---------")
+	for _, mapping := range pdb.SIFTS.UniProt[pdb.UniProtID].Mappings {
+		residues := pdb.SeqRes[mapping.ChainID]
+		unpStart := int(mapping.UnpStart)
+		pdbStart := int(mapping.UnpEnd)
+		fmt.Println("---------", pdb.ID, "Chain", mapping.ChainID, "-", pdb.UniProtID, "---------")
 		fmt.Print(">UNIPROT     ")
 		for i := 0; i < pdbStart; i++ {
 			fmt.Print(" ")
@@ -81,7 +81,7 @@ func debugPrintChainsMarkedResidues(analysisName string, pdb *pdb.PDB, aRes []*p
 			fmt.Print(" ")
 		}
 		for i := range residues {
-			res, ok := pdb.SeqResChains[chain][int64(i)]
+			res, ok := pdb.SeqResChains[mapping.ChainID][int64(i)]
 			if ok {
 				if residueExists(res, aRes) {
 					fmt.Print(aurora.BgRed(aurora.Bold(aurora.Yellow(res.Abbrv1))))
