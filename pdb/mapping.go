@@ -19,7 +19,7 @@ func (pdb *PDB) makeMappings() {
 	chainMappings := pdb.SIFTS.UniProt[pdb.UniProtID].Mappings
 	for _, m := range chainMappings {
 		var i int64
-		for i = 0; i <= m.End.ResidueNumber-m.Start.ResidueNumber; i++ {
+		for i = 0; i <= m.PDBEnd.ResidueNumber-m.PDBStart.ResidueNumber; i++ {
 			seqResPos := i + pdb.SeqResOffsets[m.ChainID] + 1
 			unpPos := seqResPos + m.UnpStart - 1
 			if res, ok := pdb.SeqResChains[m.ChainID][seqResPos]; ok {
