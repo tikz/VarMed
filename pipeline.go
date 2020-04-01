@@ -62,34 +62,47 @@ func analysePDB(a *Analysis) *Analysis {
 	interactionChan := make(chan *interaction.Step)
 	exposureChan := make(chan *exposure.Step)
 
-	go binding.RunBindingStep(a.PDB, bindingChan)
-	go interaction.RunInteractionStep(a.PDB, interactionChan)
-	go exposure.RunExposureStep(a.PDB, exposureChan)
+	if cfg.VarQ.Pipeline.EnableSteps.Binding {
+		go binding.RunBindingStep(a.PDB, bindingChan)
+	}
+	if cfg.VarQ.Pipeline.EnableSteps.Interaction {
+		go interaction.RunInteractionStep(a.PDB, interactionChan)
+	}
+	if cfg.VarQ.Pipeline.EnableSteps.Exposure {
+		go exposure.RunExposureStep(a.PDB, exposureChan)
+	}
 
 	// TODO: refactor these repeated patterns
-	bindingRes := <-bindingChan
-	if bindingRes.Error != nil {
-		a.Error = fmt.Errorf("binding analysis: %v", bindingRes.Error)
-		return a
-	}
-	a.Binding = bindingRes
-	log.Printf("PDB %s binding analysis done in %.3f secs", a.PDB.ID, bindingRes.Duration.Seconds())
 
-	interactionRes := <-interactionChan
-	if interactionRes.Error != nil {
-		a.Error = fmt.Errorf("interaction analysis: %v", interactionRes.Error)
-		return a
+	if cfg.VarQ.Pipeline.EnableSteps.Binding {
+		bindingRes := <-bindingChan
+		if bindingRes.Error != nil {
+			a.Error = fmt.Errorf("binding analysis: %v", bindingRes.Error)
+			return a
+		}
+		a.Binding = bindingRes
+		log.Printf("PDB %s binding analysis done in %.3f secs", a.PDB.ID, bindingRes.Duration.Seconds())
 	}
-	a.Interaction = interactionRes
-	log.Printf("PDB %s interaction analysis done in %.3f secs", a.PDB.ID, interactionRes.Duration.Seconds())
 
-	exposureRes := <-exposureChan
-	if exposureRes.Error != nil {
-		a.Error = fmt.Errorf("exposure analysis: %v", exposureRes.Error)
-		return a
+	if cfg.VarQ.Pipeline.EnableSteps.Interaction {
+		interactionRes := <-interactionChan
+		if interactionRes.Error != nil {
+			a.Error = fmt.Errorf("interaction analysis: %v", interactionRes.Error)
+			return a
+		}
+		a.Interaction = interactionRes
+		log.Printf("PDB %s interaction analysis done in %.3f secs", a.PDB.ID, interactionRes.Duration.Seconds())
 	}
-	a.Exposure = exposureRes
-	log.Printf("PDB %s exposure analysis done in %.3f secs", a.PDB.ID, exposureRes.Duration.Seconds())
+
+	if cfg.VarQ.Pipeline.EnableSteps.Exposure {
+		exposureRes := <-exposureChan
+		if exposureRes.Error != nil {
+			a.Error = fmt.Errorf("exposure analysis: %v", exposureRes.Error)
+			return a
+		}
+		a.Exposure = exposureRes
+		log.Printf("PDB %s exposure analysis done in %.3f secs", a.PDB.ID, exposureRes.Duration.Seconds())
+	}
 
 	debugPrintChains(a)
 	return a

@@ -18,15 +18,16 @@ func (i *arrayFlags) Set(value string) error {
 }
 
 func cliRun(uniprotID string, pdbFlags arrayFlags) {
-	var analyses []*Analysis
+	RunPipeline(uniprotID, pdbFlags)
+	// var analyses []*Analysis
 
-	a, err := RunPipeline(uniprotID, pdbFlags)
-	if err != nil {
-		log.Fatal(err)
-	}
-	analyses = a
+	// a, err := RunPipeline(uniprotID, pdbFlags)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// analyses = a
 
-	dumpJSON(analyses)
+	// dumpJSON(analyses)
 }
 
 func dumpJSON(analyses []*Analysis) {
