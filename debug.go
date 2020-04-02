@@ -70,7 +70,11 @@ func debugPrintChains(a *Analysis) {
 	}
 	e := func() {
 		for id, fam := range a.PDB.SIFTS.Pfam {
-			fmt.Println(aurora.BrightGreen(id), aurora.BrightGreen(fam.Name), "-", fam.Description)
+			var chains []string
+			for _, m := range fam.Mappings {
+				chains = append(chains, m.ChainID)
+			}
+			fmt.Println(aurora.BrightGreen(id), aurora.BrightGreen(fam.Name), "("+strings.Join(chains, ", ")+")", "-", fam.Description)
 		}
 	}
 	debugPrintChainsMarkedResidues("Pfam", a.PDB, famRes, e)
@@ -139,7 +143,6 @@ func debugPrintChainsMarkedResidues(analysisName string, pdb *pdb.PDB, aRes []*p
 			if ok {
 				if residueExists(res, aRes) {
 					fmt.Print(aurora.BgRed(aurora.Bold(aurora.Yellow(res.Abbrv1))))
-					fmt.Print()
 				} else {
 					fmt.Print(res.Abbrv1)
 				}
