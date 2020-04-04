@@ -105,7 +105,10 @@ func analysePDB(a *Analysis) *Analysis {
 		log.Printf("PDB %s exposure analysis done in %.3f secs", a.PDB.ID, exposureRes.Duration.Seconds())
 	}
 
-	debugPrintChains(a)
+	if cfg.DebugPrint.Enabled {
+		debugPrintChains(a)
+	}
+
 	return a
 }
 
