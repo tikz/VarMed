@@ -20,3 +20,9 @@ varq:
       binding: true
       exposure: true
       interaction: true
+
+debug-print:
+  enabled: true
+  rulers:
+    uniprot: true
+    pdb: true

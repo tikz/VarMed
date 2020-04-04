@@ -122,20 +122,22 @@ func debugPrintChainsMarkedResidues(analysisName string, pdb *pdb.PDB, aRes []*p
 		unpStart := int(mapping.UnpStart)
 		pdbStart := int(mapping.PDBStart.ResidueNumber)
 		fmt.Println("---------", pdb.ID, "Chain", mapping.ChainID, "-", pdb.UniProtID, "---------")
-		// Ruler
-		fmt.Print("             ")
-		for i := 0; i < pdbStart; i++ {
-			fmt.Print(" ")
-		}
-		fmt.Print(aurora.Underline("1"), "        ")
-		for i := 10; i < len(pdb.UniProtSequence); i = i + 10 {
-			n := strconv.Itoa(i)
-			fmt.Print(aurora.Bold(aurora.Underline(n[:1])), n[1:])
-			for s := 0; s < 10-len(n); s++ {
+
+		if cfg.DebugPrint.Rulers.UniProt {
+			fmt.Print("             ")
+			for i := 0; i < pdbStart; i++ {
 				fmt.Print(" ")
 			}
+			fmt.Print(aurora.Underline("1"), "        ")
+			for i := 10; i < len(pdb.UniProtSequence); i = i + 10 {
+				n := strconv.Itoa(i)
+				fmt.Print(aurora.Bold(aurora.Underline(n[:1])), n[1:])
+				for s := 0; s < 10-len(n); s++ {
+					fmt.Print(" ")
+				}
+			}
+			fmt.Println()
 		}
-		fmt.Println()
 
 		fmt.Print(">UNIPROT     ")
 		for i := 0; i < pdbStart; i++ {
@@ -153,20 +155,21 @@ func debugPrintChainsMarkedResidues(analysisName string, pdb *pdb.PDB, aRes []*p
 		// }
 		// fmt.Println()
 
-		// Ruler
-		fmt.Print("             ")
-		for i := 0; i < unpStart; i++ {
-			fmt.Print(" ")
-		}
-		fmt.Print(aurora.Underline("1"), "        ")
-		for i := 10; i < len(pdb.Chains[mapping.ChainID]); i = i + 10 {
-			n := strconv.Itoa(i)
-			fmt.Print(aurora.Bold(aurora.Underline(n[:1])), n[1:])
-			for s := 0; s < 10-len(n); s++ {
+		if cfg.DebugPrint.Rulers.PDB {
+			fmt.Print("             ")
+			for i := 0; i < unpStart; i++ {
 				fmt.Print(" ")
 			}
+			fmt.Print(aurora.Underline("1"), "        ")
+			for i := 10; i < len(pdb.Chains[mapping.ChainID]); i = i + 10 {
+				n := strconv.Itoa(i)
+				fmt.Print(aurora.Bold(aurora.Underline(n[:1])), n[1:])
+				for s := 0; s < 10-len(n); s++ {
+					fmt.Print(" ")
+				}
+			}
+			fmt.Println()
 		}
-		fmt.Println()
 
 		fmt.Print(">PDB         ")
 		for i := 1; i < unpStart; i++ {
