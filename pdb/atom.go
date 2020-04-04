@@ -39,7 +39,7 @@ func (pdb *PDB) extractPDBATMRecords(recordName string) ([]*Atom, error) {
 
 		// https://www.wwpdb.org/documentation/file-format-content/format23/sect9.html#ATOM
 		atom.Number, _ = strconv.ParseInt(strings.TrimSpace(match[6:11]), 10, 64)
-		atom.Residue = match[17:20]
+		atom.Residue = strings.TrimSpace(match[17:20])
 		atom.Chain = match[21:22]
 		atom.ResidueNumber, _ = strconv.ParseInt(strings.TrimSpace(match[22:26]), 10, 64)
 		atom.X, _ = strconv.ParseFloat(strings.TrimSpace(match[30:38]), 64)
