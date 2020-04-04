@@ -46,7 +46,7 @@ func debugPrintChains(a *Analysis) {
 					for _, r := range res {
 						residues = append(residues, r.Chain+"-"+r.Abbrv3+strconv.FormatInt(r.Position, 10))
 					}
-					fmt.Print("Ligand", aurora.BrightGreen(name), ": ", aurora.Red(strings.Join(residues, " ")))
+					fmt.Println("Ligand", aurora.BrightGreen(name), "-", aurora.Red(strings.Join(residues, " ")))
 				}
 			}
 			var res []*pdb.Residue
