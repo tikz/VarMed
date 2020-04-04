@@ -1,7 +1,7 @@
 package http
 
 import (
-	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -9,7 +9,6 @@ import (
 )
 
 var Cfg *config.Config
-var ErrHTTPNotOk = errors.New("HTTP response with status code not 200 OK")
 
 func Get(url string) ([]byte, error) {
 	timeout := 120
@@ -35,7 +34,7 @@ func Get(url string) ([]byte, error) {
 		return nil, err
 	}
 	if res.StatusCode != 200 {
-		return nil, ErrHTTPNotOk
+		return nil, fmt.Errorf("HTTP status code %d", res.StatusCode)
 	}
 
 	body, err := ioutil.ReadAll(res.Body)

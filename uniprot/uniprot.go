@@ -11,16 +11,15 @@ import (
 
 // UniProt contains relevant protein data for a single accession.
 type UniProt struct {
-	ID       string     // accession ID
-	URL      string     // page URL for the entry
-	TXTURL   string     // TXT API URL for the entry.
-	Sequence string     // canonical sequence
-	Raw      []byte     `json:"-"` // TXT API raw bytes.
-	PDBIDs   []string   // associated PDB IDs
-	PDBs     []*pdb.PDB `json:"-"` // associated PDB entries
+	ID       string              // accession ID
+	URL      string              // page URL for the entry
+	TXTURL   string              // TXT API URL for the entry.
+	Sequence string              // canonical sequence
+	Raw      []byte              `json:"-"` // TXT API raw bytes.
+	PDBs     map[string]*pdb.PDB `json:"-"` // associated PDB entries
 }
 
-// NewUniProt constructs a Protein instance from an UniProt accession ID
+// NewUniProt constructs an instance from an UniProt accession ID and a list of target PDB IDs
 func NewUniProt(uniprotID string) (*UniProt, error) {
 	url := "https://www.uniprot.org/uniprot/" + uniprotID
 	txtURL := url + ".txt"
@@ -43,20 +42,6 @@ func NewUniProt(uniprotID string) (*UniProt, error) {
 	}
 
 	return u, nil
-}
-
-// FilterPDBs removes PDBIDs that aren't in the given slice.
-func (u *UniProt) FilterPDBs(PDBIDs []string) {
-	var newCrystals []*pdb.PDB
-	for _, filterID := range PDBIDs {
-		for _, crystal := range u.PDBs {
-			if strings.ToLower(filterID) == strings.ToLower(crystal.ID) {
-				newCrystals = append(newCrystals, crystal)
-			}
-		}
-	}
-
-	u.PDBs = newCrystals
 }
 
 // extract launches all the parsing to be done in the TXT response.
@@ -85,16 +70,15 @@ func (u *UniProt) extractPDBs() error {
 	}
 
 	// Parse each PDB match in TXT
-	var PDBs []*pdb.PDB
+	u.PDBs = make(map[string]*pdb.PDB)
 	for _, m := range matches {
 		pdb := pdb.PDB{
 			ID:              m[1],
 			UniProtID:       u.ID,
 			UniProtSequence: u.Sequence,
 		}
-		PDBs = append(PDBs, &pdb)
+		u.PDBs[m[1]] = &pdb
 	}
-	u.PDBs = PDBs
 
 	return nil
 }
