@@ -51,8 +51,8 @@ type residueSequence struct {
 	ResID       int64  `json:"resid"`
 }
 
-// GetCSA queries M-CSA for the catalytic positions of the given UniProt ID
-func GetCSA(pdb *pdb.PDB) (*Catalytic, error) {
+// GetPositions queries M-CSA and fetches catalytic residue UniProt positions for the given PDB.
+func GetPositions(pdb *pdb.PDB) (*Catalytic, error) {
 	url := "https://www.ebi.ac.uk/thornton-srv/m-csa/api/entries/?" + url.Values{
 		"format":                                 {"json"},
 		"entries.proteins.sequences.uniprot_ids": {pdb.UniProtID},
