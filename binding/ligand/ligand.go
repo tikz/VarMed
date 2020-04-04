@@ -3,7 +3,6 @@ package ligand
 import (
 	"fmt"
 	"math"
-	"os"
 	"varq/pdb"
 )
 
@@ -47,6 +46,5 @@ func ResiduesNearLigands(p *pdb.PDB) (map[string][]*pdb.Residue, error) {
 			}
 		}
 	}
-	os.Exit(0)
 	return ligands, nil
 }
