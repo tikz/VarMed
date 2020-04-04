@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"time"
 	"varq/binding"
 	"varq/exposure"
@@ -108,8 +109,8 @@ func analysePDB(a *Analysis) *Analysis {
 	return a
 }
 
-func runPipelinePDBs(pdbs []*pdb.PDB) (analyses []*Analysis, err error) {
-	length := len(pdbs)
+func runPipelinePDBs(u *uniprot.UniProt, pdbIDs []string) (analyses []*Analysis, err error) {
+	length := len(pdbIDs)
 	pdbChan := make(chan *pdb.PDB, length)
 	analysisChan := make(chan *Analysis, length)
 
@@ -117,8 +118,12 @@ func runPipelinePDBs(pdbs []*pdb.PDB) (analyses []*Analysis, err error) {
 		go pipelinePDBWorker(pdbChan, analysisChan)
 	}
 
-	for _, pdb := range pdbs {
-		pdbChan <- pdb
+	for _, id := range pdbIDs {
+		idu := strings.ToUpper(id)
+		if _, ok := u.PDBs[idu]; !ok {
+			return nil, fmt.Errorf("PDB ID %s not found", idu)
+		}
+		pdbChan <- u.PDBs[idu]
 	}
 	close(pdbChan)
 
@@ -143,11 +148,7 @@ func RunPipeline(uniprotID string, filterPDBIDs []string) ([]*Analysis, error) {
 		return nil, fmt.Errorf("run pipeline: %v", err)
 	}
 
-	if len(filterPDBIDs) > 0 {
-		u.FilterPDBs(filterPDBIDs)
-	}
-
-	analyses, err := runPipelinePDBs(u.PDBs)
+	analyses, err := runPipelinePDBs(u, filterPDBIDs)
 	if err != nil {
 		return nil, fmt.Errorf("analyzing crystals: %v", err)
 	}

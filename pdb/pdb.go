@@ -133,3 +133,18 @@ func (pdb *PDB) Extract() error {
 
 	return nil
 }
+
+// SeqExactMatchInUniProt returns true if the crystal primary sequence is contained
+// and exactly matched per each residue in the canonical UniProt sequence range, false otherwise.
+func (pdb *PDB) SeqExactMatchInUniProt() bool {
+	for _, m := range pdb.SIFTS.UniProt[pdb.UniProtID].Mappings {
+		var i int64
+		for i = m.PDBStart.ResidueNumber; i < m.PDBEnd.ResidueNumber; i++ {
+			if pdb.Chains[m.ChainID][i].Name != string(pdb.UniProtSequence[i]) {
+				return false
+			}
+		}
+	}
+
+	return true
+}

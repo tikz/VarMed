@@ -18,7 +18,10 @@ func (i *arrayFlags) Set(value string) error {
 }
 
 func cliRun(uniprotID string, pdbFlags arrayFlags) {
-	RunPipeline(uniprotID, pdbFlags)
+	_, err := RunPipeline(uniprotID, pdbFlags)
+	if err != nil {
+		log.Fatal(err)
+	}
 	// var analyses []*Analysis
 
 	// a, err := RunPipeline(uniprotID, pdbFlags)

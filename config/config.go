@@ -36,6 +36,14 @@ type Config struct {
 			} `yaml:"enable-steps"`
 		} `yaml:"pipeline"`
 	} `yaml:"varq"`
+
+	DebugPrint struct {
+		Enabled bool `yaml:"enabled"`
+		Rulers  struct {
+			UniProt bool `yaml:"uniprot"`
+			PDB     bool `yaml:"pdb"`
+		} `yaml:"rulers"`
+	} `yaml:"debug-print"`
 }
 
 // LoadFile opens and parses the YAML config file
