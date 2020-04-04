@@ -16,7 +16,6 @@ func debugPrintChains(a *Analysis) {
 		for _, pocket := range a.Binding.Pockets {
 			pocketResidues = append(pocketResidues, pocket.Residues...)
 		}
-
 	}
 
 	if a.Interaction != nil {
@@ -39,6 +38,24 @@ func debugPrintChains(a *Analysis) {
 		if a.Binding.Catalytic != nil {
 			debugPrintChainsMarkedResidues("M-CSA", a.PDB, a.Binding.Catalytic.Residues, nil)
 		}
+
+		if len(a.Binding.Ligands) > 0 {
+			e := func() {
+				for name, res := range a.Binding.Ligands {
+					var residues []string
+					for _, r := range res {
+						residues = append(residues, r.Chain+"-"+r.Abbrv3+strconv.FormatInt(r.Position, 10))
+					}
+					fmt.Print("Ligand", aurora.BrightGreen(name), ": ", aurora.Red(strings.Join(residues, " ")))
+				}
+			}
+			var res []*pdb.Residue
+			for _, ligand := range a.Binding.Ligands {
+				res = append(res, ligand...)
+			}
+			debugPrintChainsMarkedResidues("Residues near ligands", a.PDB, res, e)
+		}
+
 	}
 
 	if len(a.PDB.BindingSite) > 0 {
@@ -126,6 +143,7 @@ func debugPrintChainsMarkedResidues(analysisName string, pdb *pdb.PDB, aRes []*p
 		}
 		fmt.Print(pdb.UniProtSequence)
 		fmt.Println()
+
 		// fmt.Print(">SEQRES      ")
 		// for i := 0; i < unpStart; i++ {
 		// 	fmt.Print(" ")
@@ -134,6 +152,22 @@ func debugPrintChainsMarkedResidues(analysisName string, pdb *pdb.PDB, aRes []*p
 		// 	fmt.Printf(res.Abbrv1)
 		// }
 		// fmt.Println()
+
+		// Ruler
+		fmt.Print("             ")
+		for i := 0; i < unpStart; i++ {
+			fmt.Print(" ")
+		}
+		fmt.Print(aurora.Underline("1"), "        ")
+		for i := 10; i < len(pdb.Chains[mapping.ChainID]); i = i + 10 {
+			n := strconv.Itoa(i)
+			fmt.Print(aurora.Bold(aurora.Underline(n[:1])), n[1:])
+			for s := 0; s < 10-len(n); s++ {
+				fmt.Print(" ")
+			}
+		}
+		fmt.Println()
+
 		fmt.Print(">PDB         ")
 		for i := 1; i < unpStart; i++ {
 			fmt.Print(" ")
