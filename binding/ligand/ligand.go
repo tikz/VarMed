@@ -40,7 +40,16 @@ func ResiduesNearLigands(p *pdb.PDB) (map[string][]*pdb.Residue, error) {
 				}
 
 				if hasCloseAtom && (len(ligands[ln]) == 0 || ligands[ln][len(ligands[ln])-1] != res) {
-					ligands[ln] = append(ligands[ln], res)
+					var exists bool
+					for _, r := range ligands[ln] {
+						if res == r {
+							exists = true
+							break
+						}
+					}
+					if !exists {
+						ligands[ln] = append(ligands[ln], res)
+					}
 				}
 
 			}
