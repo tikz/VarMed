@@ -17,7 +17,7 @@ import (
 type Pocket struct {
 	Name      string
 	DrugScore float64
-	Residues  []*pdb.Residue // Pointers to original residues in the requested structure.
+	Residues  []*pdb.Residue // pointers to original residues in the requested structure
 }
 
 // Run creates a temp file of the specified PDB structure, runs Fpocket on it and parses the results
