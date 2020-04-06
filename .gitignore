@@ -1,7 +1,16 @@
 config.yaml
-varq
+
 /*.json
 /*.pdb
+
+# py
 *.pyc
 __pycache__
+
+# build binaries
 bin/
+varq
+
+# npm modules and webpack build
+web/node_modules/
+web/output/
