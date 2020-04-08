@@ -13,24 +13,28 @@ export default class StructureViewer extends React.Component {
         let query = LiteMol.Core.Structure.Query.sequence('1', 'A', { seqNumber: start }, { seqNumber: end });
         LiteMol.Bootstrap.Command.Molecule.Highlight.dispatch(plugin.context, { model, query, isOn: true });
     };
+
     clearHighlight() {
         var plugin = this.state.plugin
         var model = plugin.context.select('model')[0];
         let query = LiteMol.Core.Structure.Query.sequence('1', 'A', { seqNumber: 1 }, { seqNumber: 185 });
         LiteMol.Bootstrap.Command.Molecule.Highlight.dispatch(plugin.context, { model, query, isOn: false });
-    }
+    };
+
     focus(start, end) {
         var plugin = this.state.plugin
         var model = plugin.context.select('model')[0];
         let query = LiteMol.Core.Structure.Query.sequence('1', 'A', { seqNumber: start }, { seqNumber: end });
         LiteMol.Bootstrap.Command.Molecule.FocusQuery.dispatch(plugin.context, { model, query, isOn: true });
-    }
+    };
+
     select(start, end) {
         var plugin = this.state.plugin
         var model = plugin.context.select('model')[0];
         let query = LiteMol.Core.Structure.Query.sequence('1', 'A', { seqNumber: start }, { seqNumber: end });
         LiteMol.Bootstrap.Command.Molecule.CreateSelectInteraction.dispatch(plugin.context, { entity: model, query: query });
-    }
+    };
+
     test() {
         var plugin = this.state.plugin
         var model = plugin.context.select('model')[0];
@@ -56,7 +60,8 @@ export default class StructureViewer extends React.Component {
         // for (const v of visuals) {
         //     plugin.command(LiteMol.Bootstrap.Command.Visual.UpdateBasicTheme, { visual: v, theme });
         // }
-    }
+    };
+
     applyTheme() {
         var plugin = this.state.plugin;
         let colors = LiteMol.Core.Utils.FastMap.create();
@@ -71,7 +76,8 @@ export default class StructureViewer extends React.Component {
         for (const v of visuals) {
             plugin.command(LiteMol.Bootstrap.Command.Visual.UpdateBasicTheme, { visual: v, theme });
         }
-    }
+    };
+
     componentDidMount() {
         var plugin = LiteMol.Plugin.create({
             target: '#litemol',
@@ -96,13 +102,13 @@ export default class StructureViewer extends React.Component {
             }));
             this.applyTheme();
         });
+    };
 
-    }
     render() {
         return (
             <div>
                 <div id="litemol" />
             </div>
         )
-    }
+    };
 }
