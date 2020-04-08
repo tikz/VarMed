@@ -2,8 +2,8 @@ all: build
 
 build: dep
 	echo "Building VarQ web frontend"
-	yarn --cwd web/ install
-	yarn --cwd web/ build
+	npm install --prefix web
+	npm run-script build --prefix web
 	echo "Building VarQ to bin/varq"
 	go build -o bin/varq -v
 
