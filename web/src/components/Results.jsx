@@ -31,15 +31,15 @@ export default class Results extends React.Component {
         if (start == 0 && end == 0) {
             this.structureRef.current.clearHighlight();
         } else {
-            this.structureRef.current.highlight(start + 17, end + 17);
+            this.structureRef.current.highlight(start + 18, end + 18);
         }
     }
 
     selectStructure(start, end) {
-        this.structureRef.current.focus(start + 17, end + 17);
-        this.structureRef.current.highlight(start + 17, end + 17);
+        this.structureRef.current.focus(start + 18, end + 18);
+        this.structureRef.current.highlight(start + 18, end + 18);
         if (start - end == 0) {
-            this.structureRef.current.select(start + 17, end + 17);
+            this.structureRef.current.select(start + 18, end + 18);
         }
     }
 
