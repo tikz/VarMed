@@ -67,12 +67,10 @@ export default class SequenceViewer extends React.Component {
 
         var selectFunc = this.props.select
         fv.onFeatureSelected(function (d) {
-            console.log(d);
             selectFunc(d.detail.start, d.detail.end);
         });
 
         fv.onZoom(function (d) {
-            console.log(d.detail);
         });
 
         this.setState(state => ({

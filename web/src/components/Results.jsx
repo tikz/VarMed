@@ -24,7 +24,6 @@ export default class Results extends React.Component {
     }
 
     componentDidMount() {
-        console.log(this.structureRef)
     }
 
     highlightStructure(start, end) {
