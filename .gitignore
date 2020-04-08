@@ -11,6 +11,7 @@ __pycache__
 bin/
 varq
 
-# npm modules and webpack build
+# web
+web/*.lock
 web/node_modules/
 web/output/
