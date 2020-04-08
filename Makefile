@@ -2,10 +2,10 @@ all: build
 
 build: dep
 	echo "Building VarQ web frontend"
-	npm install --prefix web
-	npm run-script build --prefix web
-	echo "Building VarQ to bin/varq"
-	go build -o bin/varq -v
+	yarn --cwd web/ install
+	yarn --cwd web/ build
+	echo "Building VarQ binary to ./varq"
+	go build -o varq -v
 
 test: dep
 	go test ./... -v
