@@ -52,11 +52,22 @@ func statusEndpoint(w http.ResponseWriter, r *http.Request) {
 
 func httpServe() {
 	// REST API entrypoints
-	r := mux.NewRouter()
-	r.HandleFunc("/status", statusEndpoint)
-	r.HandleFunc("/uniprot/{ID}", UniProtEndpoint)
-	http.Handle("/", r)
+	// r := mux.NewRouter()
+	// r.HandleFunc("/status", statusEndpoint)
+	// r.HandleFunc("/uniprot/{ID}", UniProtEndpoint)
+
+	// r.PathPrefix("/output/").Handler(http.FileServer(http.Dir("./web/output/")))
+	// http.Handle("/", r)
+
+	// log.Printf("Starting VarQ web server: http://127.0.0.1:%s/", cfg.HTTPServer.Port)
+	// http.ListenAndServe(":"+cfg.HTTPServer.Port, nil)
+
+	fs := http.FileServer(http.Dir("./web/output"))
+	http.Handle("/", fs)
 
 	log.Printf("Starting VarQ web server: http://127.0.0.1:%s/", cfg.HTTPServer.Port)
-	http.ListenAndServe(":"+cfg.HTTPServer.Port, nil)
+	err := http.ListenAndServe(":"+cfg.HTTPServer.Port, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
