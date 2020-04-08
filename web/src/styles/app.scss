@@ -1,1 +1,10 @@
 @import 'components/nav-bar';
+@import 'components/feature-viewer';
+@import 'components/litemol';
+
+body {
+    // background-color: #2a2d30;
+    background-color: #1c1e20;
+    color: #fff;    
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+}
