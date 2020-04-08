@@ -15,12 +15,18 @@ export default class Results extends React.Component {
     constructor(props) {
         super(props);
         this.structureRef = React.createRef();
+
+        this.state = { pdb: "3CON" }
+
         this.highlightStructure = this.highlightStructure.bind(this);
         this.selectStructure = this.selectStructure.bind(this);
+        this.pdbChange = this.pdbChange.bind(this);
     }
+
     componentDidMount() {
         console.log(this.structureRef)
     }
+
     highlightStructure(start, end) {
         if (start == 0 && end == 0) {
             this.structureRef.current.clearHighlight();
@@ -28,11 +34,20 @@ export default class Results extends React.Component {
             this.structureRef.current.highlight(start + 17, end + 17);
         }
     }
+
     selectStructure(start, end) {
-        this.structureRef.current.select(start + 17, end + 17);
+        this.structureRef.current.focus(start + 17, end + 17);
+        this.structureRef.current.highlight(start + 17, end + 17);
+        if (start - end == 0) {
+            this.structureRef.current.select(start + 17, end + 17);
+        }
     }
+
+    pdbChange(e) {
+        this.setState({ pdb: e.target.value })
+    }
+
     render() {
-        // return (<StructureViewer />)
         return (
             <ThemeProvider theme={darkTheme} >
                 <Box>
@@ -48,10 +63,11 @@ export default class Results extends React.Component {
                                         <InputLabel>PDB</InputLabel>
                                         <Select
                                             label="PDB"
+                                            value={this.state.pdb}
+                                            onChange={this.pdbChange}
                                         >
-                                            <MenuItem value={10}>IZ1N</MenuItem>
-                                            <MenuItem value={20}>3CON</MenuItem>
-                                            <MenuItem value={30}>1A93</MenuItem>
+                                            <MenuItem value={"3CON"}>3CON</MenuItem>
+                                            <MenuItem value={"123X"}>123X</MenuItem>
                                         </Select>
                                     </FormControl>
                                 </Grid>
