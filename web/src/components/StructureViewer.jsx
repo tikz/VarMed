@@ -35,33 +35,6 @@ export default class StructureViewer extends React.Component {
         LiteMol.Bootstrap.Command.Molecule.CreateSelectInteraction.dispatch(plugin.context, { entity: model, query: query });
     };
 
-    test() {
-        var plugin = this.state.plugin
-        var model = plugin.context.select('model')[0];
-        let query = LiteMol.Core.Structure.Query.sequence('1', 'A', { seqNumber: 10 }, { seqNumber: 25 });
-        // LiteMol.Bootstrap.Command.Molecule.FocusQuery.dispatch(plugin.context, { model, query });
-        // LiteMol.Bootstrap.Command.Molecule.Highlight.dispatch(plugin.context, { model, query, isOn: true });
-        // LiteMol.Bootstrap.Command.Molecule.CreateSelectInteraction.dispatch(plugin.context, { model, query, isOn: true });
-
-        // theme
-
-        // var model = plugin.context.select('molecule')[0];
-        // let colors = LiteMol.Core.Utils.FastMap.create();
-        // colors.set('Uniform', LiteMol.Visualization.Color.fromHex(0xffffff));
-        // colors.set('Selection', LiteMol.Visualization.Color.fromHex(0xffffff));
-        // colors.set('Highlight', LiteMol.Visualization.Color.fromHex(0xffffff));
-        // // colors.set('Selection', CoreVis.Color.fromHex(0xffffff));
-        // // colors.set('Highlight', CoreVis.Color.fromHex(0xffffff));
-        // let theme = LiteMol.Bootstrap.Visualization.Molecule.uniformThemeProvider(void 0, { colors });
-        // // console.log(LiteMol.Bootstrap.Command.Visual.UpdateBasicTheme.dispatch(plugin.context, { model, theme }))
-        // // LiteMol.Bootstrap.Command.Visual.UpdateBasicTheme.dispatch(plugin.context, { model, theme });
-
-        // const visuals = plugin.selectEntities(LiteMol.Bootstrap.Tree.Selection.byRef('model').subtree().ofType(LiteMol.Bootstrap.Entity.Molecule.Visual));
-        // for (const v of visuals) {
-        //     plugin.command(LiteMol.Bootstrap.Command.Visual.UpdateBasicTheme, { visual: v, theme });
-        // }
-    };
-
     applyTheme() {
         var plugin = this.state.plugin;
         let colors = LiteMol.Core.Utils.FastMap.create();
@@ -106,9 +79,7 @@ export default class StructureViewer extends React.Component {
 
     render() {
         return (
-            <div>
-                <div id="litemol" />
-            </div>
+            <div id="litemol" />
         )
     };
 }
