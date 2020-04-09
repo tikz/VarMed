@@ -2,6 +2,7 @@ import React from 'react';
 import LiteMol from 'litemol';
 import 'litemol/dist/css/LiteMol-plugin.css';
 
+
 let Transformer = LiteMol.Bootstrap.Entity.Transformer;
 let Transform = LiteMol.Bootstrap.Tree.Transform;
 
@@ -75,6 +76,13 @@ export default class StructureViewer extends React.Component {
             }));
             this.applyTheme();
         });
+
+        // https://www.ebi.ac.uk/pdbe/about/news/pdbe-brings-electron-density-viewing-masses
+
+        // action = Transform.build()
+        //     .add(plugin.context.tree.root, Viewer.PDBe.Data.DownloadDensity, { id }, { ref: 'density' })
+
+        // plugin.applyTransforms(action);
     };
 
     render() {

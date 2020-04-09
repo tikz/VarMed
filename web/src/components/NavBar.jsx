@@ -1,9 +1,10 @@
-import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
-import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
+import { makeStyles } from '@material-ui/core/styles';
 import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import React from 'react';
+import { Link } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -29,6 +30,14 @@ const useStyles = makeStyles((theme) => ({
     title: {
         flexGrow: 1,
     },
+    link: {
+        color: 'inherit',
+        textDecoration: 'inherit',
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+    }
+
 }));
 
 export default function NavBar() {
@@ -37,11 +46,14 @@ export default function NavBar() {
     return (
         <div className={classes.root}>
             <AppBar className={classes.bar}>
-                <Toolbar>
-                    <img className={classes.logo} src="assets/varq.svg" alt="" />
+                <Toolbar className="bar">
+                    <Link to="/" className={classes.link}>
+                        <img className={classes.logo} src="assets/varq.svg" alt="" />
+                    </Link>
                     <Typography variant="h6" className={classes.title}>
                         VarQ
                     </Typography>
+
                     <Button className={classes.myJobs} variant="outlined" color="inherit">My Jobs</Button>
                     <Button className={classes.newJob}>New Job</Button>
                 </Toolbar>

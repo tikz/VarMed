@@ -48,59 +48,54 @@ export default class Results extends React.Component {
 
     render() {
         return (
-            <ThemeProvider theme={darkTheme} >
-                <Box>
-                    <NavBar />
-                    <Toolbar />
-                    <Container>
-                        <Box className="over">
-                            <Typography variant="h4">GTPase NRas</Typography>
-                            <Divider />
-                            <Grid container spacing={2} alignItems="center">
-                                <Grid item>
-                                    <FormControl variant="outlined" >
-                                        <InputLabel>PDB</InputLabel>
-                                        <Select
-                                            label="PDB"
-                                            value={this.state.pdb}
-                                            onChange={this.pdbChange}
-                                        >
-                                            <MenuItem value={"3CON"}>3CON</MenuItem>
-                                            <MenuItem value={"123X"}>123X</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item>
-                                    <Typography>Crystal structure of the human NRAS GTPase bound with GDP</Typography>
-                                </Grid>
+            <Box>
+                <Container>
+                    <Box className="over">
+                        <Typography variant="h4">GTPase NRas</Typography>
+                        <Divider />
+                        <Grid container spacing={2} alignItems="center">
+                            <Grid item>
+                                <FormControl variant="outlined" >
+                                    <InputLabel>PDB</InputLabel>
+                                    <Select
+                                        label="PDB"
+                                        value={this.state.pdb}
+                                        onChange={this.pdbChange}
+                                    >
+                                        <MenuItem value={"3CON"}>3CON</MenuItem>
+                                        <MenuItem value={"123X"}>123X</MenuItem>
+                                    </Select>
+                                </FormControl>
                             </Grid>
-                        </Box>
-                    </Container>
-
-                    <StructureViewer ref={this.structureRef} />
-
-                    <Container>
-
-                        <Box>
-                            <Grid container spacing={3}>
-                                <Grid item xs={5}>
-
-                                </Grid>
-                                <Grid item xs={7}>
-                                    <Paper>
-
-                                    </Paper>
-                                </Grid>
+                            <Grid item>
+                                <Typography>Crystal structure of the human NRAS GTPase bound with GDP</Typography>
                             </Grid>
-                        </Box>
-                        <Box my={2}>
-                            <SequenceViewer highlight={this.highlightStructure} select={this.selectStructure} />
-                        </Box>
+                        </Grid>
+                    </Box>
+                </Container>
 
-                    </Container>
-                </Box>
+                <StructureViewer ref={this.structureRef} />
 
-            </ThemeProvider>
+                <Container>
+
+                    <Box>
+                        <Grid container spacing={3}>
+                            <Grid item xs={5}>
+
+                            </Grid>
+                            <Grid item xs={7}>
+                                <Paper>
+
+                                </Paper>
+                            </Grid>
+                        </Grid>
+                    </Box>
+                    <Box my={2}>
+                        <SequenceViewer highlight={this.highlightStructure} select={this.selectStructure} />
+                    </Box>
+
+                </Container>
+            </Box>
         )
     }
 
