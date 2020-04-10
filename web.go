@@ -4,14 +4,15 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"varq/uniprot"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
-// StatusResponse contains the JSON response about the server status
 type StatusResponse struct {
-	Code int    `json:"status_code"`
-	Msg  string `json:"status_msg"`
+	Success bool   `json:"success"`
+	Msg     string `json:"msg"`
 }
 
 // ErrorResponse contains the JSON response when an error occurs
@@ -25,49 +26,61 @@ func errorResponse(msg string) []byte {
 	return out
 }
 
-// UniProtEndpoint is the function for the /uniprot/{id} endpoint
-// Shows parsed and calculated data for a given UniProt accession for debug purposes.
-func UniProtEndpoint(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	ID := vars["ID"]
-	log.Println("New request from", r.RemoteAddr, "- UniProt", ID)
+type UniProtResponse struct {
+	Sequence string
+	PDBs     []string
+	Name     string
+	Gene     string
+	Organism string
+}
 
-	p, err := RunPipeline(ID, []string{})
+// UniProtEndpoint handles GET /api/uniprot/:id
+func UniProtEndpoint(c *gin.Context) {
+	id := c.Param("id")
+
+	u, err := uniprot.NewUniProt(id)
 	if err != nil {
-		w.Write(errorResponse(err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
-	out, _ := json.Marshal(p)
-	w.Write(out)
+	c.JSON(http.StatusOK, UniProtResponse{
+		Sequence: u.Sequence,
+		PDBs:     u.PDBIDs,
+		Name:     u.Name,
+		Gene:     u.Gene,
+		Organism: u.Organism,
+	})
 }
 
 // statusEndpoint is the function for the GET /status endpoint
 // Shows general information about the VarQ server status
-func statusEndpoint(w http.ResponseWriter, r *http.Request) {
-	s := StatusResponse{Code: 0, Msg: "online"}
-	out, _ := json.Marshal(s)
-	w.Write(out)
-}
+// func statusEndpoint(w http.ResponseWriter, r *http.Request) {
+// 	s := StatusResponse{Code: 0, Msg: "online"}
+// 	out, _ := json.Marshal(s)
+// 	w.Write(out)
+// }
 
 func httpServe() {
+	r := gin.Default()
+	r.Use(cors.Default())
 	// REST API entrypoints
-	// r := mux.NewRouter()
 	// r.HandleFunc("/status", statusEndpoint)
-	// r.HandleFunc("/uniprot/{ID}", UniProtEndpoint)
+	r.GET("/api/uniprot/:id", UniProtEndpoint)
 
+	log.Printf("Starting VarQ web server: http://127.0.0.1:%s/", cfg.HTTPServer.Port)
+	r.Run(":" + cfg.HTTPServer.Port)
 	// r.PathPrefix("/output/").Handler(http.FileServer(http.Dir("./web/output/")))
 	// http.Handle("/", r)
 
+	// fs := http.FileServer(http.Dir("./web/output"))
+	// http.Handle("/", fs)
+
 	// log.Printf("Starting VarQ web server: http://127.0.0.1:%s/", cfg.HTTPServer.Port)
-	// http.ListenAndServe(":"+cfg.HTTPServer.Port, nil)
-
-	fs := http.FileServer(http.Dir("./web/output"))
-	http.Handle("/", fs)
-
-	log.Printf("Starting VarQ web server: http://127.0.0.1:%s/", cfg.HTTPServer.Port)
-	err := http.ListenAndServe(":"+cfg.HTTPServer.Port, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// err := http.ListenAndServe(":"+cfg.HTTPServer.Port, nil)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 }

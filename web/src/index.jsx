@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
 import App from './components/App';
 import './styles/app.scss';
+import 'typeface-roboto';
 
 require('file-loader?name=[name].[ext]!./index.html');
 
