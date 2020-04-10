@@ -14,9 +14,13 @@ type UniProt struct {
 	ID       string              // accession ID
 	URL      string              // page URL for the entry
 	TXTURL   string              // TXT API URL for the entry.
+	Name     string              // protein name
+	Gene     string              // gene code
+	Organism string              // organism
 	Sequence string              // canonical sequence
 	Raw      []byte              `json:"-"` // TXT API raw bytes.
 	PDBs     map[string]*pdb.PDB `json:"-"` // associated PDB entries
+	PDBIDs   []string            // PDB IDs
 }
 
 // NewUniProt constructs an instance from an UniProt accession ID and a list of target PDB IDs
@@ -56,6 +60,11 @@ func (u *UniProt) extract() error {
 		return fmt.Errorf("extracting crystals from UniProt TXT: %v", err)
 	}
 
+	err = u.extractNames()
+	if err != nil {
+		return fmt.Errorf("extracting names from UniProt TXT: %v", err)
+	}
+
 	return nil
 }
 
@@ -78,6 +87,7 @@ func (u *UniProt) extractPDBs() error {
 			UniProtSequence: u.Sequence,
 		}
 		u.PDBs[m[1]] = &pdb
+		u.PDBIDs = append(u.PDBIDs, m[1])
 	}
 
 	return nil
@@ -97,6 +107,35 @@ func (u *UniProt) extractSequence() error {
 	sequence = strings.ReplaceAll(sequence, "\n", "")
 
 	u.Sequence = sequence
+
+	return nil
+}
+
+// extractNames parses the TXT for protein, gene and organism names
+func (u *UniProt) extractNames() error {
+	r, _ := regexp.Compile("(?m)^DE[ ]+RecName.*?Full=(.*?);")
+	matches := r.FindAllStringSubmatch(string(u.Raw), -1)
+
+	if len(matches) == 0 {
+		return errors.New("protein name not found")
+	}
+	u.Name = matches[0][1]
+
+	r, _ = regexp.Compile("(?m)^GN.*?=(.*?);")
+	matches = r.FindAllStringSubmatch(string(u.Raw), -1)
+
+	if len(matches) == 0 {
+		return errors.New("gene name not found")
+	}
+	u.Gene = matches[0][1]
+
+	r, _ = regexp.Compile("(?m)^OS[ ]+(.*?)\\.")
+	matches = r.FindAllStringSubmatch(string(u.Raw), -1)
+
+	if len(matches) == 0 {
+		return errors.New("organism name not found")
+	}
+	u.Organism = matches[0][1]
 
 	return nil
 }
