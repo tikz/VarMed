@@ -23,18 +23,19 @@ export default class App extends React.Component {
     render() {
         return (
             <ThemeProvider theme={theme} >
-                <NavBar />
+                <Switch>
+                    <Route exact path="/" component={Index} />
+                    <Route path="/new-job" component={NewJob} />
+                    <Route path="/results" component={Results} />
+                    <Route path="*">
+                        <h1>Not found</h1>
+                    </Route>
+                </Switch>
+                {/* <NavBar />
                 <Toolbar />
                 <Box>
-                    <Switch>
-                        <Route exact path="/" component={Index} />
-                        <Route path="/new-job" component={NewJob} />
-                        <Route path="/results" component={Results} />
-                        <Route path="*">
-                            <h1>Not found</h1>
-                        </Route>
-                    </Switch>
-                </Box>
+                    
+                </Box> */}
             </ThemeProvider>
         )
     }

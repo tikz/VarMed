@@ -8,27 +8,45 @@ import { QueueInfo } from './QueueInfo';
 import SendBar from './SendBar';
 import { Variations } from './Variations';
 
-
-
 export default class NewJob extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            unpData: {}
+            unpData: {},
+            pdbs: [],
+            variations: [],
+            clinvar: false
         }
 
         this.setUnpData = this.setUnpData.bind(this);
+        this.setPDBs = this.setPDBs.bind(this);
+        this.setVars = this.setVars.bind(this);
+        this.setClinVar = this.setClinVar.bind(this);
     }
 
     setUnpData(unpData) {
         this.setState({
-            unpData: unpData
+            unpData: unpData, pdbs: [], variations: [], clinvar: false
         })
+    }
+
+    setPDBs(pdbs) {
+        this.setState({ pdbs: pdbs })
+    }
+
+    setVars(vars) {
+        this.setState({ variations: vars })
+    }
+
+    setClinVar(flag) {
+        this.setState({ clinvar: flag })
     }
 
     render() {
         let showInputs = Object.keys(this.state.unpData).length > 0;
+        let showSend = showInputs && this.state.pdbs.length > 0
+            && (this.state.variations.length > 0 || this.state.clinvar);
         return (
             <Container>
                 <Typography variant="h2" gutterBottom>New Job</Typography>
@@ -45,7 +63,10 @@ export default class NewJob extends React.Component {
                                 <Grow in={showInputs}>
                                     <Box>
                                         {showInputs &&
-                                            <PDBPicker pdbs={this.state.unpData.pdbs} />}
+                                            <PDBPicker
+                                                unpID={this.state.unpData.id}
+                                                pdbs={this.state.unpData.pdbs}
+                                                setPDBs={this.setPDBs} />}
                                     </Box>
                                 </Grow>
                             </Grid>
@@ -56,26 +77,25 @@ export default class NewJob extends React.Component {
                                 <Grow in={showInputs}>
                                     <Box>
                                         {showInputs &&
-                                            <Variations sequence={this.state.unpData.sequence} />}
+                                            <Variations
+                                                unpID={this.state.unpData.id}
+                                                sequence={this.state.unpData.sequence}
+                                                setVariations={this.setVars}
+                                                setClinVar={this.setClinVar} />}
                                     </Box>
                                 </Grow>
                             </Grid>
                         </Grid>
                     </Grid>
-
-
-                    {showInputs && <Divider />}
-
+                    {showSend && <Divider />}
                     <Grid item>
-                        <Grow in={showInputs}>
+                        <Grow in={showSend}>
                             <Box>
                                 <SendBar />
                             </Box>
                         </Grow>
                     </Grid>
-
-                    {showInputs && <Divider />}
-
+                    {showSend && <Divider />}
                 </Grid>
             </Container>
         );
