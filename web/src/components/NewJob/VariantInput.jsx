@@ -1,0 +1,106 @@
+import { Grid, Box, Chip, TextField, IconButton, Select, MenuItem } from "@material-ui/core";
+import { Add, FilterTiltShiftSharp } from '@material-ui/icons';
+import React from 'react';
+
+export default class VariantInput extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            variants: [],
+            aaValue: '', posError: false, posErrorMsg: '', aaError: false, aaErrorMsg: '',
+            pos: '', aa: ''
+        }
+        this.handleAaChange = this.handleAaChange.bind(this)
+        this.handlePosChange = this.handlePosChange.bind(this);
+        this.handleAdd = this.handleAdd.bind(this);
+    }
+
+    handleDelete(chip) {
+        this.setState({
+            variants: this.state.variants.filter((c) => c.key !== chip.key),
+        });
+    }
+
+    handleAdd() {
+        if (this.state.aa != '' && this.state.pos > 0
+            && !this.state.posError && !this.state.aaError) {
+            console.log(this.state)
+            let variants = this.state.variants;
+            variants.push({
+                key: this.state.variants.length,
+                pos: this.state.pos,
+                label: this.state.pos + ' ' + this.props.sequence[this.state.pos] + '→' + this.state.aa
+            })
+            this.setState({ variants: variants, pos: '', aa: '' });
+        }
+    }
+
+    handlePosChange(e) {
+        let pos = parseInt(e.target.value);
+        if (isNaN(pos)) { pos = '' }
+        this.setState({ pos: pos }, () => {
+            if (pos != '') { this.checkFields() }
+        });
+    }
+
+    handleAaChange(e) {
+        this.setState({ aa: e.target.value.toUpperCase() }, () => {
+            this.checkFields()
+        });
+    }
+
+    checkFields() {
+        const aminoacids = 'ARNDBCEQZGHILKMFPSTWYV';
+        let aa = this.state.aa;
+        let pos = this.state.pos;
+        (pos > this.props.sequence.length || pos < 1) ?
+            this.setState({ posError: true, posErrorMsg: 'Outside sequence length' }) :
+            this.setState({ posError: false, posErrorMsg: '' });
+        (aa.length > 1 || !aminoacids.includes(aa)) ?
+            this.setState({ aaError: true, aaErrorMsg: 'Unknown' }) :
+            this.setState({ aaError: false, aaErrorMsg: '' });
+        if (this.props.sequence[pos - 1] == aa) {
+            this.setState({
+                posError: true, posErrorMsg: 'Silent mutation',
+                aaError: true, aaErrorMsg: 'Silent mutation'
+            })
+        }
+        if (this.state.variants.filter(v => v.pos == pos).length > 0) {
+            this.setState({ posError: true, posErrorMsg: 'Position already added' })
+        }
+    }
+
+    render() {
+        return (
+            <Box>
+                <Grid container spacing={2}>
+                    <Grid item xs={7}>
+                        <TextField label="Position" onChange={this.handlePosChange} type="number"
+                            error={this.state.posError} helperText={this.state.posErrorMsg}
+                            value={this.state.pos} />
+                    </Grid>
+                    <Grid item xs={3}>
+                        <TextField onChange={this.handleAaChange} label="1-letter Aa"
+                            error={this.state.aaError} helperText={this.state.aaErrorMsg}
+                            value={this.state.aa} />
+                    </Grid>
+                    <Grid item xs={2}>
+                        <IconButton color="primary" aria-label="add variant" onClick={this.handleAdd}>
+                            <Add />
+                        </IconButton>
+                    </Grid>
+                </Grid>
+                {this.state.variants.map((data) => {
+                    return (
+                        <Chip
+                            key={data.key}
+                            label={data.label}
+                            onDelete={() => this.handleDelete(data)}
+                            size="small"
+                        />
+                    );
+                })}
+            </Box>
+        );
+    }
+}
