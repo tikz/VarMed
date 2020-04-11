@@ -22,7 +22,6 @@ export class UniProtInput extends React.Component {
 
     handleChange(e) {
         this.props.setUnpData({})
-
         this.setState({
             unpID: e.target.value,
             error: false,
@@ -71,6 +70,8 @@ export class UniProtInput extends React.Component {
                         label="UniProt Accession ID"
                         variant="filled"
                         autoFocus
+                        // autoComplete="off"
+                        fullWidth
                         onChange={this.handleChange}
                         value={this.state.unpID}
                         error={this.state.error}

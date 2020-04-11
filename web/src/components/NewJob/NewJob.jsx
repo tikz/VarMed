@@ -35,7 +35,7 @@ export default class NewJob extends React.Component {
                 <Grid container spacing={4} direction="column">
                     <Grid item>
                         <Grid container spacing={2} alignItems="center">
-                            <Grid item>
+                            <Grid item xs={2}>
                                 <UniProtInput setUnpData={this.setUnpData} />
                             </Grid>
                             <Grid item>
@@ -52,11 +52,11 @@ export default class NewJob extends React.Component {
                             <Grid item>
                                 {showInputs && <ArrowForwardIosIcon />}
                             </Grid>
-                            <Grid item>
+                            <Grid item xs={4}>
                                 <Grow in={showInputs}>
                                     <Box>
                                         {showInputs &&
-                                            <Variations />}
+                                            <Variations sequence={this.state.unpData.sequence} />}
                                     </Box>
                                 </Grow>
                             </Grid>
@@ -69,8 +69,7 @@ export default class NewJob extends React.Component {
                     <Grid item>
                         <Grow in={showInputs}>
                             <Box>
-                                {showInputs &&
-                                    <SendBar />}
+                                <SendBar />
                             </Box>
                         </Grow>
                     </Grid>
