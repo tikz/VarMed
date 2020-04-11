@@ -3,7 +3,7 @@ import React from 'react';
 import { Route, Switch } from "react-router-dom";
 import Index from './Index';
 import NavBar from './NavBar';
-import NewJob from './NewJob';
+import NewJob from './NewJob/NewJob';
 import Results from './Results';
 
 const theme = createMuiTheme({

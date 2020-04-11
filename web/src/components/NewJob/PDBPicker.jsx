@@ -1,15 +1,15 @@
-import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import List from '@material-ui/core/List';
+import { Box, Checkbox, Divider, Grid, Typography } from '@material-ui/core';
+import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
+import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
-import Checkbox from '@material-ui/core/Checkbox';
-import Button from '@material-ui/core/Button';
-import Divider from '@material-ui/core/Divider';
+import ListItemText from '@material-ui/core/ListItemText';
+import { makeStyles } from '@material-ui/core/styles';
+import React from 'react';
+
+
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -41,10 +41,10 @@ function union(a, b) {
     return [...a, ...not(b, a)];
 }
 
-export default function PDBPicker() {
+export default function PDBPicker(props) {
     const classes = useStyles();
     const [checked, setChecked] = React.useState([]);
-    const [left, setLeft] = React.useState(['123X', 'ASD4', 'TEST']);
+    const [left, setLeft] = React.useState(props.pdbs);
     const [right, setRight] = React.useState([]);
 
     const leftChecked = intersection(checked, left);
@@ -126,33 +126,36 @@ export default function PDBPicker() {
     );
 
     return (
-        <Grid container spacing={2} justify="center" alignItems="center" className={classes.root}>
-            <Grid item>{customList('Available', left)}</Grid>
-            <Grid item>
-                <Grid container direction="column" alignItems="center">
-                    <Button
-                        variant="outlined"
-                        size="small"
-                        className={classes.button}
-                        onClick={handleCheckedRight}
-                        disabled={leftChecked.length === 0}
-                        aria-label="move selected right"
-                    >
-                        &gt;
+        <Box>
+            <Typography variant="h5" gutterBottom>2. Choose structures</Typography>
+            <Grid container spacing={2} justify="center" alignItems="center" className={classes.root}>
+                <Grid item>{customList('Available', left)}</Grid>
+                <Grid item>
+                    <Grid container direction="column" alignItems="center">
+                        <Button
+                            variant="outlined"
+                            size="small"
+                            className={classes.button}
+                            onClick={handleCheckedRight}
+                            disabled={leftChecked.length === 0}
+                            aria-label="move selected right"
+                        >
+                            &gt;
           </Button>
-                    <Button
-                        variant="outlined"
-                        size="small"
-                        className={classes.button}
-                        onClick={handleCheckedLeft}
-                        disabled={rightChecked.length === 0}
-                        aria-label="move selected left"
-                    >
-                        &lt;
+                        <Button
+                            variant="outlined"
+                            size="small"
+                            className={classes.button}
+                            onClick={handleCheckedLeft}
+                            disabled={rightChecked.length === 0}
+                            aria-label="move selected left"
+                        >
+                            &lt;
           </Button>
+                    </Grid>
                 </Grid>
+                <Grid item>{customList('Process', right)}</Grid>
             </Grid>
-            <Grid item>{customList('Process', right)}</Grid>
-        </Grid>
+        </Box>
     );
 }

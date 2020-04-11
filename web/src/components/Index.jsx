@@ -1,7 +1,6 @@
 import { Container } from '@material-ui/core';
 import React from 'react';
 import { Link } from "react-router-dom";
-import NewJob from './NewJob';
 
 export default class Index extends React.Component {
     render() {

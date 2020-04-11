@@ -27,11 +27,11 @@ func errorResponse(msg string) []byte {
 }
 
 type UniProtResponse struct {
-	Sequence string
-	PDBs     []string
-	Name     string
-	Gene     string
-	Organism string
+	Sequence string   `json:"sequence"`
+	PDBs     []string `json:"pdbs"`
+	Name     string   `json:"name"`
+	Gene     string   `json:"gene"`
+	Organism string   `json:"organism"`
 }
 
 // UniProtEndpoint handles GET /api/uniprot/:id
@@ -65,7 +65,8 @@ func UniProtEndpoint(c *gin.Context) {
 
 func httpServe() {
 	r := gin.Default()
-	r.Use(cors.Default())
+	r.Use(cors.Default()) // TODO: remove
+
 	// REST API entrypoints
 	// r.HandleFunc("/status", statusEndpoint)
 	r.GET("/api/uniprot/:id", UniProtEndpoint)
