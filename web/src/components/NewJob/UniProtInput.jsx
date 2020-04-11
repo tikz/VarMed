@@ -70,7 +70,7 @@ export class UniProtInput extends React.Component {
                         label="UniProt Accession ID"
                         variant="filled"
                         autoFocus
-                        // autoComplete="off"
+                        autoComplete="off"
                         fullWidth
                         onChange={this.handleChange}
                         value={this.state.unpID}

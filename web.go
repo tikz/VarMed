@@ -27,6 +27,7 @@ func errorResponse(msg string) []byte {
 }
 
 type UniProtResponse struct {
+	ID       string   `json:"id"`
 	Sequence string   `json:"sequence"`
 	PDBs     []string `json:"pdbs"`
 	Name     string   `json:"name"`
@@ -47,6 +48,7 @@ func UniProtEndpoint(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, UniProtResponse{
+		ID:       u.ID,
 		Sequence: u.Sequence,
 		PDBs:     u.PDBIDs,
 		Name:     u.Name,

@@ -1,6 +1,7 @@
 import { Grid, Box, Chip, TextField, IconButton, Select, MenuItem } from "@material-ui/core";
 import { Add, FilterTiltShiftSharp } from '@material-ui/icons';
 import React from 'react';
+import ChipArray from "./ChipArray";
 
 export default class VariantInput extends React.Component {
     constructor(props) {
@@ -13,25 +14,30 @@ export default class VariantInput extends React.Component {
         this.handleAaChange = this.handleAaChange.bind(this)
         this.handlePosChange = this.handlePosChange.bind(this);
         this.handleAdd = this.handleAdd.bind(this);
+        this.handleKey = this.handleKey.bind(this);
+        this.handleDelete = this.handleDelete.bind(this);
     }
 
     handleDelete(chip) {
         this.setState({
             variants: this.state.variants.filter((c) => c.key !== chip.key),
+        }, () => {
+            this.props.setVariations(this.state.variants);
         });
     }
 
     handleAdd() {
         if (this.state.aa != '' && this.state.pos > 0
             && !this.state.posError && !this.state.aaError) {
-            console.log(this.state)
             let variants = this.state.variants;
             variants.push({
                 key: this.state.variants.length,
                 pos: this.state.pos,
+                aa: this.state.aa,
                 label: this.state.pos + ' ' + this.props.sequence[this.state.pos] + '→' + this.state.aa
             })
             this.setState({ variants: variants, pos: '', aa: '' });
+            this.props.setVariations(variants);
         }
     }
 
@@ -47,6 +53,10 @@ export default class VariantInput extends React.Component {
         this.setState({ aa: e.target.value.toUpperCase() }, () => {
             this.checkFields()
         });
+    }
+
+    handleKey(e) {
+        if (e.key === 'Enter') { this.handleAdd() }
     }
 
     checkFields() {
@@ -73,33 +83,26 @@ export default class VariantInput extends React.Component {
     render() {
         return (
             <Box>
-                <Grid container spacing={2}>
+                <Grid container spacing={1} alignItems="center">
                     <Grid item xs={7}>
                         <TextField label="Position" onChange={this.handlePosChange} type="number"
                             error={this.state.posError} helperText={this.state.posErrorMsg}
-                            value={this.state.pos} />
+                            value={this.state.pos}
+                            onKeyPress={this.handleKey} />
                     </Grid>
                     <Grid item xs={3}>
                         <TextField onChange={this.handleAaChange} label="1-letter Aa"
                             error={this.state.aaError} helperText={this.state.aaErrorMsg}
-                            value={this.state.aa} />
+                            value={this.state.aa}
+                            onKeyPress={this.handleKey} />
                     </Grid>
                     <Grid item xs={2}>
-                        <IconButton color="primary" aria-label="add variant" onClick={this.handleAdd}>
+                        <IconButton color="primary" aria-label="add variant" onClick={this.handleAdd} style={{ marginTop: 20 }}>
                             <Add />
                         </IconButton>
                     </Grid>
                 </Grid>
-                {this.state.variants.map((data) => {
-                    return (
-                        <Chip
-                            key={data.key}
-                            label={data.label}
-                            onDelete={() => this.handleDelete(data)}
-                            size="small"
-                        />
-                    );
-                })}
+                <ChipArray variants={this.state.variants} handleDelete={this.handleDelete} />
             </Box>
         );
     }

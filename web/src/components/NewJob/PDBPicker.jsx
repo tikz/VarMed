@@ -1,4 +1,4 @@
-import { Box, Checkbox, Divider, Grid, Typography } from '@material-ui/core';
+import { Box, Checkbox, Divider, Grid, Typography, Link } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -77,12 +77,14 @@ export default function PDBPicker(props) {
         setRight(right.concat(leftChecked));
         setLeft(not(left, leftChecked));
         setChecked(not(checked, leftChecked));
+        props.setPDBs(right.concat(leftChecked));
     };
 
     const handleCheckedLeft = () => {
         setLeft(left.concat(rightChecked));
         setRight(not(right, rightChecked));
         setChecked(not(checked, rightChecked));
+        props.setPDBs(not(right, rightChecked));
     };
 
     const customList = (title, items) => (
@@ -125,9 +127,10 @@ export default function PDBPicker(props) {
         </Card>
     );
 
+    let unpStructURL = "https://www.uniprot.org/uniprot/" + props.unpID + "#structure";
     return (
         <Box>
-            <Typography variant="h5" gutterBottom>2. Choose structures</Typography>
+            <Typography variant="h5" gutterBottom>2. Choose <Link href={unpStructURL} target="_blank" rel="noreferrer">structures</Link></Typography>
             <Grid container spacing={2} justify="center" alignItems="center" className={classes.root}>
                 <Grid item>{customList('Available', left)}</Grid>
                 <Grid item>
@@ -141,7 +144,7 @@ export default function PDBPicker(props) {
                             aria-label="move selected right"
                         >
                             &gt;
-          </Button>
+                        </Button>
                         <Button
                             variant="outlined"
                             size="small"
@@ -151,7 +154,7 @@ export default function PDBPicker(props) {
                             aria-label="move selected left"
                         >
                             &lt;
-          </Button>
+                    </Button>
                     </Grid>
                 </Grid>
                 <Grid item>{customList('Process', right)}</Grid>
