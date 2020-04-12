@@ -2,7 +2,6 @@ import { Box, Checkbox, FormControlLabel, Typography, Link } from '@material-ui/
 import React from 'react';
 import VariantInput from './VariantInput';
 
-
 export class Variations extends React.Component {
     constructor(props) {
         super(props);

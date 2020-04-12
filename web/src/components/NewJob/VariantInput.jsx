@@ -11,6 +11,7 @@ export default class VariantInput extends React.Component {
             aaValue: '', posError: false, posErrorMsg: '', aaError: false, aaErrorMsg: '',
             pos: '', aa: ''
         }
+
         this.handleAaChange = this.handleAaChange.bind(this)
         this.handlePosChange = this.handlePosChange.bind(this);
         this.handleAdd = this.handleAdd.bind(this);
@@ -45,7 +46,7 @@ export default class VariantInput extends React.Component {
         let pos = parseInt(e.target.value);
         if (isNaN(pos)) { pos = '' }
         this.setState({ pos: pos }, () => {
-            if (pos != '') { this.checkFields() }
+            this.checkFields()
         });
     }
 

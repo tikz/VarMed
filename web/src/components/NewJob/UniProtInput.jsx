@@ -3,7 +3,6 @@ import TextField from '@material-ui/core/TextField';
 import axios from 'axios';
 import React from 'react';
 
-
 export class UniProtInput extends React.Component {
     constructor(props) {
         super(props);
@@ -34,7 +33,7 @@ export class UniProtInput extends React.Component {
             p.setState({
                 loading: true,
             })
-            axios.get('/api/uniprot/' + e.target.value)
+            axios.get('http://127.0.0.1:3000/api/uniprot/' + e.target.value)
                 .then(function (response) {
                     let data = response.data
                     p.setState({

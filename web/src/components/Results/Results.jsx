@@ -1,15 +1,8 @@
+import { Box, Container, Divider, FormControl, Grid, InputLabel, MenuItem, Paper, Select, Toolbar, Typography } from '@material-ui/core';
 import React from 'react';
-import NavBar from './NavBar';
-import { Box, Container, Toolbar, Typography, Grid, Paper, createMuiTheme, ThemeProvider, Divider } from '@material-ui/core';
-import { FormControl, InputLabel, Select, MenuItem } from '@material-ui/core'
+import NavBar from '../NavBar';
 import SequenceViewer from './SequenceViewer';
 import StructureViewer from './StructureViewer';
-
-const darkTheme = createMuiTheme({
-    palette: {
-        type: 'dark',
-    },
-});
 
 export default class Results extends React.Component {
     constructor(props) {
@@ -79,7 +72,6 @@ export default class Results extends React.Component {
                 <StructureViewer ref={this.structureRef} />
 
                 <Container>
-
                     <Box>
                         <Grid container spacing={3}>
                             <Grid item xs={5}>
@@ -95,7 +87,6 @@ export default class Results extends React.Component {
                     <Box my={2}>
                         <SequenceViewer highlight={this.highlightStructure} select={this.selectStructure} />
                     </Box>
-
                 </Container>
             </Box>
         )

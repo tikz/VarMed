@@ -1,10 +1,9 @@
-import { Box, createMuiTheme, ThemeProvider, Toolbar } from '@material-ui/core';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core';
 import React from 'react';
 import { Route, Switch } from "react-router-dom";
 import Index from './Index';
-import NavBar from './NavBar';
 import NewJob from './NewJob/NewJob';
-import Results from './Results';
+import Results from './Results/Results';
 
 const theme = createMuiTheme({
     palette: {
@@ -31,11 +30,6 @@ export default class App extends React.Component {
                         <h1>Not found</h1>
                     </Route>
                 </Switch>
-                {/* <NavBar />
-                <Toolbar />
-                <Box>
-                    
-                </Box> */}
             </ThemeProvider>
         )
     }
