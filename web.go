@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"varq/uniprot"
 
-	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 )
 
@@ -67,7 +67,7 @@ func UniProtEndpoint(c *gin.Context) {
 
 func httpServe() {
 	r := gin.Default()
-	r.Use(cors.Default()) // TODO: remove
+	r.Use(static.Serve("/", static.LocalFile("web/output", true)))
 
 	// REST API entrypoints
 	// r.HandleFunc("/status", statusEndpoint)
