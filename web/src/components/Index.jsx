@@ -1,4 +1,4 @@
-import { Container, Box, Typography, makeStyles, Grid, Button, Link } from '@material-ui/core';
+import { Box, Button, Container, Grid, Link, makeStyles, Typography } from '@material-ui/core';
 import React from 'react';
 import { Link as LinkRouter } from 'react-router-dom';
 
@@ -21,6 +21,7 @@ const useStyles = makeStyles((theme) => ({
     },
     logo: {
         userSelect: 'none',
+        width: 200,
     },
     footer: {
         color: '#758694',

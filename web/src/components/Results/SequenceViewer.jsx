@@ -11,10 +11,7 @@ export default class SequenceViewer extends React.Component {
         this.handleMouseLeave = this.handleMouseLeave.bind(this);
     }
 
-    // This is hackish and adds overhead, but FeatureViewer doesn't provide mousemove or
-    // position change events and very little in the API is exported. In the future, maybe
-    // ask the authors on GitHub for this feature, or fork the repo and add it.
-    handleMouseMove(e) {
+    handleMouseMove() {
         var posText = this.state.zoomPositionElement.innerText;
         if (posText != this.state.pos) {
             var pos = parseInt(posText.slice(0, posText.length - 1));

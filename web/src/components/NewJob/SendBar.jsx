@@ -1,7 +1,6 @@
-import { Button, Grid } from '@material-ui/core';
+import { Button, Grid, TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import React from 'react';
-import { EmailInput } from './EmailInput';
 import { QueueInfo } from './QueueInfo';
 
 const useStyles = makeStyles((theme) => ({
@@ -18,7 +17,10 @@ export default function SendBar() {
     return (
         <Grid container spacing={2} alignItems="center">
             <Grid item xs>
-                <EmailInput />
+                <TextField
+                    id="name" label="Email address (optional)"
+                    margin="dense" type="email" fullWidth
+                />
             </Grid>
             <Grid item xs>
                 <QueueInfo />

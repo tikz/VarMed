@@ -1,8 +1,5 @@
-import AppBar from '@material-ui/core/AppBar';
-import Button from '@material-ui/core/Button';
+import { AppBar, Button, Toolbar, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
 import React from 'react';
 import { Link } from "react-router-dom";
 
@@ -30,13 +27,7 @@ const useStyles = makeStyles((theme) => ({
     title: {
         flexGrow: 1,
     },
-    link: {
-        color: 'inherit',
-        textDecoration: 'inherit',
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-    }
+
 
 }));
 

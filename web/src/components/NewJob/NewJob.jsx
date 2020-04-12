@@ -1,13 +1,11 @@
-import { Toolbar, Checkbox, Container, Divider, FormControlLabel, Grid, Typography, Fade, Box, Grow } from '@material-ui/core';
+import { Box, Container, Divider, Grid, Grow, Toolbar, Typography } from '@material-ui/core';
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 import React from 'react';
-import { EmailInput } from './EmailInput';
+import NavBar from '../NavBar';
 import PDBPicker from './PDBPicker';
-import { UniProtInput } from './UniProtInput';
-import { QueueInfo } from './QueueInfo';
 import SendBar from './SendBar';
+import { UniProtInput } from './UniProtInput';
 import { Variations } from './Variations';
-import NavBar from '../NavBar'
 
 export default class NewJob extends React.Component {
     constructor(props) {
