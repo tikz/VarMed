@@ -1,4 +1,4 @@
-import { Checkbox, Container, Divider, FormControlLabel, Grid, Typography, Fade, Box, Grow } from '@material-ui/core';
+import { Toolbar, Checkbox, Container, Divider, FormControlLabel, Grid, Typography, Fade, Box, Grow } from '@material-ui/core';
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 import React from 'react';
 import { EmailInput } from './EmailInput';
@@ -7,6 +7,7 @@ import { UniProtInput } from './UniProtInput';
 import { QueueInfo } from './QueueInfo';
 import SendBar from './SendBar';
 import { Variations } from './Variations';
+import NavBar from '../NavBar'
 
 export default class NewJob extends React.Component {
     constructor(props) {
@@ -44,60 +45,65 @@ export default class NewJob extends React.Component {
     }
 
     render() {
-        let showInputs = Object.keys(this.state.unpData).length > 0;
-        let showSend = showInputs && this.state.pdbs.length > 0
+        let unpOk = Object.keys(this.state.unpData).length > 0;
+        let structOk = this.state.unpData.pdbs !== null;
+        let dataOk = unpOk && this.state.pdbs.length > 0
             && (this.state.variations.length > 0 || this.state.clinvar);
         return (
-            <Container>
-                <Typography variant="h2" gutterBottom>New Job</Typography>
-                <Grid container spacing={4} direction="column">
-                    <Grid item>
-                        <Grid container spacing={2} alignItems="center">
-                            <Grid item xs={2}>
-                                <UniProtInput setUnpData={this.setUnpData} />
-                            </Grid>
-                            <Grid item>
-                                {showInputs && <ArrowForwardIosIcon />}
-                            </Grid>
-                            <Grid item>
-                                <Grow in={showInputs}>
-                                    <Box>
-                                        {showInputs &&
-                                            <PDBPicker
-                                                unpID={this.state.unpData.id}
-                                                pdbs={this.state.unpData.pdbs}
-                                                setPDBs={this.setPDBs} />}
-                                    </Box>
-                                </Grow>
-                            </Grid>
-                            <Grid item>
-                                {showInputs && <ArrowForwardIosIcon />}
-                            </Grid>
-                            <Grid item xs={4}>
-                                <Grow in={showInputs}>
-                                    <Box>
-                                        {showInputs &&
-                                            <Variations
-                                                unpID={this.state.unpData.id}
-                                                sequence={this.state.unpData.sequence}
-                                                setVariations={this.setVars}
-                                                setClinVar={this.setClinVar} />}
-                                    </Box>
-                                </Grow>
+            <Box>
+                <NavBar />
+                <Toolbar />
+                <Container>
+                    <Typography variant="h2" gutterBottom className="title">New Job</Typography>
+                    <Grid container spacing={4} direction="column">
+                        <Grid item>
+                            <Grid container spacing={2} alignItems="center">
+                                <Grid item xs={2}>
+                                    <UniProtInput setUnpData={this.setUnpData} />
+                                </Grid>
+                                <Grid item>
+                                    {unpOk && <ArrowForwardIosIcon />}
+                                </Grid>
+                                <Grid item>
+                                    <Grow in={unpOk}>
+                                        <Box>
+                                            {unpOk &&
+                                                <PDBPicker
+                                                    unpID={this.state.unpData.id}
+                                                    pdbs={this.state.unpData.pdbs}
+                                                    setPDBs={this.setPDBs} />}
+                                        </Box>
+                                    </Grow>
+                                </Grid>
+                                <Grid item>
+                                    {unpOk && structOk && <ArrowForwardIosIcon />}
+                                </Grid>
+                                <Grid item xs={4}>
+                                    <Grow in={unpOk}>
+                                        <Box>
+                                            {unpOk && structOk &&
+                                                <Variations
+                                                    unpID={this.state.unpData.id}
+                                                    sequence={this.state.unpData.sequence}
+                                                    setVariations={this.setVars}
+                                                    setClinVar={this.setClinVar} />}
+                                        </Box>
+                                    </Grow>
+                                </Grid>
                             </Grid>
                         </Grid>
+                        {dataOk && <Divider />}
+                        <Grid item>
+                            <Grow in={dataOk}>
+                                <Box>
+                                    <SendBar />
+                                </Box>
+                            </Grow>
+                        </Grid>
+                        {dataOk && <Divider />}
                     </Grid>
-                    {showSend && <Divider />}
-                    <Grid item>
-                        <Grow in={showSend}>
-                            <Box>
-                                <SendBar />
-                            </Box>
-                        </Grow>
-                    </Grid>
-                    {showSend && <Divider />}
-                </Grid>
-            </Container>
+                </Container>
+            </Box>
         );
     }
 }

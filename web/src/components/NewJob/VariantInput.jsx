@@ -34,7 +34,7 @@ export default class VariantInput extends React.Component {
                 key: this.state.variants.length,
                 pos: this.state.pos,
                 aa: this.state.aa,
-                label: this.state.pos + ' ' + this.props.sequence[this.state.pos] + '→' + this.state.aa
+                label: this.state.pos + ' ' + this.props.sequence[this.state.pos - 1] + '→' + this.state.aa
             })
             this.setState({ variants: variants, pos: '', aa: '' });
             this.props.setVariations(variants);

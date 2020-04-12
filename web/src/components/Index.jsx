@@ -1,12 +1,13 @@
-import { Container, Box, Typography, makeStyles, Grid, Button } from '@material-ui/core';
+import { Container, Box, Typography, makeStyles, Grid, Button, Link } from '@material-ui/core';
 import React from 'react';
-import { Link } from "react-router-dom";
+import { Link as LinkRouter } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
     presentation: {
         width: '100%',
         minHeight: '600px',
-        position: 'relative',
+        background: 'radial-gradient(circle, #1f2b2f 0%, #1c1e20 25%)',
+        // position: 'relative',
     },
     hero: {
         background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
@@ -18,45 +19,78 @@ const useStyles = makeStyles((theme) => ({
         boxShadow: '0 2px 10px 1px rgba(33, 203, 243, .3)',
         color: 'white',
     },
+    logo: {
+        userSelect: 'none',
+    },
+    footer: {
+        color: '#758694',
+        paddingTop: 30,
+        paddingBottom: 30,
+        backgroundColor: "#20232a"
+    }
 }));
 
 export default function Index() {
     const classes = useStyles();
     return (
-        <Grid className={classes.presentation} container direction="column" justify="center" spacing={3}>
-            <Grid item>
-                <Grid container spacing={6} direction="row" alignItems="center" justify="center">
-                    <Grid item>
-                        <img src="assets/varq.svg" alt="VarQ" className={classes.logo} />
-                    </Grid>
-                    <Grid item xs={9} sm={3}>
-                        <Grid container direction="column" alignItems="flex-start" justify="center">
-                            <Typography variant="h1" align="left" className={classes.name}>VarQ</Typography>
-                            <Typography variant="h5" align="left" className={classes.desc}>
-                                A tool for the structural and functional analysis of protein variants.
+        <Box>
+
+            <Grid className={classes.presentation} container direction="column" justify="center" spacing={3}>
+                <Grid item>
+                    <Grid container spacing={6} direction="row" alignItems="center" justify="center">
+                        <Grid item>
+                            <img src="assets/varq.svg" alt="VarQ" className={classes.logo} />
+                        </Grid>
+                        <Grid item xs={9} sm={3}>
+                            <Grid container direction="column" alignItems="flex-start" justify="center">
+                                <Typography variant="h1" align="left" className={classes.name}>VarQ</Typography>
+                                <Typography variant="h5" align="left" className={classes.desc}>
+                                    A tool for the structural and functional analysis of protein variants.
                             </Typography>
+                            </Grid>
                         </Grid>
                     </Grid>
                 </Grid>
-            </Grid>
-            <Grid item>
-                <Typography align="center" className={classes.desc}>
-                    Start a <Button className={classes.newJob}>New Job</Button> or view <Button variant="outlined">Sample Results</Button>
+                <Grid item>
+                    <Typography align="center" className={classes.desc}>
+                        Start a <LinkRouter to="/new-job"><Button className={classes.newJob}>New Job</Button></LinkRouter> or view <LinkRouter to="/results"><Button variant="outlined">Sample Results</Button></LinkRouter>
+                    </Typography>
+                </Grid>
+                <Grid item>
+                    <Typography align="center" className={classes.desc}>
+                        If you find our work useful, please cite us: <br /> -
                 </Typography>
+                </Grid>
             </Grid>
-            <Grid item>
-                <Typography align="center" className={classes.desc}>
-                    If you find our work useful, please cite:
-                </Typography>
+            <Grid container className={classes.footer}>
+                <Container>
+                    <Grid container direction="row" justify="space-between">
+                        <Grid item>
+                            <Grid container direction="column">
+                                <Grid item>
+                                    <Typography variant="caption">Bioinformática Estructural y Biofisicoquímica de Proteínas.</Typography>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="caption">IQUIBICEN, Departamento de Química Biológica.</Typography>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="caption">Facultad de Ciencias Exactas y Naturales, Universidad de Buenos Aires.</Typography>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                        <Grid item>
+                            <Grid container direction="column" justify="space-between" alignItems="flex-end">
+                                <Grid item>
+                                    <Typography variant="caption">VarQ <Link href="#">source code</Link> is released under the <Link href="#">MIT license</Link>.</Typography>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="caption">External tools and libraries may have different licenses.</Typography>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Container>
             </Grid>
-        </Grid>
-
-        // <Container>
-        //     <h1>Index</h1>
-        //     <p>test views:</p>
-        //     <Link to="/results">results</Link>
-        //     <br />
-        //     <Link to="/new-job">new job</Link>
-        // </Container>
+        </Box>
     )
 }

@@ -74,9 +74,6 @@ func (u *UniProt) extractPDBs() error {
 	// https://regex101.com/r/BpJ3QB/1
 	r, _ := regexp.Compile("PDB;[ ]*(.*?);[ ]*(X.*?ray);[ ]*([0-9\\.]*).*?;.*?\n")
 	matches := r.FindAllStringSubmatch(string(u.Raw), -1)
-	if len(matches) == 0 {
-		return errors.New("UniProt entry has no associated crystal PDB entries")
-	}
 
 	// Parse each PDB match in TXT
 	u.PDBs = make(map[string]*pdb.PDB)

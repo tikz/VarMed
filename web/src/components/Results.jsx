@@ -49,9 +49,11 @@ export default class Results extends React.Component {
     render() {
         return (
             <Box>
+                <NavBar />
+                <Toolbar />
                 <Container>
                     <Box className="over">
-                        <Typography variant="h4">GTPase NRas</Typography>
+                        <Typography variant="h4" className="title">GTPase NRas</Typography>
                         <Divider />
                         <Grid container spacing={2} alignItems="center">
                             <Grid item>
