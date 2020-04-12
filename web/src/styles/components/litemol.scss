@@ -1,14 +1,9 @@
 .over {
     height: 500px+64px;
-    padding-top: 20px;
     pointer-events: none;
     text-shadow: 2px 2px 10px #1c1e20, 2px 2px 10px #1c1e20;
     position: absolute;
     z-index: 999;
-}
-
-.over Divider {
-    margin-bottom: 10px;
 }
 
 .over hr {

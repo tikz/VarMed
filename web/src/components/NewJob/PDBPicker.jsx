@@ -128,37 +128,48 @@ export default function PDBPicker(props) {
     );
 
     let unpStructURL = "https://www.uniprot.org/uniprot/" + props.unpID + "#structure";
-    return (
-        <Box>
-            <Typography variant="h5" gutterBottom>2. Choose <Link href={unpStructURL} target="_blank" rel="noreferrer">structures</Link></Typography>
-            <Grid container spacing={2} justify="center" alignItems="center" className={classes.root}>
-                <Grid item>{customList('Available', left)}</Grid>
-                <Grid item>
-                    <Grid container direction="column" alignItems="center">
-                        <Button
-                            variant="outlined"
-                            size="small"
-                            className={classes.button}
-                            onClick={handleCheckedRight}
-                            disabled={leftChecked.length === 0}
-                            aria-label="move selected right"
-                        >
-                            &gt;
+    let title = <Typography variant="h5" gutterBottom>2. Choose <Link href={unpStructURL} target="_blank" rel="noreferrer">structures</Link></Typography>;
+    if (props.pdbs == null) {
+        return (
+            <Box>
+                {title}
+                <Typography>No structures found.</Typography>
+            </Box>
+        )
+    } else {
+
+        return (
+            <Box>
+                {title}
+                <Grid container spacing={2} justify="center" alignItems="center" className={classes.root}>
+                    <Grid item>{customList('Available', left)}</Grid>
+                    <Grid item>
+                        <Grid container direction="column" alignItems="center">
+                            <Button
+                                variant="outlined"
+                                size="small"
+                                className={classes.button}
+                                onClick={handleCheckedRight}
+                                disabled={leftChecked.length === 0}
+                                aria-label="move selected right"
+                            >
+                                &gt;
                         </Button>
-                        <Button
-                            variant="outlined"
-                            size="small"
-                            className={classes.button}
-                            onClick={handleCheckedLeft}
-                            disabled={rightChecked.length === 0}
-                            aria-label="move selected left"
-                        >
-                            &lt;
+                            <Button
+                                variant="outlined"
+                                size="small"
+                                className={classes.button}
+                                onClick={handleCheckedLeft}
+                                disabled={rightChecked.length === 0}
+                                aria-label="move selected left"
+                            >
+                                &lt;
                     </Button>
+                        </Grid>
                     </Grid>
+                    <Grid item>{customList('Process', right)}</Grid>
                 </Grid>
-                <Grid item>{customList('Process', right)}</Grid>
-            </Grid>
-        </Box>
-    );
+            </Box>
+        );
+    }
 }

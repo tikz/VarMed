@@ -23,7 +23,7 @@ export class UniProtInput extends React.Component {
     handleChange(e) {
         this.props.setUnpData({})
         this.setState({
-            unpID: e.target.value,
+            unpID: e.target.value.toUpperCase(),
             error: false,
             errorMsg: "",
             entryName: "",
