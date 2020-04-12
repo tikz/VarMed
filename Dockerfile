@@ -9,7 +9,7 @@ RUN rm -rf /var/lib/apt/lists/*
 ENV GOLANG_VERSION 1.14.1
 
 RUN curl -sSL https://storage.googleapis.com/golang/go$GOLANG_VERSION.linux-amd64.tar.gz \
-		| tar -v -C /usr/local -xz
+		| tar -C /usr/local -xz
 
 ENV PATH /usr/local/go/bin:$PATH
 
