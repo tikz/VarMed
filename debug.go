@@ -9,7 +9,7 @@ import (
 	"github.com/logrusorgru/aurora"
 )
 
-func debugPrintChains(a *Analysis) {
+func debugPrintChains(a *Results) {
 	var pocketResidues []*pdb.Residue
 
 	if a.Binding != nil {

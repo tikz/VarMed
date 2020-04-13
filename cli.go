@@ -18,10 +18,11 @@ func (i *arrayFlags) Set(value string) error {
 }
 
 func cliRun(uniprotID string, pdbFlags arrayFlags) {
-	_, err := RunPipeline(uniprotID, pdbFlags)
+	p, err := NewPipeline(uniprotID, pdbFlags, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
+	p.RunPipeline()
 	// var analyses []*Analysis
 
 	// a, err := RunPipeline(uniprotID, pdbFlags)
@@ -33,7 +34,7 @@ func cliRun(uniprotID string, pdbFlags arrayFlags) {
 	// dumpJSON(analyses)
 }
 
-func dumpJSON(analyses []*Analysis) {
+func dumpJSON(analyses []*Results) {
 	for _, analysis := range analyses {
 		out, _ := json.MarshalIndent(analysis, "", "\t")
 		err := ioutil.WriteFile(analysis.PDB.ID+".json", out, 0644)

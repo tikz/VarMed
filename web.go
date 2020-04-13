@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"varq/uniprot"
@@ -9,6 +10,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 )
 
 type StatusResponse struct {
@@ -27,6 +29,8 @@ func errorResponse(msg string) []byte {
 	return out
 }
 
+// UniProtResponse represents some basic data from an UniProt accession.
+// It is used to validate the user input in the New Job form.
 type UniProtResponse struct {
 	ID       string   `json:"id"`
 	Sequence string   `json:"sequence"`
@@ -36,9 +40,9 @@ type UniProtResponse struct {
 	Organism string   `json:"organism"`
 }
 
-// UniProtEndpoint handles GET /api/uniprot/:id
+// UniProtEndpoint handles GET /api/uniprot/:unpID
 func UniProtEndpoint(c *gin.Context) {
-	id := c.Param("id")
+	id := c.Param("unpID")
 
 	u, err := uniprot.NewUniProt(id)
 	if err != nil {
@@ -58,34 +62,67 @@ func UniProtEndpoint(c *gin.Context) {
 	})
 }
 
-// statusEndpoint is the function for the GET /status endpoint
-// Shows general information about the VarQ server status
-// func statusEndpoint(w http.ResponseWriter, r *http.Request) {
-// 	s := StatusResponse{Code: 0, Msg: "online"}
-// 	out, _ := json.Marshal(s)
-// 	w.Write(out)
-// }
+func NewJobEndpoint(c *gin.Context) {
+	id := c.Param("unpID")
+
+	req := JobRequest{UniProtID: id}
+	j := NewJob(&req)
+	queue := c.MustGet("queue").(*Queue)
+
+	// Add job to queue
+	queue.Add(&j)
+	fmt.Println("queue len", queue.Length())
+
+	c.Data(http.StatusOK, "", []byte(j.ID))
+}
+
+// WSProcessEndpoint handles WebSocket /ws/:jobID
+func WSProcessEndpoint(c *gin.Context) {
+	id := c.Param("jobID")
+	queue := c.MustGet("queue").(*Queue)
+	job, _ := queue.GetJob(id)
+	fmt.Println(job)
+	wshandler(c.Writer, c.Request, job.MsgChan)
+}
+
+func wshandler(w http.ResponseWriter, r *http.Request, c <-chan string) {
+	upgrader := websocket.Upgrader{ReadBufferSize: 1024, WriteBufferSize: 1024}
+
+	upgrader.CheckOrigin = func(r *http.Request) bool { return true } // TODO: remove
+
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Printf("websocket upgrade fail: %+v", err)
+		return
+	}
+
+	for {
+		select {
+		case m := <-c:
+			conn.WriteMessage(1, []byte(m))
+		default:
+		}
+	}
+}
 
 func httpServe() {
 	r := gin.Default()
 	r.Use(cors.Default()) // TODO: remove
-	r.Use(static.Serve("/", static.LocalFile("web/output", true)))
 
-	// REST API entrypoints
-	// r.HandleFunc("/status", statusEndpoint)
-	r.GET("/api/uniprot/:id", UniProtEndpoint)
+	queue := NewQueue(2)
+	r.Use(func(c *gin.Context) {
+		c.Set("queue", queue)
+		c.Next()
+	})
+
+	r.Use(static.Serve("/", static.LocalFile("web/output", true)))
+	// TODO: embed web/output inside binary
+
+	// REST API endpoints
+	r.GET("/api/uniprot/:unpID", UniProtEndpoint)
+	r.GET("/api/new-job/:unpID", NewJobEndpoint)
+	r.GET("/ws/:jobID", WSProcessEndpoint)
 
 	log.Printf("Starting VarQ web server: http://127.0.0.1:%s/", cfg.HTTPServer.Port)
 	r.Run(":" + cfg.HTTPServer.Port)
-	// r.PathPrefix("/output/").Handler(http.FileServer(http.Dir("./web/output/")))
-	// http.Handle("/", r)
-
-	// fs := http.FileServer(http.Dir("./web/output"))
-	// http.Handle("/", fs)
-
-	// log.Printf("Starting VarQ web server: http://127.0.0.1:%s/", cfg.HTTPServer.Port)
-	// err := http.ListenAndServe(":"+cfg.HTTPServer.Port, nil)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
 }

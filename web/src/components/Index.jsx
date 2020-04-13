@@ -42,7 +42,7 @@ export default function Index() {
                         <Grid item>
                             <img src="assets/varq.svg" alt="VarQ" className={classes.logo} />
                         </Grid>
-                        <Grid item xs={9} sm={3}>
+                        <Grid item xs={9} sm={4} lg={3}>
                             <Grid container direction="column" alignItems="flex-start" justify="center">
                                 <Typography variant="h1" align="left" className={classes.name}>VarQ</Typography>
                                 <Typography variant="h5" align="left" className={classes.desc}>
