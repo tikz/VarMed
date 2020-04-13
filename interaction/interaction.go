@@ -52,10 +52,10 @@ func calculateChainsInteraction(chains map[string]map[int64]*pdb.Residue) (chain
 					Chain1: chainName1,
 					Chain2: chainName2,
 				}
-				chainAtoms1 := flatten(chain1)
-				chainAtoms2 := flatten(chain2)
+				res1, a1 := flatten(chain1)
+				res2, a2 := flatten(chain2)
 
-				chainsInteraction.ResiduesInteractions = calculateResiduesInteraction(chainAtoms1, chainAtoms2)
+				chainsInteraction.ResiduesInteractions = calculateResiduesInteraction(res1, a1, res2, a2)
 
 				chainInters = append(chainInters, chainsInteraction)
 			}
@@ -67,14 +67,15 @@ func calculateChainsInteraction(chains map[string]map[int64]*pdb.Residue) (chain
 	return chainInters
 }
 
-func calculateResiduesInteraction(chain1 []*pdb.Atom, chain2 []*pdb.Atom) (resInteracts []*ResiduesPair) {
-	for _, atom1 := range chain1 {
-		for _, atom2 := range chain2 {
+func calculateResiduesInteraction(res1 []*pdb.Residue, a1 []*pdb.Atom,
+	res2 []*pdb.Residue, a2 []*pdb.Atom) (resInteracts []*ResiduesPair) {
+	for i1, atom1 := range a1 {
+		for i2, atom2 := range a2 {
 			if dist := calculateDistance(atom1, atom2); dist < 5 {
 				resInteracts = append(resInteracts, &ResiduesPair{
 					Distance: dist,
-					Residue1: atom1.Aminoacid,
-					Residue2: atom2.Aminoacid,
+					Residue1: res1[i1],
+					Residue2: res2[i2],
 				})
 			}
 		}
@@ -94,12 +95,13 @@ func getInteractionResidues(interactions []*ChainsPair) (residues []*pdb.Residue
 	return residues
 }
 
-// flatten converts the residue map datatype to a flat slice of atom pointers
-func flatten(chain map[int64]*pdb.Residue) (atoms []*pdb.Atom) {
+// flatten converts the residue map datatype to flat slices of residues and atom pointers
+func flatten(chain map[int64]*pdb.Residue) (residues []*pdb.Residue, atoms []*pdb.Atom) {
 	for _, residue := range chain {
 		for _, atom := range residue.Atoms {
 			atoms = append(atoms, atom)
+			residues = append(residues, residue)
 		}
 	}
-	return atoms
+	return residues, atoms
 }

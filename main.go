@@ -1,14 +1,12 @@
 package main
 
 import (
-	"bytes"
 	"encoding/gob"
-	"fmt"
+	"flag"
 	"log"
 	"os"
 	"varq/config"
 	"varq/http"
-	"varq/pdb"
 )
 
 var (
@@ -26,30 +24,31 @@ func init() {
 }
 
 func main() {
-	// pdbsFlag := arrayFlags{}
-	// uniprotID := flag.String("u", "", "UniProt accession.")
-	// flag.Var(&pdbsFlag, "p", "PDB ID(s) to analyse, can repeat this flag.")
-	// flag.Parse()
+	pdbsFlag := arrayFlags{}
+	uniprotID := flag.String("u", "", "UniProt accession.")
+	flag.Var(&pdbsFlag, "p", "PDB ID(s) to analyse, can repeat this flag.")
+	flag.Parse()
 
-	// if len(*uniprotID) > 0 {
-	// 	cliRun(*uniprotID, pdbsFlag)
-	// } else {
-	// 	httpServe()
+	if len(*uniprotID) > 0 {
+		cliRun(*uniprotID, pdbsFlag)
+	} else {
+		httpServe()
+	}
+
+	// fmt.Println("Gob Example")
+	// p, _ := pdb.NewPDBFromID("3CON", "P01111")
+	// // fmt.Println(p)
+	// // b := bytes.Buffer{}
+	// // e := gob.NewEncoder(&b)
+	// // e.Encode(p)
+	// // fmt.Println(string(b.Bytes()))
+	// b := bytes.Buffer{}
+	// enc := gob.NewEncoder(&b)
+	// err := enc.Encode(p)
+	// if err != nil {
+	// 	panic(err)
 	// }
 
-	fmt.Println("Gob Example")
-	p, _ := pdb.NewPDBFromID("3CON", "P01111")
-	// fmt.Println(p)
-	// b := bytes.Buffer{}
-	// e := gob.NewEncoder(&b)
-	// e.Encode(p)
-	// fmt.Println(string(b.Bytes()))
-
-	enc := gob.NewEncoder(&bytes.Buffer{})
-	err := enc.Encode(p)
-	if err != nil {
-		panic(err)
-	}
 	// fmt.Println(p)
 	// err := writeGob("./pdb.gob", p)
 	// if err != nil {

@@ -137,8 +137,6 @@ func (pdb *PDB) ExtractPDBChains() error {
 		} else {
 			pos.Atoms = append(pos.Atoms, atom)
 		}
-
-		atom.Aminoacid = res // parent ref
 	}
 
 	pdb.Chains = chains
