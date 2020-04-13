@@ -41,22 +41,22 @@ type PDB struct {
 	BindingSiteDesc map[string]string // binding site identifier to description
 
 	RawPDB        []byte // PDB file raw data
-	RawCIF        []byte // CIF file raw data
+	rawCIF        []byte // CIF file raw data
 	LocalPath     string // local path for the PDB file
 	LocalFilename string // local filename for the PDB file
 }
 
 // NewPDBFromID constructs a new instance from a UniProt accession ID and PDB ID, fetching and parsing the data.
-func NewPDBFromID(pdbID string, uniprotID string) (*PDB, error) {
+func NewPDBFromID(pdbID string, uniprotID string) (PDB, error) {
 	pdb := PDB{ID: pdbID, UniProtID: uniprotID}
 
 	err := pdb.Load()
-	return &pdb, err
+	return pdb, err
 }
 
-// NewPDBFromRaw constructs a new instance from raw bytes, and only extracts ATOM records.
-// This is useful for parsing PDB output files from external tools.
-func NewPDBFromRaw(raw []byte) (*PDB, error) {
+// NewPDBNoMetadata constructs a new instance from raw bytes, and only extracts ATOM records.
+// This is useful for parsing PDB output files generated from external tools.
+func NewPDBNoMetadata(raw []byte) (*PDB, error) {
 	pdb := PDB{RawPDB: raw}
 
 	err := pdb.ExtractResidues()
@@ -104,7 +104,7 @@ func (pdb *PDB) Fetch() error {
 	pdb.PDBURL = urlPDB
 	pdb.CIFURL = urlCIF
 	pdb.RawPDB = rawPDB
-	pdb.RawCIF = rawCIF
+	pdb.rawCIF = rawCIF
 
 	err = pdb.getSIFTSMappings()
 	if err != nil {
