@@ -9,7 +9,7 @@ import (
 	"varq/pdb"
 )
 
-type Step struct {
+type Results struct {
 	PDBChains       map[string]map[int64]*ResidueExposure
 	ExposedResidues []*pdb.Residue
 	Duration        time.Duration
@@ -26,20 +26,20 @@ type PyMOLResults struct {
 	Lines []string
 }
 
-func RunExposureStep(pdb *pdb.PDB, results chan<- *Step) {
+func Run(pdb *pdb.PDB, results chan<- *Results) {
 	start := time.Now()
-	Run(pdb)
-	chains, err := Run(pdb)
+	RunPyMOL(pdb)
+	chains, err := RunPyMOL(pdb)
 	if err != nil {
-		results <- &Step{Error: fmt.Errorf("running PyMOL: %v", err)}
+		results <- &Results{Error: fmt.Errorf("running PyMOL: %v", err)}
 	}
 
 	exposed := exposedResidues(pdb, chains)
-	results <- &Step{PDBChains: chains, ExposedResidues: exposed, Duration: time.Since(start)}
+	results <- &Results{PDBChains: chains, ExposedResidues: exposed, Duration: time.Since(start)}
 }
 
-// Run creates a temp file of the specified PDB structure, runs the PyMOL script on it and parses the results
-func Run(crystal *pdb.PDB) (map[string]map[int64]*ResidueExposure, error) {
+// RunPyMOL creates a temp file of the specified PDB structure, runs the PyMOL script on it and parses the results
+func RunPyMOL(crystal *pdb.PDB) (map[string]map[int64]*ResidueExposure, error) {
 	pymolWorkers := 16
 
 	length := totalLength(crystal.Chains)

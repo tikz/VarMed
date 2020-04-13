@@ -14,22 +14,94 @@ import (
 	"varq/uniprot"
 )
 
-// Analysis contains all pipeline steps results for a single PDB entry.
-type Analysis struct {
+// Step is an interface representing a group of analyses
+// related together, to run on a PDB structure.
+type Step interface {
+	Run() interface{} // resulting data type varies per case. TODO: see if can be unified
+}
+
+// Results contains all steps results for a single PDB entry.
+type Results struct {
 	PDB         *pdb.PDB
-	Binding     *binding.Step
-	Interaction *interaction.Step
-	Exposure    *exposure.Step
+	Binding     *binding.Results
+	Interaction *interaction.Results
+	Exposure    *exposure.Results
 	Error       error `json:"-"`
 }
 
-// pipelinePDBWorker fetches and loads a single PDB file.
-func pipelinePDBWorker(pdbChan <-chan *pdb.PDB, aChan chan<- *Analysis) {
+type Pipeline struct {
+	UniProt *uniprot.UniProt
+	PDBIDs  []string
+
+	PDBs     map[string]*Results
+	Duration time.Duration
+
+	msg func(string) // private callback for passing messages
+}
+
+func NewPipeline(unpID string, pdbIDs []string, msgChan chan<- string) (*Pipeline, error) {
+	uniprot, err := uniprot.NewUniProt(unpID)
+	if err != nil {
+		return nil, err
+	}
+
+	msgHook := func(m string) {
+		log.Println(m)
+		msgChan <- m
+	}
+
+	p := Pipeline{
+		UniProt: uniprot,
+		PDBIDs:  pdbIDs,
+		msg:     msgHook,
+		PDBs:    make(map[string]*Results),
+	}
+
+	return &p, nil
+}
+
+// RunPipeline grabs and analyses all structures from a given UniProt ID.
+func (p *Pipeline) RunPipeline() error {
+	start := time.Now()
+
+	pdbChan := make(chan *pdb.PDB)
+	resultsChan := make(chan *Results)
+
+	for w := 1; w <= cfg.VarQ.Pipeline.StructureWorkers; w++ {
+		go p.pdbWorker(pdbChan, resultsChan)
+	}
+
+	for _, id := range p.PDBIDs {
+		idu := strings.ToUpper(id)
+		if _, ok := p.UniProt.PDBs[idu]; !ok {
+			return fmt.Errorf("PDB ID %s not found", idu)
+		}
+		pdbChan <- p.UniProt.PDBs[idu]
+	}
+
+	close(pdbChan)
+
+	for a := 1; a <= len(p.PDBIDs); a++ {
+		result := <-resultsChan
+		if result.Error != nil {
+			return fmt.Errorf("step error: %v", result.Error)
+		}
+
+		p.PDBs[result.PDB.ID] = result
+	}
+
+	p.Duration = time.Since(start)
+	p.msg(fmt.Sprintf("Finished UniProt %s in %.3f secs", p.UniProt.ID, p.Duration.Seconds()))
+	return nil
+}
+
+// pdbWorker fetches and loads a single PDB file.
+func (p *Pipeline) pdbWorker(pdbChan <-chan *pdb.PDB, aChan chan<- *Results) {
 	for pdb := range pdbChan {
-		analysis := Analysis{PDB: pdb}
+		analysis := Results{PDB: pdb}
 
 		start := time.Now()
-		log.Printf("Loading PDB %s...", pdb.ID)
+		p.msg(fmt.Sprintf("Loading PDB %s...", pdb.ID))
 		err := pdb.Load()
 		if err != nil {
 			analysis.Error = fmt.Errorf("load PDB %s: %v", pdb.ID, err)
@@ -37,14 +109,14 @@ func pipelinePDBWorker(pdbChan <-chan *pdb.PDB, aChan chan<- *Analysis) {
 			continue
 		}
 		end := time.Since(start)
-		log.Printf("PDB %s loaded in %.3f secs", pdb.ID, end.Seconds())
+		p.msg(fmt.Sprintf("PDB %s loaded in %.3f secs", pdb.ID, end.Seconds()))
 
-		aChan <- analysePDB(&analysis)
+		aChan <- p.analysePDB(&analysis)
 	}
 }
 
 // analysePDB runs each available analysis in parallel for a single structure.
-func analysePDB(a *Analysis) *Analysis {
+func (p *Pipeline) analysePDB(a *Results) *Results {
 	// Create temp PDB on filesystem for analysis with external tools
 	a.PDB.LocalFilename = "varq_" + a.PDB.ID
 	a.PDB.LocalPath = "/tmp/" + a.PDB.LocalFilename + ".pdb"
@@ -59,22 +131,21 @@ func analysePDB(a *Analysis) *Analysis {
 		os.Remove(a.PDB.LocalPath)
 	}()
 
-	bindingChan := make(chan *binding.Step)
-	interactionChan := make(chan *interaction.Step)
-	exposureChan := make(chan *exposure.Step)
+	bindingChan := make(chan *binding.Results)
+	interactionChan := make(chan *interaction.Results)
+	exposureChan := make(chan *exposure.Results)
 
 	if cfg.VarQ.Pipeline.EnableSteps.Binding {
-		go binding.RunBindingStep(a.PDB, bindingChan)
+		go binding.Run(a.PDB, bindingChan)
 	}
 	if cfg.VarQ.Pipeline.EnableSteps.Interaction {
-		go interaction.RunInteractionStep(a.PDB, interactionChan)
+		go interaction.Run(a.PDB, interactionChan)
 	}
 	if cfg.VarQ.Pipeline.EnableSteps.Exposure {
-		go exposure.RunExposureStep(a.PDB, exposureChan)
+		go exposure.Run(a.PDB, exposureChan)
 	}
 
 	// TODO: refactor these repeated patterns
-
 	if cfg.VarQ.Pipeline.EnableSteps.Binding {
 		bindingRes := <-bindingChan
 		if bindingRes.Error != nil {
@@ -82,7 +153,7 @@ func analysePDB(a *Analysis) *Analysis {
 			return a
 		}
 		a.Binding = bindingRes
-		log.Printf("PDB %s binding analysis done in %.3f secs", a.PDB.ID, bindingRes.Duration.Seconds())
+		p.msg(fmt.Sprintf("PDB %s binding analysis done in %.3f secs", a.PDB.ID, bindingRes.Duration.Seconds()))
 	}
 
 	if cfg.VarQ.Pipeline.EnableSteps.Interaction {
@@ -92,7 +163,7 @@ func analysePDB(a *Analysis) *Analysis {
 			return a
 		}
 		a.Interaction = interactionRes
-		log.Printf("PDB %s interaction analysis done in %.3f secs", a.PDB.ID, interactionRes.Duration.Seconds())
+		p.msg(fmt.Sprintf("PDB %s interaction analysis done in %.3f secs", a.PDB.ID, interactionRes.Duration.Seconds()))
 	}
 
 	if cfg.VarQ.Pipeline.EnableSteps.Exposure {
@@ -102,7 +173,7 @@ func analysePDB(a *Analysis) *Analysis {
 			return a
 		}
 		a.Exposure = exposureRes
-		log.Printf("PDB %s exposure analysis done in %.3f secs", a.PDB.ID, exposureRes.Duration.Seconds())
+		p.msg(fmt.Sprintf("PDB %s exposure analysis done in %.3f secs", a.PDB.ID, exposureRes.Duration.Seconds()))
 	}
 
 	if cfg.DebugPrint.Enabled {
@@ -110,53 +181,4 @@ func analysePDB(a *Analysis) *Analysis {
 	}
 
 	return a
-}
-
-func runPipelinePDBs(u *uniprot.UniProt, pdbIDs []string) (analyses []*Analysis, err error) {
-	length := len(pdbIDs)
-	pdbChan := make(chan *pdb.PDB, length)
-	analysisChan := make(chan *Analysis, length)
-
-	for w := 1; w <= cfg.VarQ.Pipeline.StructureWorkers; w++ {
-		go pipelinePDBWorker(pdbChan, analysisChan)
-	}
-
-	for _, id := range pdbIDs {
-		idu := strings.ToUpper(id)
-		if _, ok := u.PDBs[idu]; !ok {
-			return nil, fmt.Errorf("PDB ID %s not found", idu)
-		}
-		pdbChan <- u.PDBs[idu]
-	}
-	close(pdbChan)
-
-	for a := 1; a <= length; a++ {
-		analysis := <-analysisChan
-		if analysis.Error != nil {
-			log.Printf("ignoring crystal: %v", analysis.Error)
-		} else {
-			analyses = append(analyses, analysis)
-		}
-	}
-
-	return analyses, nil
-}
-
-// RunPipeline grabs and analyses all structures from a given UniProt ID.
-func RunPipeline(uniprotID string, filterPDBIDs []string) ([]*Analysis, error) {
-	start := time.Now()
-
-	u, err := uniprot.NewUniProt(uniprotID)
-	if err != nil {
-		return nil, fmt.Errorf("run pipeline: %v", err)
-	}
-
-	analyses, err := runPipelinePDBs(u, filterPDBIDs)
-	if err != nil {
-		return nil, fmt.Errorf("analyzing crystals: %v", err)
-	}
-
-	end := time.Since(start)
-	log.Printf("Finished UniProt %s in %.3f secs", u.ID, end.Seconds())
-	return analyses, nil
 }

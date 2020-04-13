@@ -2,6 +2,7 @@ config.yaml
 
 /*.json
 /*.pdb
+/*.db
 
 # py
 *.pyc
