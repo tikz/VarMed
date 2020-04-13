@@ -19,9 +19,6 @@ type Atom struct {
 	Y             float64
 	Z             float64
 	// TODO: add remaining
-
-	// Parent ref
-	Aminoacid *Residue `json:"-"`
 }
 
 // extractPDBATMRecords extracts either ATOM or HETATM records.

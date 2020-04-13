@@ -47,7 +47,7 @@ func NewPipeline(unpID string, pdbIDs []string, msgChan chan<- string) (*Pipelin
 
 	msgHook := func(m string) {
 		log.Println(m)
-		msgChan <- m
+		// msgChan <- m
 	}
 
 	p := Pipeline{
