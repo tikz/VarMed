@@ -11,17 +11,17 @@ import (
 
 // ExtractCIFData parses the associated CIF file for the PDB entry.
 func (pdb *PDB) ExtractCIFData() error {
-	title, err := extractCIFLine("title", "_struct.title", pdb.RawCIF)
+	title, err := extractCIFLine("title", "_struct.title", pdb.rawCIF)
 	if err != nil {
 		return err
 	}
 
-	method, err := extractCIFLine("method", "_refine.pdbx_refine_id", pdb.RawCIF)
+	method, err := extractCIFLine("method", "_refine.pdbx_refine_id", pdb.rawCIF)
 	if err != nil {
 		return err
 	}
 
-	resolutionStr, err := extractCIFLine("resolution", "_refine.ls_d_res_high", pdb.RawCIF)
+	resolutionStr, err := extractCIFLine("resolution", "_refine.ls_d_res_high", pdb.rawCIF)
 	if err != nil {
 		return err
 	}
@@ -30,7 +30,7 @@ func (pdb *PDB) ExtractCIFData() error {
 		return err
 	}
 
-	date, err := extractCIFDate(pdb.RawCIF)
+	date, err := extractCIFDate(pdb.rawCIF)
 	if err != nil {
 		return err
 	}

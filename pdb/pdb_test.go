@@ -20,7 +20,7 @@ func TestChains(t *testing.T) {
 		t.Errorf("cannot open file: %s", err)
 	}
 
-	pdb, err := NewPDBFromRaw(raw)
+	pdb, err := NewPDBNoMetadata(raw)
 	if err != nil {
 		t.Error(err)
 	}
@@ -59,7 +59,7 @@ func TestSeqRes(t *testing.T) {
 		t.Errorf("cannot open file: %s", err)
 	}
 
-	pdb, err := NewPDBFromRaw(raw)
+	pdb, err := NewPDBNoMetadata(raw)
 	if err != nil {
 		t.Error(err)
 	}
@@ -91,7 +91,7 @@ func TestCIF(t *testing.T) {
 		t.Errorf("cannot open file: %s", err)
 	}
 
-	pdb, err := NewPDBFromRaw(raw)
+	pdb, err := NewPDBNoMetadata(raw)
 	if err != nil {
 		t.Error(err)
 	}
@@ -102,7 +102,7 @@ func TestCIF(t *testing.T) {
 	}
 
 	t.Logf("Testing CIF parse")
-	pdb.RawCIF = rawCIF
+	pdb.rawCIF = rawCIF
 
 	err = pdb.ExtractCIFData()
 	if err != nil {
@@ -136,7 +136,7 @@ func TestMappings(t *testing.T) {
 		t.Errorf("cannot open file: %s", err)
 	}
 
-	pdb, err := NewPDBFromRaw(raw)
+	pdb, err := NewPDBNoMetadata(raw)
 	if err != nil {
 		t.Error(err)
 	}
