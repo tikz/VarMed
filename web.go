@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"varq/uniprot"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/static"
@@ -44,7 +43,7 @@ type UniProtResponse struct {
 func UniProtEndpoint(c *gin.Context) {
 	id := c.Param("unpID")
 
-	u, err := uniprot.NewUniProt(id)
+	u, err := LoadUniProt(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),

@@ -69,9 +69,9 @@ func (pdb *PDB) getSIFTSMappings() error {
 		return fmt.Errorf("unmarshal: %v", err)
 	}
 
-	if _, ok := sifts.UniProt[pdb.UniProtID]; !ok {
-		return fmt.Errorf("no mappings available between %s and %s", pdb.ID, pdb.UniProtID)
-	}
+	// if _, ok := sifts.UniProt[pdb.UniProtID]; !ok {
+	// 	return fmt.Errorf("no mappings available between %s and %s", pdb.ID, pdb.UniProtID)
+	// }
 
 	pdb.SIFTS = &sifts
 

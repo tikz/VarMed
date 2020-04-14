@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"strings"
 )
 
 type arrayFlags []string
@@ -13,7 +14,7 @@ func (i *arrayFlags) String() string {
 }
 
 func (i *arrayFlags) Set(value string) error {
-	*i = append(*i, value)
+	*i = append(*i, strings.ToUpper(value))
 	return nil
 }
 
@@ -22,7 +23,10 @@ func cliRun(uniprotID string, pdbFlags arrayFlags) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	p.RunPipeline()
+	err = p.RunPipeline()
+	if err != nil {
+		log.Fatal(err)
+	}
 	// var analyses []*Analysis
 
 	// a, err := RunPipeline(uniprotID, pdbFlags)

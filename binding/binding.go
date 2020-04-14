@@ -7,6 +7,7 @@ import (
 	"varq/binding/ligand"
 	"varq/binding/mcsa"
 	"varq/pdb"
+	"varq/uniprot"
 )
 
 // Results holds the collected data in the binding analysis step
@@ -19,14 +20,14 @@ type Results struct {
 }
 
 // Run starts the binding analysis step
-func Run(pdb *pdb.PDB, results chan<- *Results) {
+func Run(unp *uniprot.UniProt, pdb *pdb.PDB, results chan<- *Results) {
 	start := time.Now()
 	pockets, err := fpocket.Run(pdb)
 	if err != nil {
 		results <- &Results{Error: fmt.Errorf("running Fpocket: %v", err)}
 	}
 
-	csa, err := mcsa.GetPositions(pdb)
+	csa, err := mcsa.GetPositions(unp, pdb)
 	if err != nil {
 		results <- &Results{Error: fmt.Errorf("M-CSA: %v", err)}
 	}

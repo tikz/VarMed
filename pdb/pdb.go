@@ -19,19 +19,16 @@ type PDB struct {
 	Resolution  float64    // method resolution
 	TotalLength int64      // total length as sum of residues of all chains in the structure
 
-	UniProtID       string // UniProt accession
-	UniProtSequence string // UniProt canonical sequence
-
 	Atoms    []*Atom // ATOM records in the structure
 	HetAtoms []*Atom // HETATM records in the structure
 
 	// Position mapping
-	SIFTS            *SIFTS                        // EBI SIFTS data for residue position mapping
-	Chains           map[string]map[int64]*Residue // PDB ATOM chain name and position to Residue pointer
-	SeqRes           map[string][]*Residue         // PDB SEQRES chain name to residues
-	SeqResChains     map[string]map[int64]*Residue // PDB SEQRES chain name and PDB ATOM position to residue
-	SeqResOffsets    map[string]int64              // PDB ATOM residue number to SEQRES position offsets
-	UniProtPositions map[int64][]*Residue          // UniProt sequence position to residue(s) (multiple chains) in structure
+	SIFTS            *SIFTS                          // EBI SIFTS data for residue position mapping
+	Chains           map[string]map[int64]*Residue   // PDB ATOM chain name and position to pointer in structure
+	SeqRes           map[string][]*Residue           // PDB SEQRES chain name to residue pointers
+	SeqResChains     map[string]map[int64]*Residue   // PDB SEQRES chain name and PDB ATOM position to residue in structure
+	SeqResOffsets    map[string]int64                // PDB ATOM residue number to SEQRES position offsets
+	UniProtPositions map[string]map[int64][]*Residue // UniProt ID to sequence position to residue(s) (multiple chains) in structure
 
 	// Extra data
 	// SITE records
@@ -41,14 +38,14 @@ type PDB struct {
 	BindingSiteDesc map[string]string // binding site identifier to description
 
 	RawPDB        []byte // PDB file raw data
-	rawCIF        []byte // CIF file raw data
+	RawCIF        []byte // CIF file raw data
 	LocalPath     string // local path for the PDB file
 	LocalFilename string // local filename for the PDB file
 }
 
 // NewPDBFromID constructs a new instance from a UniProt accession ID and PDB ID, fetching and parsing the data.
-func NewPDBFromID(pdbID string, uniprotID string) (PDB, error) {
-	pdb := PDB{ID: pdbID, UniProtID: uniprotID}
+func NewPDBFromID(pdbID string) (PDB, error) {
+	pdb := PDB{ID: pdbID}
 
 	err := pdb.Load()
 	return pdb, err
@@ -74,9 +71,18 @@ func (pdb *PDB) Load() error {
 		return fmt.Errorf("fetch data: %v", err)
 	}
 
-	err = pdb.Extract()
+	err = pdb.Parse()
 	if err != nil {
 		return fmt.Errorf("parse: %v", err)
+	}
+
+	return nil
+}
+
+func (pdb *PDB) Parse() error {
+	err := pdb.Extract()
+	if err != nil {
+		return fmt.Errorf("extract: %v", err)
 	}
 
 	pdb.makeMappings()
@@ -104,7 +110,7 @@ func (pdb *PDB) Fetch() error {
 	pdb.PDBURL = urlPDB
 	pdb.CIFURL = urlCIF
 	pdb.RawPDB = rawPDB
-	pdb.rawCIF = rawCIF
+	pdb.RawCIF = rawCIF
 
 	err = pdb.getSIFTSMappings()
 	if err != nil {
@@ -136,15 +142,15 @@ func (pdb *PDB) Extract() error {
 
 // SeqExactMatchInUniProt returns true if the crystal primary sequence is contained
 // and exactly matched per each residue in the canonical UniProt sequence range, false otherwise.
-func (pdb *PDB) SeqExactMatchInUniProt() bool {
-	for _, m := range pdb.SIFTS.UniProt[pdb.UniProtID].Mappings {
-		var i int64
-		for i = m.PDBStart.ResidueNumber; i < m.PDBEnd.ResidueNumber; i++ {
-			if pdb.Chains[m.ChainID][i].Name != string(pdb.UniProtSequence[i]) {
-				return false
-			}
-		}
-	}
+// func (pdb *PDB) SeqExactMatchInUniProt() bool {
+// 	for _, m := range pdb.SIFTS.UniProt[pdb.UniProtID].Mappings {
+// 		var i int64
+// 		for i = m.PDBStart.ResidueNumber; i < m.PDBEnd.ResidueNumber; i++ {
+// 			if pdb.Chains[m.ChainID][i].Name != string(pdb.UniProtSequence[i]) {
+// 				return false
+// 			}
+// 		}
+// 	}
 
-	return true
-}
+// 	return true
+// }
