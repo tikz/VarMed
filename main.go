@@ -21,6 +21,8 @@ func init() {
 	}
 	cfg = c
 	http.Cfg = c
+
+	MakeDirs()
 }
 
 func main() {
