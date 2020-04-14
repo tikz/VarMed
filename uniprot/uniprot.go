@@ -6,21 +6,19 @@ import (
 	"regexp"
 	"strings"
 	"varq/http"
-	"varq/pdb"
 )
 
 // UniProt contains relevant protein data for a single accession.
 type UniProt struct {
-	ID       string              // accession ID
-	URL      string              // page URL for the entry
-	TXTURL   string              // TXT API URL for the entry.
-	Name     string              // protein name
-	Gene     string              // gene code
-	Organism string              // organism
-	Sequence string              // canonical sequence
-	Raw      []byte              `json:"-"` // TXT API raw bytes.
-	PDBs     map[string]*pdb.PDB `json:"-"` // associated PDB entries
-	PDBIDs   []string            // PDB IDs
+	ID       string   // accession ID
+	URL      string   // page URL for the entry
+	TXTURL   string   // TXT API URL for the entry.
+	Name     string   // protein name
+	Gene     string   // gene code
+	Organism string   // organism
+	Sequence string   // canonical sequence
+	Raw      []byte   `json:"-"` // TXT API raw bytes.
+	PDBIDs   []string // PDB IDs
 }
 
 // NewUniProt constructs an instance from an UniProt accession ID and a list of target PDB IDs
@@ -76,14 +74,7 @@ func (u *UniProt) extractPDBs() error {
 	matches := r.FindAllStringSubmatch(string(u.Raw), -1)
 
 	// Parse each PDB match in TXT
-	u.PDBs = make(map[string]*pdb.PDB)
 	for _, m := range matches {
-		pdb := pdb.PDB{
-			ID:              m[1],
-			UniProtID:       u.ID,
-			UniProtSequence: u.Sequence,
-		}
-		u.PDBs[m[1]] = &pdb
 		u.PDBIDs = append(u.PDBIDs, m[1])
 	}
 
@@ -135,4 +126,15 @@ func (u *UniProt) extractNames() error {
 	u.Organism = matches[0][1]
 
 	return nil
+}
+
+// PDBIDExists returns true if the given PDB ID is included in this
+// UniProt entry, false otherwise.
+func (u *UniProt) PDBIDExists(pdbID string) bool {
+	for _, id := range u.PDBIDs {
+		if id == pdbID {
+			return true
+		}
+	}
+	return false
 }

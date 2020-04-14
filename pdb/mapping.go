@@ -15,15 +15,18 @@ func (pdb *PDB) makeMappings() {
 	}
 
 	// UniProt canonical sequence position to structure residues.
-	pdb.UniProtPositions = make(map[int64][]*Residue)
-	chainMappings := pdb.SIFTS.UniProt[pdb.UniProtID].Mappings
-	for _, m := range chainMappings {
-		var i int64
-		for i = 0; i <= m.PDBEnd.ResidueNumber-m.PDBStart.ResidueNumber; i++ {
-			seqResPos := i + pdb.SeqResOffsets[m.ChainID] + 1
-			unpPos := seqResPos + m.UnpStart - 1
-			if res, ok := pdb.SeqResChains[m.ChainID][seqResPos]; ok {
-				pdb.UniProtPositions[unpPos] = append(pdb.UniProtPositions[unpPos], res)
+	pdb.UniProtPositions = make(map[string]map[int64][]*Residue)
+	// chainMappings := pdb.SIFTS.UniProt[pdb.UniProtID].Mappings
+	for unpID, unp := range pdb.SIFTS.UniProt {
+		pdb.UniProtPositions[unpID] = make(map[int64][]*Residue)
+		for _, m := range unp.Mappings {
+			var i int64
+			for i = 0; i <= m.PDBEnd.ResidueNumber-m.PDBStart.ResidueNumber; i++ {
+				seqResPos := i + pdb.SeqResOffsets[m.ChainID] + 1
+				unpPos := seqResPos + m.UnpStart - 1
+				if res, ok := pdb.SeqResChains[m.ChainID][seqResPos]; ok {
+					pdb.UniProtPositions[unpID][unpPos] = append(pdb.UniProtPositions[unpID][unpPos], res)
+				}
 			}
 		}
 	}

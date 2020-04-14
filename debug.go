@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 	"varq/pdb"
+	"varq/uniprot"
 
 	"github.com/logrusorgru/aurora"
 )
@@ -20,23 +21,23 @@ func debugPrintChains(a *Results) {
 
 	if a.Interaction != nil {
 		if len(a.Interaction.Residues) > 0 {
-			debugPrintChainsMarkedResidues("Interface residues by distance", a.PDB, a.Interaction.Residues, nil)
+			debugPrintChainsMarkedResidues("Interface residues by distance", a.UniProt, a.PDB, a.Interaction.Residues, nil)
 		}
 	}
 
 	if a.Exposure != nil {
 		if len(a.Exposure.ExposedResidues) > 0 {
-			debugPrintChainsMarkedResidues("Exposed residues", a.PDB, a.Exposure.ExposedResidues, nil)
+			debugPrintChainsMarkedResidues("Exposed residues", a.UniProt, a.PDB, a.Exposure.ExposedResidues, nil)
 		}
 	}
 
 	if len(pocketResidues) > 0 {
-		debugPrintChainsMarkedResidues("Fpocket", a.PDB, pocketResidues, nil)
+		debugPrintChainsMarkedResidues("Fpocket", a.UniProt, a.PDB, pocketResidues, nil)
 	}
 
 	if a.Binding != nil {
 		if a.Binding.Catalytic != nil {
-			debugPrintChainsMarkedResidues("M-CSA", a.PDB, a.Binding.Catalytic.Residues, nil)
+			debugPrintChainsMarkedResidues("M-CSA", a.UniProt, a.PDB, a.Binding.Catalytic.Residues, nil)
 		}
 
 		if len(a.Binding.Ligands) > 0 {
@@ -53,7 +54,7 @@ func debugPrintChains(a *Results) {
 			for _, ligand := range a.Binding.Ligands {
 				res = append(res, ligand...)
 			}
-			debugPrintChainsMarkedResidues("Residues near ligands", a.PDB, res, e)
+			debugPrintChainsMarkedResidues("Residues near ligands", a.UniProt, a.PDB, res, e)
 		}
 
 	}
@@ -74,7 +75,7 @@ func debugPrintChains(a *Results) {
 			}
 			fmt.Println()
 		}
-		debugPrintChainsMarkedResidues("PDB SITE records", a.PDB, residues, e)
+		debugPrintChainsMarkedResidues("PDB SITE records", a.UniProt, a.PDB, residues, e)
 	}
 
 	var famRes []*pdb.Residue
@@ -94,7 +95,7 @@ func debugPrintChains(a *Results) {
 			fmt.Println(aurora.BrightGreen(id), aurora.BrightGreen(fam.Name), "("+strings.Join(chains, ", ")+")", "-", fam.Description)
 		}
 	}
-	debugPrintChainsMarkedResidues("Pfam", a.PDB, famRes, e)
+	debugPrintChainsMarkedResidues("Pfam", a.UniProt, a.PDB, famRes, e)
 
 	fmt.Println()
 }
@@ -108,20 +109,19 @@ func residueExists(res *pdb.Residue, resList []*pdb.Residue) bool {
 	return false
 }
 
-func debugPrintChainsMarkedResidues(analysisName string, pdb *pdb.PDB, aRes []*pdb.Residue, extra func()) {
+func debugPrintChainsMarkedResidues(analysisName string, unp *uniprot.UniProt, pdb *pdb.PDB, aRes []*pdb.Residue, extra func()) {
 	fmt.Println("==============================================================================")
 	fmt.Println(aurora.BgBlack(aurora.Bold(aurora.Cyan(analysisName))))
-
 	if extra != nil {
 		fmt.Println("-----------------------------------------")
 		extra()
 	}
 
-	for _, mapping := range pdb.SIFTS.UniProt[pdb.UniProtID].Mappings {
+	for _, mapping := range pdb.SIFTS.UniProt[unp.ID].Mappings {
 		residues := pdb.SeqRes[mapping.ChainID]
 		unpStart := int(mapping.UnpStart)
 		pdbStart := int(mapping.PDBStart.ResidueNumber)
-		fmt.Println("---------", pdb.ID, "Chain", mapping.ChainID, "-", pdb.UniProtID, "---------")
+		fmt.Println("---------", pdb.ID, "Chain", mapping.ChainID, "-", unp.ID, "---------")
 
 		if cfg.DebugPrint.Rulers.UniProt {
 			fmt.Print("             ")
@@ -129,7 +129,7 @@ func debugPrintChainsMarkedResidues(analysisName string, pdb *pdb.PDB, aRes []*p
 				fmt.Print(" ")
 			}
 			fmt.Print(aurora.Underline("1"), "        ")
-			for i := 10; i < len(pdb.UniProtSequence); i = i + 10 {
+			for i := 10; i < len(unp.Sequence); i = i + 10 {
 				n := strconv.Itoa(i)
 				fmt.Print(aurora.Bold(aurora.Underline(n[:1])), n[1:])
 				for s := 0; s < 10-len(n); s++ {
@@ -143,7 +143,7 @@ func debugPrintChainsMarkedResidues(analysisName string, pdb *pdb.PDB, aRes []*p
 		for i := 0; i < pdbStart; i++ {
 			fmt.Print(" ")
 		}
-		fmt.Print(pdb.UniProtSequence)
+		fmt.Print(unp.Sequence)
 		fmt.Println()
 
 		// fmt.Print(">SEQRES      ")

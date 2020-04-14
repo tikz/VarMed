@@ -34,35 +34,6 @@ func main() {
 	} else {
 		httpServe()
 	}
-
-	// fmt.Println("Gob Example")
-	// p, _ := pdb.NewPDBFromID("3CON", "P01111")
-	// // fmt.Println(p)
-	// // b := bytes.Buffer{}
-	// // e := gob.NewEncoder(&b)
-	// // e.Encode(p)
-	// // fmt.Println(string(b.Bytes()))
-	// b := bytes.Buffer{}
-	// enc := gob.NewEncoder(&b)
-	// err := enc.Encode(p)
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// fmt.Println(p)
-	// err := writeGob("./pdb.gob", p)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-
-	// var pdbRead = new(pdb.PDB)
-	// err = readGob("./student.gob", pdbRead)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// } else {
-	// 	fmt.Println(pdbRead.SIFTS, "\t", pdbRead.SIFTS)
-	// }
-
 }
 
 func writeGob(filePath string, object interface{}) error {

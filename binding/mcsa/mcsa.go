@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"varq/http"
 	"varq/pdb"
+	"varq/uniprot"
 )
 
 // CatalyticResidues holds the protein's residues that have catalytic activity according to M-CSA.
@@ -52,10 +53,10 @@ type residueSequence struct {
 }
 
 // GetPositions queries M-CSA and fetches catalytic residue UniProt positions for the given PDB.
-func GetPositions(pdb *pdb.PDB) (*Catalytic, error) {
+func GetPositions(unp *uniprot.UniProt, pdb *pdb.PDB) (*Catalytic, error) {
 	url := "https://www.ebi.ac.uk/thornton-srv/m-csa/api/entries/?" + url.Values{
 		"format":                                 {"json"},
-		"entries.proteins.sequences.uniprot_ids": {pdb.UniProtID},
+		"entries.proteins.sequences.uniprot_ids": {unp.ID},
 	}.Encode()
 
 	raw, err := http.Get(url)
@@ -77,7 +78,7 @@ func GetPositions(pdb *pdb.PDB) (*Catalytic, error) {
 	for _, res := range response.Results[0].Residues {
 		for _, seq := range res.ResidueSequences {
 			cs.UniProtPositions = append(cs.UniProtPositions, seq.ResID)
-			if resInPos, ok := pdb.UniProtPositions[seq.ResID]; ok {
+			if resInPos, ok := pdb.UniProtPositions[unp.ID][seq.ResID]; ok {
 				for _, res := range resInPos {
 					cs.Residues = append(cs.Residues, res)
 				}

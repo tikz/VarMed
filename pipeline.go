@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"strings"
 	"time"
 	"varq/binding"
 	"varq/exposure"
@@ -14,14 +13,8 @@ import (
 	"varq/uniprot"
 )
 
-// Step is an interface representing a group of analyses
-// related together, to run on a PDB structure.
-type Step interface {
-	Run() interface{} // resulting data type varies per case. TODO: see if can be unified
-}
-
-// Results contains all steps results for a single PDB entry.
 type Results struct {
+	UniProt     *uniprot.UniProt
 	PDB         *pdb.PDB
 	Binding     *binding.Results
 	Interaction *interaction.Results
@@ -30,17 +23,16 @@ type Results struct {
 }
 
 type Pipeline struct {
-	UniProt *uniprot.UniProt
-	PDBIDs  []string
-
-	PDBs     map[string]*Results
+	UniProt  *uniprot.UniProt
+	Results  map[string]*Results // PDB ID to results
 	Duration time.Duration
 
-	msg func(string) // private callback for passing messages
+	pdbIDs []string
+	msg    func(string) // private callback for passing messages
 }
 
 func NewPipeline(unpID string, pdbIDs []string, msgChan chan<- string) (*Pipeline, error) {
-	uniprot, err := uniprot.NewUniProt(unpID)
+	uniprot, err := LoadUniProt(unpID)
 	if err != nil {
 		return nil, err
 	}
@@ -48,13 +40,13 @@ func NewPipeline(unpID string, pdbIDs []string, msgChan chan<- string) (*Pipelin
 	msgHook := func(m string) {
 		log.Println(m)
 		// msgChan <- m
-	}
+	} // TODO: remove this crap, let the caller manage the channel
 
 	p := Pipeline{
 		UniProt: uniprot,
-		PDBIDs:  pdbIDs,
+		pdbIDs:  pdbIDs,
 		msg:     msgHook,
-		PDBs:    make(map[string]*Results),
+		Results: make(map[string]*Results),
 	}
 
 	return &p, nil
@@ -64,30 +56,29 @@ func NewPipeline(unpID string, pdbIDs []string, msgChan chan<- string) (*Pipelin
 func (p *Pipeline) RunPipeline() error {
 	start := time.Now()
 
-	pdbChan := make(chan *pdb.PDB)
+	pdbIDChan := make(chan string)
 	resultsChan := make(chan *Results)
 
 	for w := 1; w <= cfg.VarQ.Pipeline.StructureWorkers; w++ {
-		go p.pdbWorker(pdbChan, resultsChan)
+		go p.pdbWorker(pdbIDChan, resultsChan)
 	}
 
-	for _, id := range p.PDBIDs {
-		idu := strings.ToUpper(id)
-		if _, ok := p.UniProt.PDBs[idu]; !ok {
-			return fmt.Errorf("PDB ID %s not found", idu)
+	for _, id := range p.pdbIDs {
+		if !p.UniProt.PDBIDExists(id) {
+			return fmt.Errorf("PDB ID %s not found", id)
 		}
-		pdbChan <- p.UniProt.PDBs[idu]
+		pdbIDChan <- id
 	}
 
-	close(pdbChan)
+	close(pdbIDChan)
 
-	for a := 1; a <= len(p.PDBIDs); a++ {
+	for a := 1; a <= len(p.pdbIDs); a++ {
 		result := <-resultsChan
 		if result.Error != nil {
 			return fmt.Errorf("step error: %v", result.Error)
 		}
 
-		p.PDBs[result.PDB.ID] = result
+		p.Results[result.PDB.ID] = result
 	}
 
 	p.Duration = time.Since(start)
@@ -96,22 +87,24 @@ func (p *Pipeline) RunPipeline() error {
 }
 
 // pdbWorker fetches and loads a single PDB file.
-func (p *Pipeline) pdbWorker(pdbChan <-chan *pdb.PDB, aChan chan<- *Results) {
-	for pdb := range pdbChan {
-		analysis := Results{PDB: pdb}
+func (p *Pipeline) pdbWorker(pdbIDChan <-chan string, resChan chan<- *Results) {
+	for pdbID := range pdbIDChan {
+		results := Results{}
 
 		start := time.Now()
-		p.msg(fmt.Sprintf("Loading PDB %s...", pdb.ID))
-		err := pdb.Load()
+		p.msg(fmt.Sprintf("Loading PDB %s...", pdbID))
+		pdb, err := LoadPDB(pdbID)
 		if err != nil {
-			analysis.Error = fmt.Errorf("load PDB %s: %v", pdb.ID, err)
-			aChan <- &analysis
+			results.Error = fmt.Errorf("load PDB %s: %v", pdbID, err)
+			resChan <- &results
 			continue
 		}
+		results.PDB = pdb
+		results.UniProt = p.UniProt
 		end := time.Since(start)
-		p.msg(fmt.Sprintf("PDB %s loaded in %.3f secs", pdb.ID, end.Seconds()))
+		p.msg(fmt.Sprintf("PDB %s loaded in %.3f secs", pdbID, end.Seconds()))
 
-		aChan <- p.analysePDB(&analysis)
+		resChan <- p.analysePDB(&results)
 	}
 }
 
@@ -120,6 +113,7 @@ func (p *Pipeline) analysePDB(a *Results) *Results {
 	// Create temp PDB on filesystem for analysis with external tools
 	a.PDB.LocalFilename = "varq_" + a.PDB.ID
 	a.PDB.LocalPath = "/tmp/" + a.PDB.LocalFilename + ".pdb"
+	// TODO: code smell?
 
 	err := ioutil.WriteFile(a.PDB.LocalPath, a.PDB.RawPDB, 0644)
 	if err != nil {
@@ -136,7 +130,7 @@ func (p *Pipeline) analysePDB(a *Results) *Results {
 	exposureChan := make(chan *exposure.Results)
 
 	if cfg.VarQ.Pipeline.EnableSteps.Binding {
-		go binding.Run(a.PDB, bindingChan)
+		go binding.Run(a.UniProt, a.PDB, bindingChan)
 	}
 	if cfg.VarQ.Pipeline.EnableSteps.Interaction {
 		go interaction.Run(a.PDB, interactionChan)

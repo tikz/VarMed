@@ -102,7 +102,7 @@ func TestCIF(t *testing.T) {
 	}
 
 	t.Logf("Testing CIF parse")
-	pdb.rawCIF = rawCIF
+	pdb.RawCIF = rawCIF
 
 	err = pdb.ExtractCIFData()
 	if err != nil {
@@ -142,8 +142,8 @@ func TestMappings(t *testing.T) {
 	}
 
 	pdb.ID = "1mso"
-	pdb.UniProtID = "P01308"
-	pdb.UniProtSequence = "MALWMRLLPLLALLALWGPDPAAAFVNQHLCGSHLVEALYLVCGERGFFYTPKTRREAEDLQVGQVELGGGPGAGSLQPLALEGSLQKRGIVEQCCTSICSLYQLENYCN"
+	uniProtID := "P01308"
+	// uniProtSequence := "MALWMRLLPLLALLALWGPDPAAAFVNQHLCGSHLVEALYLVCGERGFFYTPKTRREAEDLQVGQVELGGGPGAGSLQPLALEGSLQKRGIVEQCCTSICSLYQLENYCN"
 
 	err = pdb.getSIFTSMappings()
 	if err != nil {
@@ -153,7 +153,7 @@ func TestMappings(t *testing.T) {
 	pdb.makeMappings()
 
 	testChain := "B"
-	chainSIFT, _ := pdb.SIFTS.GetChainMapping(pdb.UniProtID, testChain)
+	chainSIFT, _ := pdb.SIFTS.GetChainMapping(uniProtID, testChain)
 	pdbStart := chainSIFT.PDBStart.ResidueNumber
 	pdbEnd := chainSIFT.PDBEnd.ResidueNumber
 	unpStart := chainSIFT.UnpStart
@@ -173,32 +173,32 @@ func TestMappings(t *testing.T) {
 	}
 
 	testChain = "B"
-	chainSIFT, _ = pdb.SIFTS.GetChainMapping(pdb.UniProtID, testChain)
+	chainSIFT, _ = pdb.SIFTS.GetChainMapping(uniProtID, testChain)
 	unpStart = chainSIFT.UnpStart
 	var i int64
 	for i = 1; i <= 30; i++ {
 		if pdb.Chains[testChain][i] != pdb.SeqResChains[testChain][i] {
 			t.Errorf("chain %s: misalignment between chain and SEQRES at pos %d", testChain, i)
 		}
-		if !resInSlice(pdb.Chains[testChain][i], pdb.UniProtPositions[i+unpStart-1]) {
+		if !resInSlice(pdb.Chains[testChain][i], pdb.UniProtPositions[uniProtID][i+unpStart-1]) {
 			t.Errorf("chain %s: misalignment between chain and UniProt seq at pos %d", testChain, i)
 		}
-		if !resInSlice(pdb.SeqResChains[testChain][i], pdb.UniProtPositions[i+unpStart-1]) {
+		if !resInSlice(pdb.SeqResChains[testChain][i], pdb.UniProtPositions[uniProtID][i+unpStart-1]) {
 			t.Errorf("chain %s: misalignment between SEQRES and UniProt seq at pos %d", testChain, i)
 		}
 	}
 
 	testChain = "C"
-	chainSIFT, _ = pdb.SIFTS.GetChainMapping(pdb.UniProtID, testChain)
+	chainSIFT, _ = pdb.SIFTS.GetChainMapping(uniProtID, testChain)
 	unpStart = chainSIFT.UnpStart
 	for i = 1; i <= 21; i++ {
 		if pdb.Chains[testChain][i] != pdb.SeqResChains[testChain][i] {
 			t.Errorf("chain %s: misalignment between chain and SEQRES at pos %d", testChain, i)
 		}
-		if !resInSlice(pdb.Chains[testChain][i], pdb.UniProtPositions[i+unpStart-1]) {
+		if !resInSlice(pdb.Chains[testChain][i], pdb.UniProtPositions[uniProtID][i+unpStart-1]) {
 			t.Errorf("chain %s: misalignment between chain and UniProt seq at pos %d", testChain, i)
 		}
-		if !resInSlice(pdb.SeqResChains[testChain][i], pdb.UniProtPositions[i+unpStart-1]) {
+		if !resInSlice(pdb.SeqResChains[testChain][i], pdb.UniProtPositions[uniProtID][i+unpStart-1]) {
 			t.Errorf("chain %s: misalignment between SEQRES and UniProt seq at pos %d", testChain, i)
 		}
 	}
