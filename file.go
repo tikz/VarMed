@@ -8,6 +8,12 @@ import (
 	"varq/uniprot"
 )
 
+func MakeDirs() {
+	os.MkdirAll("data/uniprot", os.ModePerm)
+	os.MkdirAll("data/pdb", os.ModePerm)
+	os.MkdirAll("data/results", os.ModePerm)
+}
+
 func LoadPDB(pdbID string) (*pdb.PDB, error) {
 	path := "data/pdb/" + pdbID + ".varq"
 	_, err := os.Stat(path)
