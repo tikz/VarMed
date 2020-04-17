@@ -4,7 +4,8 @@ import React from 'react';
 export default class StatusConsole extends React.Component {
     constructor(props) {
         super(props);
-        this.ws = new WebSocket('ws://ip169.qb.fcen.uba.ar:8888/ws/' + this.props.jobID);
+        let protocol = (window.location.protocol === "https:") ? "wss://" : "ws://"
+        this.ws = new WebSocket(protocol + window.location.host + "/ws/" + this.props.jobID);
 
         this.state = { messages: [], connected: false }
     }
