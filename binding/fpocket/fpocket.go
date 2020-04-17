@@ -21,8 +21,8 @@ type Pocket struct {
 }
 
 // Run creates a temp file of the specified PDB structure, runs Fpocket on it and parses the results
-func Run(crystal *pdb.PDB) (pockets []*Pocket, err error) {
-	outPath := "/tmp/" + crystal.LocalFilename + "_out"
+func Run(p *pdb.PDB) (pockets []*Pocket, err error) {
+	outPath := p.LocalPath + "_out"
 
 	// Delete Fpocket result files on function exit
 	defer func() {
@@ -30,7 +30,7 @@ func Run(crystal *pdb.PDB) (pockets []*Pocket, err error) {
 	}()
 
 	// Run Fpocket
-	out, err := exec.Command("fpocket", "-f", crystal.LocalPath).CombinedOutput()
+	out, err := exec.Command("fpocket", "-f", p.LocalPath).CombinedOutput()
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func Run(crystal *pdb.PDB) (pockets []*Pocket, err error) {
 
 	// Walk created folder containing pocket analysis files
 	dir := outPath + "/pockets"
-	pockets, err = walkPocketDir(crystal, dir)
+	pockets, err = walkPocketDir(p, dir)
 	if err != nil {
 		return nil, err
 	}

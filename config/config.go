@@ -18,13 +18,6 @@ type Config struct {
 		Port string `yaml:"port"`
 	} `yaml:"http-server"`
 
-	Database struct {
-		Host     string `yaml:"host"`
-		Port     string `yaml:"port"`
-		Username string `yaml:"username"`
-		Password string `yaml:"password"`
-	} `yaml:"database"`
-
 	VarQ struct {
 		JobWorkers int `yaml:"job-workers"`
 		Pipeline   struct {

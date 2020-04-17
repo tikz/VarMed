@@ -2,11 +2,9 @@ package main
 
 import (
 	"bytes"
-	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
-	"log"
-	"strconv"
+	"strings"
 	"time"
 )
 
@@ -16,38 +14,39 @@ const (
 	statusDone    = 2
 )
 
+// JobRequest represents a single job request from an user,
+// contains the inputs and extra client data.
 type JobRequest struct {
-	IP        string
-	Email     string
-	Time      time.Time
-	UniProtID string
-	PDBIDs    []string
-	ClinVar   bool
-	Variants  map[int64]string
+	UniProtID     string   `json:"uniprot_id"`
+	PDBIDs        []string `json:"pdbs"`
+	ClinVar       bool     `json:"clinvar"`
+	VariationsPos []int    `json:"variations_pos"`
+	VariationsAA  []string `json:"variations_aa"`
+
+	IP    string
+	Email string
+	Time  time.Time
 }
 
 type Job struct {
 	ID       string
 	Request  *JobRequest
-	Status   int
-	MsgChan  chan string
-	Started  time.Time
-	Ended    time.Time
-	Pipeline *Pipeline
-	Error    error
+	Pipeline *Pipeline `json:"-"`
+
+	Status  int
+	Started time.Time
+	Ended   time.Time
+
+	msgChan chan string
+	Error   error `json:"-"`
 }
 
-// generateID returns a SHA256 hash of timestamp+UniProtID+256 random bits.
-func (j *Job) generateID() string {
-	rb := [32]byte{}
-	_, err := rand.Read(rb[:])
-	if err != nil {
-		log.Fatal(err)
-	}
+// generateID returns a SHA256 hash of UniProtID+joined PDBIDs
+func (j *Job) generateID() string { // TODO: include variations in hash after implementing that
 
-	timestamp := []byte(strconv.FormatInt(j.Request.Time.Unix(), 10))
 	unpID := []byte(j.Request.UniProtID)
-	b := bytes.Join([][]byte{timestamp, unpID, rb[:]}, []byte("-"))
+	pdbIDs := []byte(strings.Join(j.Request.PDBIDs, ""))
+	b := bytes.Join([][]byte{unpID, pdbIDs}, []byte(""))
 	hash := sha256.Sum256(b)
 
 	return hex.EncodeToString(hash[:])
@@ -55,7 +54,7 @@ func (j *Job) generateID() string {
 
 func NewJob(request *JobRequest) Job {
 	j := Job{Request: request}
-	j.MsgChan = make(chan string, 100)
+	j.msgChan = make(chan string, 100)
 
 	j.ID = j.generateID()
 
@@ -66,8 +65,30 @@ func (j *Job) Process() {
 	j.Status = statusProcess
 	j.Started = time.Now()
 
-	j.Pipeline, _ = NewPipeline(j.Request.UniProtID, []string{"3CON", "5UHV", "6E6H"}, j.MsgChan)
-	_ = j.Pipeline.RunPipeline()
-	// j.PDBAnalyses, _ = RunPipeline("P01111", []string{"3CON"})
+	j.Pipeline, _ = NewPipeline(j.Request.UniProtID, j.Request.PDBIDs, j.msgChan)
+	err := j.Pipeline.Run()
+	if err != nil {
+		j.fail(err)
+		return
+	}
 	j.Ended = time.Now()
+
+	j.Status = statusDone
+
+	err = WriteJob(j)
+	if err != nil {
+		j.fail(err)
+		return
+	}
+
+	// Either "SUCCESS" or "FAILED" is the specific message that
+	// the frontend expects from the WebSocket to proceed.
+	j.msgChan <- "SUCCESS"
+	close(j.msgChan)
+}
+
+func (j *Job) fail(err error) {
+	j.msgChan <- err.Error()
+	j.msgChan <- "FAILED"
+	close(j.msgChan)
 }

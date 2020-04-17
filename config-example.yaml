@@ -4,14 +4,7 @@ http-client:
 
 http-server:
   port: 8888
-
-database:
-  type: "sqlite"
-  host: ""
-  port: 1234
-  username: ""
-  password: ""
-
+  
 varq:
   job-workers: 3
   pipeline:

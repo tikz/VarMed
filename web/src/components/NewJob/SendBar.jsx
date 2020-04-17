@@ -1,33 +1,37 @@
-import { Button, Grid, TextField } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { Grid, TextField } from '@material-ui/core';
 import React from 'react';
 import { QueueInfo } from './QueueInfo';
+import SendButton from './SendButton';
 
-const useStyles = makeStyles((theme) => ({
-    sendJob: {
-        background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-        borderRadius: 3,
-        boxShadow: '0 2px 10px 1px rgba(33, 203, 243, .3)',
-        color: 'white',
+export default class SendBar extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { email: "" }
+        this.handleChange = this.handleChange.bind(this)
+        this.handleSubmit = this.handleSubmit.bind(this)
     }
-}));
-
-export default function SendBar() {
-    const classes = useStyles();
-    return (
-        <Grid container spacing={2} alignItems="center">
-            <Grid item xs>
-                <TextField
-                    id="name" label="Email address (optional)"
-                    margin="dense" type="email" fullWidth
-                />
+    handleChange(e) {
+        this.setState({ email: e.target.value })
+    }
+    handleSubmit() {
+        this.props.submit(this.state.email)
+    }
+    render() {
+        return (
+            <Grid container spacing={2} alignItems="center" >
+                <Grid item xs>
+                    <TextField
+                        id="name" label="Email address (optional)" onChange={this.handleChange}
+                        margin="dense" type="email" value={this.state.email} fullWidth
+                    />
+                </Grid>
+                <Grid item xs>
+                    <QueueInfo />
+                </Grid>
+                <Grid item xs={2}>
+                    <SendButton submit={this.handleSubmit} />
+                </Grid>
             </Grid>
-            <Grid item xs>
-                <QueueInfo />
-            </Grid>
-            <Grid item xs={2}>
-                <Button className={classes.sendJob}>Send Job</Button>
-            </Grid>
-        </Grid>
-    )
+        )
+    }
 }

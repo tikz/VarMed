@@ -1,12 +1,18 @@
-import { Box, Container, Divider, Grid, Grow, Toolbar, Typography } from '@material-ui/core';
+import { Box, Container, Divider, Grid, Grow, Snackbar, Toolbar, Typography } from '@material-ui/core';
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
+import MuiAlert from '@material-ui/lab/Alert';
+import axios from 'axios';
 import React from 'react';
+import { Redirect } from "react-router-dom";
 import NavBar from '../NavBar';
 import PDBPicker from './PDBPicker';
 import SendBar from './SendBar';
 import { UniProtInput } from './UniProtInput';
 import { Variations } from './Variations';
 
+function Alert(props) {
+    return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 export default class NewJob extends React.Component {
     constructor(props) {
         super(props);
@@ -15,13 +21,18 @@ export default class NewJob extends React.Component {
             unpData: {},
             pdbs: [],
             variations: [],
-            clinvar: false
+            clinvar: false,
+            error: false,
+            errorMsg: '',
+            redirect: ''
         }
 
         this.setUnpData = this.setUnpData.bind(this);
         this.setPDBs = this.setPDBs.bind(this);
         this.setVars = this.setVars.bind(this);
         this.setClinVar = this.setClinVar.bind(this);
+        this.submit = this.submit.bind(this);
+        this.handleErrorClose = this.handleErrorClose.bind(this);
     }
 
     setUnpData(unpData) {
@@ -30,19 +41,39 @@ export default class NewJob extends React.Component {
         })
     }
 
-    setPDBs(pdbs) {
-        this.setState({ pdbs: pdbs })
+    setPDBs(pdbs) { this.setState({ pdbs: pdbs }) }
+    setVars(vars) { this.setState({ variations: vars }) }
+    setClinVar(flag) { this.setState({ clinvar: flag }) }
+
+    submit(email) {
+        let that = this;
+        axios.post('/api/new-job', {
+            uniprot_id: this.state.unpData.id,
+            pdbs: this.state.pdbs,
+            email: email,
+            variations_pos: this.state.variations.map(x => x.pos),
+            variations_aa: this.state.variations.map(x => x.aa),
+            clinvar: this.state.clinvar,
+        }).then(function (response) {
+            if (response.data.error != '') {
+                that.setState({ errorMsg: response.data.error }, () => {
+                    that.setState({ error: true })
+                })
+            } else {
+                that.setState({ redirect: "/job/" + response.data.id })
+            }
+        })
     }
 
-    setVars(vars) {
-        this.setState({ variations: vars })
-    }
-
-    setClinVar(flag) {
-        this.setState({ clinvar: flag })
+    handleErrorClose() {
+        this.setState({ error: false })
     }
 
     render() {
+        if (this.state.redirect != '') {
+            return <Redirect to={this.state.redirect} />
+        }
+
         let unpOk = Object.keys(this.state.unpData).length > 0;
         let structOk = this.state.unpData.pdbs !== null;
         let dataOk = unpOk && this.state.pdbs.length > 0
@@ -94,13 +125,18 @@ export default class NewJob extends React.Component {
                         <Grid item>
                             <Grow in={dataOk}>
                                 <Box>
-                                    <SendBar />
+                                    <SendBar submit={this.submit} />
                                 </Box>
                             </Grow>
                         </Grid>
                         {dataOk && <Divider />}
                     </Grid>
                 </Container>
+                <Snackbar open={this.state.error} autoHideDuration={6000} onClose={this.handleErrorClose}>
+                    <Alert onClose={this.handleErrorClose} severity="error">
+                        {this.state.errorMsg}
+                    </Alert>
+                </Snackbar>
             </Box>
         );
     }

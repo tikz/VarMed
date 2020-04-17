@@ -26,8 +26,8 @@ func debugPrintChains(a *Results) {
 	}
 
 	if a.Exposure != nil {
-		if len(a.Exposure.ExposedResidues) > 0 {
-			debugPrintChainsMarkedResidues("Exposed residues", a.UniProt, a.PDB, a.Exposure.ExposedResidues, nil)
+		if len(a.Exposure.Residues) > 0 {
+			debugPrintChainsMarkedResidues("Buried residues", a.UniProt, a.PDB, a.Exposure.Residues, nil)
 		}
 	}
 
@@ -146,14 +146,14 @@ func debugPrintChainsMarkedResidues(analysisName string, unp *uniprot.UniProt, p
 		fmt.Print(unp.Sequence)
 		fmt.Println()
 
-		// fmt.Print(">SEQRES      ")
-		// for i := 0; i < unpStart; i++ {
-		// 	fmt.Print(" ")
-		// }
-		// for _, res := range residues {
-		// 	fmt.Printf(res.Abbrv1)
-		// }
-		// fmt.Println()
+		fmt.Print(">SEQRES      ")
+		for i := 0; i < unpStart; i++ {
+			fmt.Print(" ")
+		}
+		for _, res := range residues {
+			fmt.Printf(res.Abbrv1)
+		}
+		fmt.Println()
 
 		if cfg.DebugPrint.Rulers.PDB {
 			fmt.Print("             ")

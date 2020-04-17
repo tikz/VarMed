@@ -1,6 +1,6 @@
-import { Box, Container, Divider, FormControl, Grid, InputLabel, MenuItem, Paper, Select, Toolbar, Typography } from '@material-ui/core';
+import { Box, Container, Divider, FormControl, Grid, InputLabel, MenuItem, Paper, Select, Typography } from '@material-ui/core';
+import axios from 'axios';
 import React from 'react';
-import NavBar from '../NavBar';
 import SequenceViewer from './SequenceViewer';
 import StructureViewer from './StructureViewer';
 
@@ -9,14 +9,25 @@ export default class Results extends React.Component {
         super(props);
         this.structureRef = React.createRef();
 
-        this.state = { pdb: "3CON" }
+        this.state = { pdbID: this.props.pdbID, jobID: this.props.jobID, res: {} }
 
         this.highlightStructure = this.highlightStructure.bind(this);
+        this.highlightResidues = this.highlightResidues.bind(this);
         this.selectStructure = this.selectStructure.bind(this);
         this.pdbChange = this.pdbChange.bind(this);
+
+        this.pdbLoad(this.props.pdbID);
     }
 
     componentDidMount() {
+    }
+
+    highlightResidues(residues) {
+        if (residues.length == 0) {
+            this.structureRef.current.clearHighlight();
+        } else {
+            this.structureRef.current.highlightResidues(residues);
+        }
     }
 
     highlightStructure(start, end) {
@@ -27,26 +38,35 @@ export default class Results extends React.Component {
         }
     }
 
-    selectStructure(start, end) {
-        this.structureRef.current.focus(start + 18, end + 18);
-        this.structureRef.current.highlight(start + 18, end + 18);
+    selectStructure(chain, start, end) {
+        this.structureRef.current.focus(chain, start, end);
+        this.structureRef.current.highlight(chain, start, end);
         if (start - end == 0) {
-            this.structureRef.current.select(start + 18, end + 18);
+            this.structureRef.current.select(chain, start, end);
         }
     }
 
     pdbChange(e) {
-        this.setState({ pdb: e.target.value })
+        let id = e.target.value;
+        this.pdbLoad(id);
+    }
+
+    pdbLoad(id) {
+        let that = this;
+        axios.get('/api/job/' + this.state.jobID + '/' + id)
+            .then(function (response) {
+                that.setState({ res: response.data, pdb: id });
+                that.structureRef.current.load(response.data);
+            })
     }
 
     render() {
+        if (this.state.res.PDB === undefined) { return (<Box />) }
         return (
             <Box>
-                <NavBar />
-                <Toolbar />
                 <Container>
                     <Box className="over">
-                        <Typography variant="h4" className="title">GTPase NRas</Typography>
+                        <Typography variant="h4" className="title">{this.state.res.UniProt.Name}</Typography>
                         <Divider />
                         <Grid container spacing={2} alignItems="center">
                             <Grid item>
@@ -57,19 +77,22 @@ export default class Results extends React.Component {
                                         value={this.state.pdb}
                                         onChange={this.pdbChange}
                                     >
-                                        <MenuItem value={"3CON"}>3CON</MenuItem>
-                                        <MenuItem value={"123X"}>123X</MenuItem>
+                                        {this.props.results.Request.pdbs.map((pdbID, index) => {
+                                            return (
+                                                <MenuItem key={index} value={pdbID}>{pdbID}</MenuItem>
+                                            );
+                                        })}
                                     </Select>
                                 </FormControl>
                             </Grid>
                             <Grid item>
-                                <Typography>Crystal structure of the human NRAS GTPase bound with GDP</Typography>
+                                <Typography>{this.state.res.PDB.Title}</Typography>
                             </Grid>
                         </Grid>
                     </Box>
                 </Container>
 
-                <StructureViewer ref={this.structureRef} />
+                <StructureViewer ref={this.structureRef} pdbID={this.state.pdbID} res={this.state.res} />
 
                 <Container>
                     <Box>
@@ -85,7 +108,12 @@ export default class Results extends React.Component {
                         </Grid>
                     </Box>
                     <Box my={2}>
-                        <SequenceViewer highlight={this.highlightStructure} select={this.selectStructure} />
+                        <SequenceViewer
+                            highlightResidues={this.highlightResidues}
+                            highlight={this.highlightStructure}
+                            select={this.selectStructure}
+                            res={this.state.res}
+                            key={this.state.res.PDB.ID} />
                     </Box>
                 </Container>
             </Box>

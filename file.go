@@ -11,7 +11,21 @@ import (
 func MakeDirs() {
 	os.MkdirAll("data/uniprot", os.ModePerm)
 	os.MkdirAll("data/pdb", os.ModePerm)
-	os.MkdirAll("data/results", os.ModePerm)
+	os.MkdirAll("data/jobs", os.ModePerm)
+}
+
+func WriteJob(j *Job) error {
+	return write("data/jobs/"+j.ID+".varq", j)
+}
+
+func LoadJob(id string) (*Job, error) {
+	j := Job{}
+	err := read("data/jobs/"+id+".varq", &j)
+	if err != nil {
+		return nil, err
+	}
+
+	return &j, nil
 }
 
 func LoadPDB(pdbID string) (*pdb.PDB, error) {
@@ -30,15 +44,18 @@ func LoadPDB(pdbID string) (*pdb.PDB, error) {
 		return &p, nil
 	}
 
+	return ReadPDB(pdbID)
+}
+
+func ReadPDB(pdbID string) (*pdb.PDB, error) {
+	path := "data/pdb/" + pdbID + ".varq"
 	p := new(pdb.PDB)
-	err = read(path, &p)
+	err := read(path, &p)
 	if err != nil {
 		return nil, fmt.Errorf("load file: %v", err)
 	}
 
-	// Parse again since loading from file doesn't preserve pointers
 	err = p.Parse()
-
 	return p, err
 }
 
@@ -74,6 +91,7 @@ func write(filePath string, object interface{}) error {
 		encoder.Encode(object)
 	}
 	file.Close()
+
 	return err
 }
 
@@ -84,5 +102,6 @@ func read(filePath string, object interface{}) error {
 		err = decoder.Decode(object)
 	}
 	file.Close()
+
 	return err
 }

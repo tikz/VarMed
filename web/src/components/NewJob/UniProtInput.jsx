@@ -29,25 +29,25 @@ export class UniProtInput extends React.Component {
         })
 
         if (e.target.value.length > 5) {
-            let p = this
-            p.setState({
+            let that = this;
+            that.setState({
                 loading: true,
             })
-            axios.get('http://127.0.0.1:3000/api/uniprot/' + e.target.value)
+            axios.get('/api/uniprot/' + e.target.value)
                 .then(function (response) {
                     let data = response.data
-                    p.setState({
+                    that.setState({
                         entryName: [data.gene, data.name, data.organism].join(" - "),
                         unpData: data
                     })
-                    p.props.setUnpData(data)
+                    that.props.setUnpData(data)
                 }).catch(function (error) {
-                    p.setState({
+                    that.setState({
                         error: true,
                         errorMsg: "Network error"
                     })
                 }).then(function () {
-                    p.setState({
+                    that.setState({
                         loading: false
                     })
                 });
@@ -66,11 +66,8 @@ export class UniProtInput extends React.Component {
                 <Typography variant="h5" gutterBottom>1. Enter a protein</Typography>
                 <div>
                     <TextField id="filled-basic"
+                        variant="filled" autoFocus autoComplete="off" fullWidth
                         label="UniProt Accession ID"
-                        variant="filled"
-                        autoFocus
-                        autoComplete="off"
-                        fullWidth
                         onChange={this.handleChange}
                         value={this.state.unpID}
                         error={this.state.error}

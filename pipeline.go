@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"log"
 	"os"
 	"time"
 	"varq/binding"
@@ -13,6 +11,7 @@ import (
 	"varq/uniprot"
 )
 
+// Results represents a group of results from each one of the available analysis steps.
 type Results struct {
 	UniProt     *uniprot.UniProt
 	PDB         *pdb.PDB
@@ -22,38 +21,44 @@ type Results struct {
 	Error       error `json:"-"`
 }
 
+// Pipeline represents a single run of the VarQ pipeline.
 type Pipeline struct {
 	UniProt  *uniprot.UniProt
 	Results  map[string]*Results // PDB ID to results
 	Duration time.Duration
 
-	pdbIDs []string
-	msg    func(string) // private callback for passing messages
+	msgChan chan string // readable text messages about the status
+	pdbIDs  []string
 }
 
-func NewPipeline(unpID string, pdbIDs []string, msgChan chan<- string) (*Pipeline, error) {
+// msg prints and sends a message with added format to the channel.
+func (p *Pipeline) msg(m string) {
+	select {
+	case p.msgChan <- time.Now().Format("15:04:05-0700") + " " + m:
+	default:
+		<-p.msgChan
+	}
+}
+
+// NewPipeline constructs a new Pipeline.
+func NewPipeline(unpID string, pdbIDs []string, msgChan chan string) (*Pipeline, error) {
 	uniprot, err := LoadUniProt(unpID)
 	if err != nil {
 		return nil, err
 	}
 
-	msgHook := func(m string) {
-		log.Println(m)
-		// msgChan <- m
-	} // TODO: remove this crap, let the caller manage the channel
-
 	p := Pipeline{
 		UniProt: uniprot,
+		msgChan: msgChan,
 		pdbIDs:  pdbIDs,
-		msg:     msgHook,
 		Results: make(map[string]*Results),
 	}
 
 	return &p, nil
 }
 
-// RunPipeline grabs and analyses all structures from a given UniProt ID.
-func (p *Pipeline) RunPipeline() error {
+// Run starts the process of analyzing given PDB IDs corresponding to an UniProt ID.
+func (p *Pipeline) Run() error {
 	start := time.Now()
 
 	pdbIDChan := make(chan string)
@@ -82,7 +87,7 @@ func (p *Pipeline) RunPipeline() error {
 	}
 
 	p.Duration = time.Since(start)
-	p.msg(fmt.Sprintf("Finished UniProt %s in %.3f secs", p.UniProt.ID, p.Duration.Seconds()))
+	p.msg(fmt.Sprintf("Pipeline finished in %.3f secs", p.Duration.Seconds()))
 	return nil
 }
 
@@ -111,18 +116,13 @@ func (p *Pipeline) pdbWorker(pdbIDChan <-chan string, resChan chan<- *Results) {
 // analysePDB runs each available analysis in parallel for a single structure.
 func (p *Pipeline) analysePDB(a *Results) *Results {
 	// Create temp PDB on filesystem for analysis with external tools
-	a.PDB.LocalFilename = "varq_" + a.PDB.ID
-	a.PDB.LocalPath = "/tmp/" + a.PDB.LocalFilename + ".pdb"
-	// TODO: code smell?
-
-	err := ioutil.WriteFile(a.PDB.LocalPath, a.PDB.RawPDB, 0644)
-	if err != nil {
-		a.Error = fmt.Errorf("create tmp PDB: %v", err)
-		return a
-	}
+	filename := "varq_" + a.PDB.ID
+	path := "/tmp/" + filename + ".pdb"
+	a.PDB.WriteFile(path)
+	// TODO: don't hardcode paths, cross platform
 
 	defer func() {
-		os.Remove(a.PDB.LocalPath)
+		os.Remove(path)
 	}()
 
 	bindingChan := make(chan *binding.Results)
@@ -139,7 +139,8 @@ func (p *Pipeline) analysePDB(a *Results) *Results {
 		go exposure.Run(a.PDB, exposureChan)
 	}
 
-	// TODO: refactor these repeated patterns
+	// TODO: refactor these repeated patterns when all analyses
+	// result data types become somewhat unchanging.
 	if cfg.VarQ.Pipeline.EnableSteps.Binding {
 		bindingRes := <-bindingChan
 		if bindingRes.Error != nil {

@@ -12,7 +12,6 @@ var (
 )
 
 func init() {
-	// Load config.yaml
 	c, err := config.LoadFile("config.yaml")
 	if err != nil {
 		log.Fatalf("Cannot open and parse config.yaml: %v", err)

@@ -6,38 +6,49 @@ import (
 	"sync"
 )
 
-// TODO: maybe interface{} Job
+// TODO: maybe interface Job and package this
 
 // Queue represents a job queue.
 type Queue struct {
-	jobs   []*Job
-	jobsCh chan *Job
-	mux    *sync.Mutex
+	jobs     []*Job
+	jobsCh   chan *Job
+	nWorkers int
+	mux      *sync.Mutex
 }
 
 // NewQueue creates a new job queue and launches the specified workers.
 func NewQueue(workers int) *Queue {
 	queue := Queue{
-		jobsCh: make(chan *Job),
-		mux:    &sync.Mutex{},
+		jobsCh:   make(chan *Job),
+		mux:      &sync.Mutex{},
+		nWorkers: workers,
 	}
 
 	for i := 0; i < workers; i++ {
 		go queue.worker()
 	}
 
-	go func() {
-		for _, j := range queue.jobs {
-			select {
-			case j.MsgChan <- "caca":
-				fmt.Println("sent")
-			default:
-				fmt.Println("not")
-			}
-		}
-	}()
-
 	return &queue
+}
+
+// posMsg informs all jobs in the queue with a message of their position.
+func (q *Queue) posMsg() {
+	for _, j := range q.jobs {
+		m := fmt.Sprintf("Position in queue: #%d", q.GetJobPosition(j)-q.nWorkers+2)
+		select {
+		case j.msgChan <- m:
+		default:
+			<-j.msgChan
+		}
+	}
+}
+
+func (q *Queue) worker() {
+	for j := range q.jobsCh {
+		j.Process()
+		q.Delete(j)
+		q.posMsg()
+	}
 }
 
 // Length returns the number of pending jobs currently in the queue.
@@ -79,12 +90,4 @@ func (q *Queue) GetJob(id string) (*Job, error) {
 		}
 	}
 	return nil, errors.New("not found")
-}
-
-func (q *Queue) worker() {
-	for j := range q.jobsCh {
-		fmt.Println("processing", j)
-		j.Process()
-		q.Delete(j)
-	}
 }
