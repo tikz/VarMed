@@ -4,7 +4,7 @@ import React from 'react';
 export default class StatusConsole extends React.Component {
     constructor(props) {
         super(props);
-        this.ws = new WebSocket('ws://127.0.20.1:3000/ws/' + this.props.jobID);
+        this.ws = new WebSocket('ws://127.0.20.1:8888/ws/' + this.props.jobID);
 
         this.state = { messages: [], connected: false }
     }
