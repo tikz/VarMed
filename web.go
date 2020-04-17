@@ -191,9 +191,9 @@ func httpServe() {
 	r.GET("/ws/:jobID", WSProcessEndpoint)
 
 	// Let React Router manage all root paths not declared here
-	// r.NoRoute(func(c *gin.Context) {
-	// 	c.File("web/output/index.html")
-	// })
+	r.NoRoute(func(c *gin.Context) {
+		c.File("web/output/index.html")
+	})
 
 	log.Printf("Starting VarQ web server: http://127.0.0.1:%s/", cfg.HTTPServer.Port)
 	r.Run(":" + cfg.HTTPServer.Port)
