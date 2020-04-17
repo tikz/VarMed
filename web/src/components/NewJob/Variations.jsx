@@ -15,7 +15,7 @@ export class Variations extends React.Component {
         return (
             <Box>
                 <Typography variant="h5" gutterBottom>3. Add variations</Typography>
-                <Typography variant="overline" gutterBottom><Link href={unpSeqURL} target="_blank" rel="noreferrer">sequence</Link> length: {this.props.sequence.length}
+                <Typography variant="overline" gutterBottom><Link href={unpSeqURL} target="_blank" rel="noreferrer">canonical sequence</Link> length: {this.props.sequence.length}
                 </Typography>
                 <Box>
                     <FormControlLabel

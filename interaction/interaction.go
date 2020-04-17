@@ -87,8 +87,25 @@ func calculateResiduesInteraction(res1 []*pdb.Residue, a1 []*pdb.Atom,
 func getInteractionResidues(interactions []*ChainsPair) (residues []*pdb.Residue) {
 	for _, chainPair := range interactions {
 		for _, interaction := range chainPair.ResiduesInteractions {
-			residues = append(residues, interaction.Residue1)
-			residues = append(residues, interaction.Residue2)
+			var r1Exists, r2Exists bool
+			for _, r := range residues {
+				if r == interaction.Residue1 {
+					r1Exists = true
+					break
+				}
+			}
+			for _, r := range residues {
+				if r == interaction.Residue2 {
+					r2Exists = true
+					break
+				}
+			}
+			if !r1Exists {
+				residues = append(residues, interaction.Residue1)
+			}
+			if !r2Exists {
+				residues = append(residues, interaction.Residue2)
+			}
 		}
 	}
 

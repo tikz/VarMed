@@ -39,14 +39,14 @@ export default function NavBar() {
             <AppBar className={classes.bar}>
                 <Toolbar className="bar">
                     <Link to="/" className={classes.link}>
-                        <img className={classes.logo} src="assets/varq.svg" alt="" />
+                        <img className={classes.logo} src="/assets/varq.svg" alt="" />
                     </Link>
                     <Typography variant="h6" className={classes.title}>
                         VarQ
                     </Typography>
 
                     <Button className={classes.myJobs} variant="outlined" color="inherit">My Jobs</Button>
-                    <Button className={classes.newJob}>New Job</Button>
+                    <Link to="/new-job"><Button className={classes.newJob}>New Job</Button></Link>
                 </Toolbar>
             </AppBar>
         </div >

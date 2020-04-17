@@ -2,6 +2,7 @@ package pdb
 
 import (
 	"fmt"
+	"io/ioutil"
 	"time"
 	"varq/http" // TOOD: decouple this
 )
@@ -19,16 +20,19 @@ type PDB struct {
 	Resolution  float64    // method resolution
 	TotalLength int64      // total length as sum of residues of all chains in the structure
 
-	Atoms    []*Atom // ATOM records in the structure
-	HetAtoms []*Atom // HETATM records in the structure
+	Atoms    []*Atom `json:"-"` // ATOM records in the structure
+	HetAtoms []*Atom `json:"-"` // HETATM records in the structure
 
 	// Position mapping
-	SIFTS            *SIFTS                          // EBI SIFTS data for residue position mapping
-	Chains           map[string]map[int64]*Residue   // PDB ATOM chain name and position to pointer in structure
-	SeqRes           map[string][]*Residue           // PDB SEQRES chain name to residue pointers
-	SeqResChains     map[string]map[int64]*Residue   // PDB SEQRES chain name and PDB ATOM position to residue in structure
-	SeqResOffsets    map[string]int64                // PDB ATOM residue number to SEQRES position offsets
-	UniProtPositions map[string]map[int64][]*Residue // UniProt ID to sequence position to residue(s) (multiple chains) in structure
+	SIFTS               *SIFTS           // EBI SIFTS data for residue position mapping
+	SeqResOffsets       map[string]int64 // Chain ID to SEQRES position offsets
+	ChainStartResNumber map[string]int64 // Chain ID to First residue number as informed in ATOM column.
+	ChainEndResNumber   map[string]int64 // Chain ID to Last residue number as informed in ATOM column.
+
+	SeqRes           map[string][]*Residue           `json:"-"` // PDB SEQRES chain ID to residue pointers
+	SeqResChains     map[string]map[int64]*Residue   `json:"-"` // PDB SEQRES chain ID and PDB ATOM position to residue in structure
+	Chains           map[string]map[int64]*Residue   `json:"-"` // PDB ATOM chain ID and position to pointer in structure
+	UniProtPositions map[string]map[int64][]*Residue `json:"-"` // UniProt ID to sequence position to residue(s) (multiple chains) in structure
 
 	// Extra data
 	// SITE records
@@ -37,10 +41,10 @@ type PDB struct {
 	// REMARK 800 site descriptions
 	BindingSiteDesc map[string]string // binding site identifier to description
 
-	RawPDB        []byte // PDB file raw data
-	RawCIF        []byte // CIF file raw data
-	LocalPath     string // local path for the PDB file
-	LocalFilename string // local filename for the PDB file
+	RawPDB []byte `json:"-"` // PDB file raw data
+	RawCIF []byte `json:"-"` // CIF file raw data
+
+	LocalPath string `json:"-"` // local path for the PDB file
 }
 
 // NewPDBFromID constructs a new instance from a UniProt accession ID and PDB ID, fetching and parsing the data.
@@ -137,6 +141,17 @@ func (pdb *PDB) Extract() error {
 		return fmt.Errorf("extract CIF data: %v", err)
 	}
 
+	return nil
+}
+
+// WriteFile writes the raw PDB contents to a file.
+func (pdb *PDB) WriteFile(path string) error {
+	err := ioutil.WriteFile(path, pdb.RawPDB, 0644)
+	if err != nil {
+		return fmt.Errorf("write PDB file: %v", err)
+	}
+
+	pdb.LocalPath = path
 	return nil
 }
 

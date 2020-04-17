@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"strings"
@@ -19,11 +20,18 @@ func (i *arrayFlags) Set(value string) error {
 }
 
 func cliRun(uniprotID string, pdbFlags arrayFlags) {
-	p, err := NewPipeline(uniprotID, pdbFlags, nil)
+	msgs := make(chan string, 100) // TODO: check
+	go func() {
+		for {
+			fmt.Println(<-msgs)
+		}
+	}()
+	p, err := NewPipeline(uniprotID, pdbFlags, msgs)
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = p.RunPipeline()
+
+	err = p.Run()
 	if err != nil {
 		log.Fatal(err)
 	}

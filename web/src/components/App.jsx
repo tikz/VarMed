@@ -3,7 +3,7 @@ import React from 'react';
 import { Route, Switch } from "react-router-dom";
 import Index from './Index';
 import NewJob from './NewJob/NewJob';
-import Results from './Results/Results';
+import Job from './Job/Job';
 
 const theme = createMuiTheme({
     palette: {
@@ -25,7 +25,7 @@ export default class App extends React.Component {
                 <Switch>
                     <Route exact path="/" component={Index} />
                     <Route path="/new-job" component={NewJob} />
-                    <Route path="/results" component={Results} />
+                    <Route path="/job/:id" component={Job} />
                     <Route path="*">
                         <h1>Not found</h1>
                     </Route>

@@ -1,6 +1,13 @@
 package pdb
 
 func (pdb *PDB) makeMappings() {
+	pdb.ChainStartResNumber = make(map[string]int64)
+	pdb.ChainEndResNumber = make(map[string]int64)
+	for c := range pdb.Chains {
+		pdb.ChainStartResNumber[c] = pdb.minChainPos(c)
+		pdb.ChainEndResNumber[c] = pdb.maxChainPos(c)
+	}
+
 	pdb.calculateChainsOffset()
 
 	// SEQRES chain and position to structure residues.
@@ -8,7 +15,7 @@ func (pdb *PDB) makeMappings() {
 
 	for chain, offset := range pdb.SeqResOffsets {
 		pdb.SeqResChains[chain] = make(map[int64]*Residue)
-		minPos := pdb.minChainPos(chain)
+		minPos := pdb.ChainStartResNumber[chain]
 		for pos, res := range pdb.Chains[chain] {
 			pdb.SeqResChains[chain][pos-minPos+offset+1] = res
 		}
@@ -39,8 +46,8 @@ func (pdb *PDB) calculateChainsOffset() {
 	for chain := range pdb.Chains {
 		var bestOffset, bestScore int
 
-		minPos := pdb.minChainPos(chain)
-		chainLength := pdb.maxChainPos(chain) - minPos
+		minPos := pdb.ChainStartResNumber[chain]
+		chainLength := pdb.ChainEndResNumber[chain] - minPos
 		steps := len(pdb.SeqRes[chain]) - int(chainLength)
 
 		for offset := 0; offset < steps; offset++ {

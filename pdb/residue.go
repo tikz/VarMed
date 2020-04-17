@@ -37,7 +37,7 @@ type Residue struct {
 	Name     string
 	Abbrv1   string
 	Abbrv3   string
-	Atoms    []*Atom
+	Atoms    []*Atom `json:"-"`
 }
 
 // NewResidue constructs a new residue given a chain, position and aminoacid name.

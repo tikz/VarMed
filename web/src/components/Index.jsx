@@ -40,7 +40,7 @@ export default function Index() {
                 <Grid item>
                     <Grid container spacing={6} direction="row" alignItems="center" justify="center">
                         <Grid item>
-                            <img src="assets/varq.svg" alt="VarQ" className={classes.logo} />
+                            <img src="/assets/varq.svg" alt="VarQ" className={classes.logo} />
                         </Grid>
                         <Grid item xs={9} sm={4} lg={3}>
                             <Grid container direction="column" alignItems="flex-start" justify="center">
@@ -54,7 +54,7 @@ export default function Index() {
                 </Grid>
                 <Grid item>
                     <Typography align="center" className={classes.desc}>
-                        Start a <LinkRouter to="/new-job"><Button className={classes.newJob}>New Job</Button></LinkRouter> or view <LinkRouter to="/results"><Button variant="outlined">Sample Results</Button></LinkRouter>
+                        Start a <LinkRouter to="/new-job"><Button className={classes.newJob}>New Job</Button></LinkRouter> or view <LinkRouter to="/job/fe2423053f1a75a300e4074b1609ed972e3e2eaeae149f21d9c5fd79b4ef3d5c"><Button variant="outlined">Sample Results</Button></LinkRouter>
                     </Typography>
                 </Grid>
                 <Grid item>
