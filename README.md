@@ -11,6 +11,6 @@ cp config-example.yaml config.yaml
 ## Docker image
 ```
 docker login registry.gitlab.com
-docker pull registry.gitlab.com/glyco1/varq
-docker run -p 8888:8888 --name varq -dit registry.gitlab.com/glyco1/varq
+docker pull registry.gitlab.com/glyco1/varq:latest
+docker run -p 8888:8888 --name varq -dit registry.gitlab.com/glyco1/varq:latest
 ```
