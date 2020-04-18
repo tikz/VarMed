@@ -12,6 +12,7 @@ const (
 	statusPending = 0
 	statusProcess = 1
 	statusDone    = 2
+	statusError   = 3
 )
 
 // JobRequest represents a single job request from an user,
@@ -37,8 +38,8 @@ type Job struct {
 	Started time.Time
 	Ended   time.Time
 
-	msgChan chan string
-	Error   error `json:"-"`
+	msgs  []string
+	Error error `json:"-"`
 }
 
 // generateID returns a SHA256 hash of UniProtID+joined PDBIDs
@@ -54,7 +55,6 @@ func (j *Job) generateID() string { // TODO: include variations in hash after im
 
 func NewJob(request *JobRequest) Job {
 	j := Job{Request: request}
-	j.msgChan = make(chan string, 100)
 
 	j.ID = j.generateID()
 
@@ -65,30 +65,31 @@ func (j *Job) Process() {
 	j.Status = statusProcess
 	j.Started = time.Now()
 
-	j.Pipeline, _ = NewPipeline(j.Request.UniProtID, j.Request.PDBIDs, j.msgChan)
+	msgChan := make(chan string, 100)
+	j.Pipeline, _ = NewPipeline(j.Request.UniProtID, j.Request.PDBIDs, msgChan)
+
+	go func() {
+		for m := range msgChan {
+			j.msgs = append(j.msgs, m)
+		}
+	}()
+
 	err := j.Pipeline.Run()
 	if err != nil {
 		j.fail(err)
 		return
 	}
-	j.Ended = time.Now()
 
+	j.Ended = time.Now()
 	j.Status = statusDone
 
 	err = WriteJob(j)
 	if err != nil {
-		j.fail(err)
-		return
+		panic(err)
 	}
-
-	// Either "SUCCESS" or "FAILED" is the specific message that
-	// the frontend expects from the WebSocket to proceed.
-	j.msgChan <- "SUCCESS"
-	close(j.msgChan)
 }
 
 func (j *Job) fail(err error) {
-	j.msgChan <- err.Error()
-	j.msgChan <- "FAILED"
-	close(j.msgChan)
+	j.msgs = append(j.msgs, err.Error())
+	j.Status = statusError
 }

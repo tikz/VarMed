@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 )
 
 // TODO: maybe interface Job and package this
@@ -28,17 +29,23 @@ func NewQueue(workers int) *Queue {
 		go queue.worker()
 	}
 
+	posTicker := time.NewTicker(10 * time.Second)
+	go func() {
+		for range posTicker.C {
+			queue.posMsg()
+		}
+	}()
+
 	return &queue
 }
 
 // posMsg informs all jobs in the queue with a message of their position.
 func (q *Queue) posMsg() {
 	for _, j := range q.jobs {
-		m := fmt.Sprintf("Position in queue: #%d", q.GetJobPosition(j)-q.nWorkers+2)
-		select {
-		case j.msgChan <- m:
-		default:
-			<-j.msgChan
+		pos := q.GetJobPosition(j) - q.nWorkers + 1
+		if pos > 0 {
+			m := fmt.Sprintf("Awaiting in queue. Position #%d", pos)
+			j.msgs = append(j.msgs, m)
 		}
 	}
 }

@@ -25,9 +25,8 @@ export default class StatusConsole extends React.Component {
                 messages: this.state.messages.concat(evt.data)
             })
         }
-        this.ws.onerror = () => {
-            this.props.reload();
-        }
+        this.ws.onclose = () => { this.props.reload(); }
+        this.ws.onerror = () => { this.props.reload(); }
     }
 
     render() {

@@ -29,7 +29,7 @@ export default class Job extends React.Component {
             <Box>
                 <NavBar />
                 <Toolbar />
-                {(this.state.results.Status == 1) &&
+                {(this.state.results.Status == 0 || this.state.results.Status == 1) &&
                     <StatusConsole jobID={this.jobID} reload={this.loadResults} />}
                 {(this.state.results.Status == 2) &&
                     <Results results={this.state.results} jobID={this.jobID} pdbID={this.state.results.Request.pdbs[0]} />}
