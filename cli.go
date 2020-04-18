@@ -18,7 +18,7 @@ func (i *arrayFlags) Set(value string) error {
 }
 
 func cliRun(uniprotID string, pdbFlags arrayFlags) {
-	msgs := make(chan string, 100) // TODO: check
+	msgs := make(chan string, 100)
 	go func() {
 		for m := range msgs {
 			fmt.Println(m)
