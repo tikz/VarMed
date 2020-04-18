@@ -184,7 +184,7 @@ func httpServe() {
 	r.Use(cors.Default()) // TODO: remove in production, unsafe
 
 	// Job queue, pass inside context to Gin methods
-	queue := NewQueue(1) // TODO: config file entry for number of workers
+	queue := NewQueue(cfg.VarQ.JobWorkers)
 	r.Use(func(c *gin.Context) {
 		c.Set("queue", queue)
 		c.Next()
