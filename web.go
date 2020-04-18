@@ -49,15 +49,18 @@ func UniProtEndpoint(c *gin.Context) {
 func JobEndpoint(c *gin.Context) {
 	id := c.Param("jobID")
 	queue := c.MustGet("queue").(*Queue)
+
+	// From queue
 	job, err := queue.GetJob(id)
 	if err == nil {
 		c.JSON(http.StatusOK, job)
 		return
 	}
 
+	// From file
 	job, err = LoadJob(id)
 	if err != nil {
-		c.JSON(404, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, job)
@@ -71,12 +74,12 @@ func JobPDBEndpoint(c *gin.Context) {
 
 	job, err := LoadJob(jobID)
 	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	if _, ok := job.Pipeline.Results[pdbID]; !ok {
-		c.JSON(404, gin.H{"error": "not found"})
+		c.JSON(http.StatusOK, gin.H{"error": "not found"})
 		return
 	}
 	c.JSON(http.StatusOK, job.Pipeline.Results[pdbID])
@@ -156,7 +159,7 @@ func CIFEndpoint(c *gin.Context) {
 
 	p, err := ReadPDB(id)
 	if err != nil {
-		c.JSON(404, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
