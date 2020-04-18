@@ -60,7 +60,7 @@ func JobEndpoint(c *gin.Context) {
 	// From file
 	job, err = LoadJob(id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, job)
@@ -74,12 +74,12 @@ func JobPDBEndpoint(c *gin.Context) {
 
 	job, err := LoadJob(jobID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
 	if _, ok := job.Pipeline.Results[pdbID]; !ok {
-		c.JSON(http.StatusOK, gin.H{"error": "not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 		return
 	}
 	c.JSON(http.StatusOK, job.Pipeline.Results[pdbID])
@@ -111,8 +111,6 @@ func WSProcessEndpoint(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
-		// TODO: check if it's idiomatic/common practice to JSON response on an
-		// endpoint expected to be a WebSocket before upgrading it
 		return
 	}
 	wsHandler(c.Writer, c.Request, job)
@@ -159,7 +157,7 @@ func CIFEndpoint(c *gin.Context) {
 
 	p, err := ReadPDB(id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
