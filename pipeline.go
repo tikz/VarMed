@@ -33,7 +33,6 @@ type Pipeline struct {
 
 // msg prints and sends a message with added format to the channel.
 func (p *Pipeline) msg(m string) {
-	fmt.Println(m)
 	select {
 	case p.msgChan <- time.Now().Format("15:04:05-0700") + " " + m:
 	default:
