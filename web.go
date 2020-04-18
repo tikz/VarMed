@@ -96,7 +96,7 @@ func NewJobEndpoint(c *gin.Context) {
 	queue := c.MustGet("queue").(*Queue)
 	queue.Add(&j)
 
-	c.JSON(http.StatusOK, gin.H{"id": j.ID})
+	c.JSON(http.StatusOK, gin.H{"id": j.ID, "error": ""})
 }
 
 // WSProcessEndpoint handles WebSocket /ws/:jobID
