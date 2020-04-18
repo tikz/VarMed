@@ -129,30 +129,41 @@ func WSProcessEndpoint(c *gin.Context) {
 		// endpoint expected to be a WebSocket before upgrading it
 		return
 	}
-	wsHandler(c.Writer, c.Request, job.msgChan)
+	wsHandler(c.Writer, c.Request, job)
 }
 
-func wsHandler(w http.ResponseWriter, r *http.Request, c <-chan string) {
-	upgrader := websocket.Upgrader{ReadBufferSize: 1024, WriteBufferSize: 1024}
+func wsHandler(w http.ResponseWriter, r *http.Request, j *Job) {
+	upg := websocket.Upgrader{ReadBufferSize: 1024, WriteBufferSize: 1024}
 
-	upgrader.CheckOrigin = func(r *http.Request) bool { return true } // TODO: remove in production, unsafe
+	upg.CheckOrigin = func(r *http.Request) bool { return true } // TODO: remove in production, unsafe
 
-	conn, err := upgrader.Upgrade(w, r, nil)
+	ws, err := upg.Upgrade(w, r, nil)
 	if err != nil {
 		log.Printf("websocket upgrade fail: %+v", err)
 		return
 	}
 
-	// Retrieve messages from channel until closed
+	msgTicker := time.NewTicker(100 * time.Millisecond)
+	defer func() {
+		msgTicker.Stop()
+		ws.Close()
+	}()
+
+	i := 0
 	for {
 		select {
-		case m, ok := <-c:
-			if !ok {
-				return
+		case <-msgTicker.C:
+			if i < len(j.msgs) {
+				msg := j.msgs[i]
+				ws.WriteMessage(1, []byte(msg))
+				i++
+
+				if j.Status == statusDone || j.Status == statusError {
+					return
+				}
 			}
-			conn.WriteMessage(1, []byte(m))
-		default:
 		}
+
 	}
 }
 
