@@ -8,7 +8,7 @@ import (
 	"varq/uniprot"
 )
 
-func MakeDirs() {
+func makeDirs() {
 	os.MkdirAll("data/uniprot", os.ModePerm)
 	os.MkdirAll("data/pdb", os.ModePerm)
 	os.MkdirAll("data/jobs", os.ModePerm)
