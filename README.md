@@ -1,11 +1,16 @@
-### Radusky, L., Modenutti, C., Delgado, J., Bustamante, J. P., Vishnopolska, S., Kiel, C., Serrano, L., Marti, M., & Turjanski, A. (2018). VarQ: A Tool for the Structural and Functional Analysis of Human Protein Variants. Frontiers in Genetics, 9. https://doi.org/10.3389/fgene.2018.00620
-
-
-## Run
+## Local build
+Requires [go](https://golang.org/doc/install#install) >= 1.14 and [yarn](https://classic.yarnpkg.com/en/docs/install/) >= 1.22 in `PATH`
 ```
 git clone git@gitlab.com:glyco1/varq.git
 cd varq
-go get -d -v
-go build
+make build
+cp config-example.yaml config.yaml
 ./varq
+```
+
+## Docker image
+```
+docker login registry.gitlab.com
+docker pull registry.gitlab.com/glyco1/varq
+docker run -p 8888:8888 --name varq -dit registry.gitlab.com/glyco1/varq
 ```
