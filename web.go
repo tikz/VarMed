@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"time"
@@ -11,22 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
-
-type ResponseStatus struct {
-	Success bool   `json:"success"`
-	Msg     string `json:"msg"`
-}
-
-// ResponseError contains the JSON response when an error occurs
-type ResponseError struct {
-	Msg string `json:"error_msg"`
-}
-
-func errorResponse(msg string) []byte {
-	s := ResponseError{Msg: msg}
-	out, _ := json.Marshal(s)
-	return out
-}
 
 // ResponseUniProt represents some basic data from an UniProt accession.
 // It is used to validate the user input in the New Job form.
@@ -61,6 +44,8 @@ func UniProtEndpoint(c *gin.Context) {
 	})
 }
 
+// JobEndpoint handles GET /api/job/:jobID
+// Returns general info about a job.
 func JobEndpoint(c *gin.Context) {
 	id := c.Param("jobID")
 	queue := c.MustGet("queue").(*Queue)
@@ -78,6 +63,8 @@ func JobEndpoint(c *gin.Context) {
 	c.JSON(http.StatusOK, job)
 }
 
+// JobPDBEndpoint handles GET /api/job/:jobID/:pdbID
+// Returns results about a structure in a job.
 func JobPDBEndpoint(c *gin.Context) {
 	jobID := c.Param("jobID")
 	pdbID := c.Param("pdbID")
@@ -95,11 +82,7 @@ func JobPDBEndpoint(c *gin.Context) {
 	c.JSON(http.StatusOK, job.Pipeline.Results[pdbID])
 }
 
-type ResponseNewJob struct {
-	ID    string `json:"id"`
-	Error string `json:"error"`
-}
-
+// NewJobEndpoint handles POST /api/new-job
 func NewJobEndpoint(c *gin.Context) {
 	req := JobRequest{}
 	c.BindJSON(&req)
@@ -113,7 +96,7 @@ func NewJobEndpoint(c *gin.Context) {
 	queue := c.MustGet("queue").(*Queue)
 	queue.Add(&j)
 
-	c.JSON(http.StatusOK, ResponseNewJob{ID: j.ID})
+	c.JSON(http.StatusOK, gin.H{"id": j.ID})
 }
 
 // WSProcessEndpoint handles WebSocket /ws/:jobID
@@ -122,7 +105,7 @@ func WSProcessEndpoint(c *gin.Context) {
 	queue := c.MustGet("queue").(*Queue)
 	job, err := queue.GetJob(id)
 	if err != nil {
-		c.JSON(404, gin.H{
+		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
 		// TODO: check if it's idiomatic/common practice to JSON response on an
@@ -167,6 +150,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request, j *Job) {
 	}
 }
 
+// CIFEndpoint handles GET /api/structure/cif/:pdbID
 func CIFEndpoint(c *gin.Context) {
 	id := c.Param("pdbID")
 
