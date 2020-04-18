@@ -6,9 +6,9 @@ http-server:
   port: 8888
   
 varq:
-  job-workers: 3
+  job-workers: 1
   pipeline:
-    structure-workers: 16
+    structure-workers: 4
     enable-steps:
       binding: true
       exposure: true
