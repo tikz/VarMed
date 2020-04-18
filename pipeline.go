@@ -61,11 +61,11 @@ func NewPipeline(unpID string, pdbIDs []string, msgChan chan string) (*Pipeline,
 func (p *Pipeline) Run() error {
 	start := time.Now()
 
-	pdbIDChan := make(chan string)
-	resultsChan := make(chan *Results)
+	pdbIDChan := make(chan string, len(p.pdbIDs))
+	resChan := make(chan *Results, len(p.pdbIDs))
 
 	for w := 1; w <= cfg.VarQ.Pipeline.StructureWorkers; w++ {
-		go p.pdbWorker(pdbIDChan, resultsChan)
+		go p.pdbWorker(pdbIDChan, resChan)
 	}
 
 	for _, id := range p.pdbIDs {
@@ -75,10 +75,8 @@ func (p *Pipeline) Run() error {
 		pdbIDChan <- id
 	}
 
-	close(pdbIDChan)
-
 	for a := 1; a <= len(p.pdbIDs); a++ {
-		result := <-resultsChan
+		result := <-resChan
 		if result.Error != nil {
 			return fmt.Errorf("step error: %v", result.Error)
 		}
