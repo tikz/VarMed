@@ -26,7 +26,7 @@ type ResponseUniProt struct {
 func UniProtEndpoint(c *gin.Context) {
 	id := c.Param("unpID")
 
-	u, err := LoadUniProt(id)
+	u, err := loadUniProt(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -58,7 +58,7 @@ func JobEndpoint(c *gin.Context) {
 	}
 
 	// From file
-	job, err = LoadJob(id)
+	job, err = loadJob(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -72,7 +72,7 @@ func JobPDBEndpoint(c *gin.Context) {
 	jobID := c.Param("jobID")
 	pdbID := c.Param("pdbID")
 
-	job, err := LoadJob(jobID)
+	job, err := loadJob(jobID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -157,7 +157,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request, j *Job) {
 func CIFEndpoint(c *gin.Context) {
 	id := c.Param("pdbID")
 
-	p, err := ReadPDB(id)
+	p, err := readPDB(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return

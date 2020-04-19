@@ -84,7 +84,7 @@ func (j *Job) Process() {
 	j.Ended = time.Now()
 	j.Status = statusDone
 
-	err = WriteJob(j)
+	err = writeJob(j)
 	if err != nil {
 		panic(err)
 	}

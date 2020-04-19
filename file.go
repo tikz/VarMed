@@ -22,11 +22,11 @@ func makeDirs() {
 	os.MkdirAll(dataDir+jobDir, os.ModePerm)
 }
 
-func WriteJob(j *Job) error {
+func writeJob(j *Job) error {
 	return write(jobDir+j.ID+fileExt, j)
 }
 
-func LoadJob(id string) (*Job, error) {
+func loadJob(id string) (*Job, error) {
 	j := Job{}
 	err := read(jobDir+id+fileExt, &j)
 	if err != nil {
@@ -36,7 +36,7 @@ func LoadJob(id string) (*Job, error) {
 	return &j, nil
 }
 
-func LoadPDB(pdbID string) (*pdb.PDB, error) {
+func loadPDB(pdbID string) (*pdb.PDB, error) {
 	path := pdbDir + pdbID + fileExt
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
@@ -52,10 +52,10 @@ func LoadPDB(pdbID string) (*pdb.PDB, error) {
 		return &p, nil
 	}
 
-	return ReadPDB(pdbID)
+	return readPDB(pdbID)
 }
 
-func ReadPDB(pdbID string) (*pdb.PDB, error) {
+func readPDB(pdbID string) (*pdb.PDB, error) {
 	path := pdbDir + pdbID + fileExt
 	p := new(pdb.PDB)
 	err := read(path, &p)
@@ -67,7 +67,7 @@ func ReadPDB(pdbID string) (*pdb.PDB, error) {
 	return p, err
 }
 
-func LoadUniProt(unpID string) (*uniprot.UniProt, error) {
+func loadUniProt(unpID string) (*uniprot.UniProt, error) {
 	path := unpDir + unpID + fileExt
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
