@@ -17,9 +17,9 @@ const (
 )
 
 func makeDirs() {
-	os.MkdirAll(dataDir+unpDir, os.ModePerm)
-	os.MkdirAll(dataDir+pdbDir, os.ModePerm)
-	os.MkdirAll(dataDir+jobDir, os.ModePerm)
+	os.MkdirAll(unpDir, os.ModePerm)
+	os.MkdirAll(pdbDir, os.ModePerm)
+	os.MkdirAll(jobDir, os.ModePerm)
 }
 
 func writeJob(j *Job) error {
