@@ -1,15 +1,15 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { BrowserRouter } from 'react-router-dom';
-import App from './components/App';
-import './styles/app.scss';
-import 'typeface-roboto';
+import React from "react";
+import ReactDOM from "react-dom";
+import { BrowserRouter } from "react-router-dom";
+import App from "./components/App";
+import "typeface-roboto";
+import "./styles/app.scss";
 
-require('file-loader?name=[name].[ext]!./index.html');
+require("file-loader?name=[name].[ext]!./index.html");
 
 ReactDOM.render(
-    <BrowserRouter>
-        <App />
-    </BrowserRouter>,
-    document.getElementById('app')
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>,
+  document.getElementById("app")
 );

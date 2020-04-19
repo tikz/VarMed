@@ -8,10 +8,9 @@ import StatusConsole from "./StatusConsole";
 export default class Job extends React.Component {
   constructor(props) {
     super(props);
+
     this.jobID = this.props.match.params.id;
-
     this.state = { results: {} };
-
     this.loadResults = this.loadResults.bind(this);
     this.loadResults();
   }

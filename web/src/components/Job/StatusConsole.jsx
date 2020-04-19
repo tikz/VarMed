@@ -7,6 +7,7 @@ import {
   LinearProgress,
 } from "@material-ui/core";
 import React from "react";
+import "../../styles/components/status-console.scss";
 
 export default class StatusConsole extends React.Component {
   constructor(props) {

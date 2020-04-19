@@ -1,6 +1,7 @@
 import React from "react";
 import LiteMol from "litemol";
 import "litemol/dist/css/LiteMol-plugin.css";
+import "../../styles/components/structure-viewer.scss";
 
 let Transformer = LiteMol.Bootstrap.Entity.Transformer;
 let Transform = LiteMol.Bootstrap.Tree.Transform;

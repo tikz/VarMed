@@ -4,47 +4,17 @@ import {
   Container,
   Grid,
   Link,
-  makeStyles,
   Typography,
 } from "@material-ui/core";
 import React from "react";
 import { Link as LinkRouter } from "react-router-dom";
-
-const useStyles = makeStyles((theme) => ({
-  presentation: {
-    width: "100%",
-    minHeight: "600px",
-    background: "radial-gradient(circle, #1f2b2f 0%, #1c1e20 25%)",
-    // position: 'relative',
-  },
-  hero: {
-    background: "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
-    color: "white",
-  },
-  newJob: {
-    background: "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
-    borderRadius: 3,
-    boxShadow: "0 2px 10px 1px rgba(33, 203, 243, .3)",
-    color: "white",
-  },
-  logo: {
-    userSelect: "none",
-    width: 200,
-  },
-  footer: {
-    color: "#758694",
-    paddingTop: 30,
-    paddingBottom: 30,
-    backgroundColor: "#20232a",
-  },
-}));
+import "../styles/components/index.scss";
 
 export default function Index() {
-  const classes = useStyles();
   return (
     <Box>
       <Grid
-        className={classes.presentation}
+        className="presentation"
         container
         direction="column"
         justify="center"
@@ -59,7 +29,7 @@ export default function Index() {
             justify="center"
           >
             <Grid item>
-              <img src="/assets/varq.svg" alt="VarQ" className={classes.logo} />
+              <img src="/assets/varq.svg" alt="VarQ" className="logo" />
             </Grid>
             <Grid item xs={9} sm={4} lg={3}>
               <Grid
@@ -68,10 +38,10 @@ export default function Index() {
                 alignItems="flex-start"
                 justify="center"
               >
-                <Typography variant="h1" align="left" className={classes.name}>
+                <Typography variant="h1" align="left" className="name">
                   VarQ
                 </Typography>
-                <Typography variant="h5" align="left" className={classes.desc}>
+                <Typography variant="h5" align="left" className="desc">
                   A tool for the structural and functional analysis of protein
                   variants.
                 </Typography>
@@ -80,10 +50,10 @@ export default function Index() {
           </Grid>
         </Grid>
         <Grid item>
-          <Typography align="center" className={classes.desc}>
+          <Typography align="center" className="desc">
             Start a{" "}
             <LinkRouter to="/new-job">
-              <Button className={classes.newJob}>New Job</Button>
+              <Button className="glowButton">New Job</Button>
             </LinkRouter>{" "}
             or view{" "}
             <LinkRouter to="/job/fe2423053f1a75a300e4074b1609ed972e3e2eaeae149f21d9c5fd79b4ef3d5c">
@@ -92,12 +62,12 @@ export default function Index() {
           </Typography>
         </Grid>
         <Grid item>
-          <Typography align="center" className={classes.desc}>
+          <Typography align="center" className="desc">
             If you find our work useful, please cite us: <br /> -
           </Typography>
         </Grid>
       </Grid>
-      <Grid container className={classes.footer}>
+      <Grid container className="footer">
         <Container>
           <Grid container direction="row" justify="space-between">
             <Grid item>
