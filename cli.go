@@ -18,15 +18,20 @@ func (i *arrayFlags) Set(value string) error {
 }
 
 func cliRun(uniprotID string, pdbFlags arrayFlags) {
-	msgs := make(chan string, 100)
+	msgs := make(chan string)
 	go func() {
 		for m := range msgs {
 			fmt.Println(m)
 		}
 	}()
+
 	p, err := NewPipeline(uniprotID, pdbFlags, msgs)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if len(pdbFlags) == 0 {
+		p.pdbIDs = p.UniProt.PDBIDs
 	}
 
 	err = p.Run()
