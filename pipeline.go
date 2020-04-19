@@ -33,11 +33,7 @@ type Pipeline struct {
 
 // msg prints and sends a message with added format to the channel.
 func (p *Pipeline) msg(m string) {
-	select {
-	case p.msgChan <- time.Now().Format("15:04:05-0700") + " " + m:
-	default:
-		<-p.msgChan
-	}
+	p.msgChan <- time.Now().Format("15:04:05-0700") + " " + m
 }
 
 // NewPipeline constructs a new Pipeline.
@@ -60,6 +56,7 @@ func NewPipeline(unpID string, pdbIDs []string, msgChan chan string) (*Pipeline,
 // Run starts the process of analyzing given PDB IDs corresponding to an UniProt ID.
 func (p *Pipeline) Run() error {
 	start := time.Now()
+	p.msg("Job started")
 
 	pdbIDChan := make(chan string, len(p.pdbIDs))
 	resChan := make(chan *Results, len(p.pdbIDs))
@@ -127,14 +124,22 @@ func (p *Pipeline) analysePDB(a *Results) *Results {
 	interactionChan := make(chan *interaction.Results)
 	exposureChan := make(chan *exposure.Results)
 
+	idStr := fmt.Sprintf("PDB %s ", a.PDB.ID)
+	msgPDB := func(msg string) {
+		p.msg(idStr + msg)
+	}
+
 	if cfg.VarQ.Pipeline.EnableSteps.Binding {
-		go binding.Run(a.UniProt, a.PDB, bindingChan)
+		go binding.Run(a.UniProt, a.PDB, bindingChan, msgPDB)
+		msgPDB("started binding analysis")
 	}
 	if cfg.VarQ.Pipeline.EnableSteps.Interaction {
-		go interaction.Run(a.PDB, interactionChan)
+		go interaction.Run(a.PDB, interactionChan, msgPDB)
+		msgPDB("started interaction analysis")
 	}
 	if cfg.VarQ.Pipeline.EnableSteps.Exposure {
-		go exposure.Run(a.PDB, exposureChan)
+		go exposure.Run(a.PDB, exposureChan, msgPDB)
+		msgPDB("started exposure analysis")
 	}
 
 	// TODO: refactor these repeated patterns when all analyses
@@ -146,7 +151,7 @@ func (p *Pipeline) analysePDB(a *Results) *Results {
 			return a
 		}
 		a.Binding = bindingRes
-		p.msg(fmt.Sprintf("PDB %s binding analysis done in %.3f secs", a.PDB.ID, bindingRes.Duration.Seconds()))
+		msgPDB(fmt.Sprintf("binding analysis done in %.3f secs", bindingRes.Duration.Seconds()))
 	}
 
 	if cfg.VarQ.Pipeline.EnableSteps.Interaction {
@@ -156,7 +161,7 @@ func (p *Pipeline) analysePDB(a *Results) *Results {
 			return a
 		}
 		a.Interaction = interactionRes
-		p.msg(fmt.Sprintf("PDB %s interaction analysis done in %.3f secs", a.PDB.ID, interactionRes.Duration.Seconds()))
+		msgPDB(fmt.Sprintf("interaction analysis done in %.3f secs", interactionRes.Duration.Seconds()))
 	}
 
 	if cfg.VarQ.Pipeline.EnableSteps.Exposure {
@@ -166,7 +171,7 @@ func (p *Pipeline) analysePDB(a *Results) *Results {
 			return a
 		}
 		a.Exposure = exposureRes
-		p.msg(fmt.Sprintf("PDB %s exposure analysis done in %.3f secs", a.PDB.ID, exposureRes.Duration.Seconds()))
+		msgPDB(fmt.Sprintf("exposure analysis done in %.3f secs", exposureRes.Duration.Seconds()))
 	}
 
 	if cfg.DebugPrint.Enabled {

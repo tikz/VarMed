@@ -21,7 +21,7 @@ type Pocket struct {
 }
 
 // Run creates a temp file of the specified PDB structure, runs Fpocket on it and parses the results
-func Run(p *pdb.PDB) (pockets []*Pocket, err error) {
+func Run(p *pdb.PDB, msg func(string)) (pockets []*Pocket, err error) {
 	outPath := p.LocalPath + "_out"
 
 	// Delete Fpocket result files on function exit
@@ -30,6 +30,7 @@ func Run(p *pdb.PDB) (pockets []*Pocket, err error) {
 	}()
 
 	// Run Fpocket
+	msg("running Fpocket")
 	out, err := exec.Command("fpocket", "-f", p.LocalPath).CombinedOutput()
 	if err != nil {
 		return nil, err
@@ -39,9 +40,10 @@ func Run(p *pdb.PDB) (pockets []*Pocket, err error) {
 		return nil, errors.New("FPocket failed")
 	}
 
+	msg("retrieving Fpocket results")
 	// Walk created folder containing pocket analysis files
 	dir := outPath + "/pockets"
-	pockets, err = walkPocketDir(p, dir)
+	pockets, err = walkPocketDir(p, dir, msg)
 	if err != nil {
 		return nil, err
 	}
@@ -49,10 +51,12 @@ func Run(p *pdb.PDB) (pockets []*Pocket, err error) {
 	return pockets, nil
 }
 
-func walkPocketDir(crystal *pdb.PDB, dir string) (pockets []*Pocket, err error) {
+func walkPocketDir(crystal *pdb.PDB, dir string, msg func(string)) (pockets []*Pocket, err error) {
 	err = filepath.Walk(dir, func(file string, info os.FileInfo, err error) error {
+		n := 0
 		// For each Fpocket result PDB file
 		if strings.Contains(file, "_atm.pdb") {
+			msg(fmt.Sprintf("parsing Fpocket %s", file))
 			data, err := ioutil.ReadFile(file)
 			if err != nil {
 				return err
@@ -85,8 +89,10 @@ func walkPocketDir(crystal *pdb.PDB, dir string) (pockets []*Pocket, err error) 
 				}
 				pockets = append(pockets, pocket)
 			}
-
+			n++
 		}
+
+		msg(fmt.Sprintf("found %d pockets, %d suitable", n, len(pockets)))
 		return nil
 	})
 

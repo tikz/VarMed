@@ -6,6 +6,11 @@ import (
 	"regexp"
 )
 
+const (
+	nucleicIndexPath = "static/pdbbind/INDEX_general_NL.2019"
+	proteinIndexPath = "static/pdbbind/INDEX_general_PL.2019"
+)
+
 // PDBBind represents added data from the index files.
 type PDBBind struct {
 	Ligands map[string][]*PDBBindEntry // unique 3-letter ligand code to entries containing it
@@ -25,12 +30,12 @@ type PDBBindEntry struct {
 func LoadPDBBind() (map[string][]*PDBBindEntry, error) {
 	codes := make(map[string][]*PDBBindEntry)
 
-	err := ParseIndexFile("static/pdbbind/INDEX_general_NL.2019", codes)
+	err := ParseIndexFile(nucleicIndexPath, codes)
 	if err != nil {
 		return nil, err
 	}
 
-	err = ParseIndexFile("static/pdbbind/INDEX_general_PL.2019", codes)
+	err = ParseIndexFile(proteinIndexPath, codes)
 	if err != nil {
 		return nil, err
 	}

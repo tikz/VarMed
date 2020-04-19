@@ -1,12 +1,13 @@
 package interaction
 
 import (
+	"fmt"
 	"math"
 	"time"
 	"varq/pdb"
 )
 
-// InteractionAnalysis holds the collected data in the interaction analysis step
+// Results holds the collected data in the interaction analysis step
 type Results struct {
 	ChainsInteractions []*ChainsPair
 	Residues           []*pdb.Residue
@@ -29,11 +30,13 @@ type ResiduesPair struct {
 }
 
 // Run starts the interaction analysis step
-func Run(p *pdb.PDB, results chan<- *Results) {
+func Run(p *pdb.PDB, results chan<- *Results, msg func(string)) {
 	start := time.Now()
 	interactions := calculateChainsInteraction(p.Chains)
+	residues := getInteractionResidues(interactions)
+	msg(fmt.Sprintf("%d interface residues by distance", len(residues)))
 	results <- &Results{ChainsInteractions: interactions,
-		Residues: getInteractionResidues(interactions),
+		Residues: residues,
 		Duration: time.Since(start)}
 }
 

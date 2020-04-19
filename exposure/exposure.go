@@ -25,10 +25,10 @@ type PyMOLResults struct {
 	Lines []string
 }
 
-func Run(pdb *pdb.PDB, results chan<- *Results) {
+func Run(pdb *pdb.PDB, results chan<- *Results, msg func(string)) {
 	start := time.Now()
-	RunPyMOL(pdb)
-	chains, err := RunPyMOL(pdb)
+	RunPyMOL(pdb, msg)
+	chains, err := RunPyMOL(pdb, msg)
 	if err != nil {
 		results <- &Results{Error: fmt.Errorf("running PyMOL: %v", err)}
 	}
@@ -38,7 +38,7 @@ func Run(pdb *pdb.PDB, results chan<- *Results) {
 }
 
 // RunPyMOL creates a temp file of the specified PDB structure, runs the PyMOL script on it and parses the results
-func RunPyMOL(crystal *pdb.PDB) (map[string]map[int64]*ResidueExposure, error) {
+func RunPyMOL(crystal *pdb.PDB, msg func(string)) (map[string]map[int64]*ResidueExposure, error) {
 	pymolWorkers := 16
 
 	length := totalLength(crystal.Chains)
@@ -63,7 +63,10 @@ func RunPyMOL(crystal *pdb.PDB) (map[string]map[int64]*ResidueExposure, error) {
 	}
 
 	for j := 0; j < totalJobs; j++ {
-		pos := [2]int{j * chunkSize, (j + 1) * chunkSize}
+		start := j * chunkSize
+		end := (j + 1) * chunkSize
+		msg(fmt.Sprintf("do SASA for residues %d-%d", start, end))
+		pos := [2]int{start, end}
 		jobs <- pos
 	}
 	close(jobs)
@@ -71,6 +74,7 @@ func RunPyMOL(crystal *pdb.PDB) (map[string]map[int64]*ResidueExposure, error) {
 	exposureChains := make(map[string]map[int64]*ResidueExposure)
 	for a := 0; a < totalJobs; a++ {
 		res := <-results
+		msg("SASA worker done")
 
 		for _, line := range res.Lines {
 			cols := strings.Split(line, " ")

@@ -20,19 +20,19 @@ type Results struct {
 }
 
 // Run starts the binding analysis step
-func Run(unp *uniprot.UniProt, pdb *pdb.PDB, results chan<- *Results) {
+func Run(unp *uniprot.UniProt, pdb *pdb.PDB, results chan<- *Results, msg func(string)) {
 	start := time.Now()
-	pockets, err := fpocket.Run(pdb)
+	pockets, err := fpocket.Run(pdb, msg)
 	if err != nil {
 		results <- &Results{Error: fmt.Errorf("running Fpocket: %v", err)}
 	}
 
-	csa, err := mcsa.GetPositions(unp, pdb)
+	csa, err := mcsa.GetPositions(unp, pdb, msg)
 	if err != nil {
 		results <- &Results{Error: fmt.Errorf("M-CSA: %v", err)}
 	}
 
-	ligand, err := ligand.ResiduesNearLigands(pdb)
+	ligand, err := ligand.ResiduesNearLigands(pdb, msg)
 	if err != nil {
 		results <- &Results{Error: fmt.Errorf("Ligands: %v", err)}
 	}

@@ -2,6 +2,7 @@ package mcsa
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/url"
 	"varq/http"
 	"varq/pdb"
@@ -53,7 +54,7 @@ type residueSequence struct {
 }
 
 // GetPositions queries M-CSA and fetches catalytic residue UniProt positions for the given PDB.
-func GetPositions(unp *uniprot.UniProt, pdb *pdb.PDB) (*Catalytic, error) {
+func GetPositions(unp *uniprot.UniProt, pdb *pdb.PDB, msg func(string)) (*Catalytic, error) {
 	url := "https://www.ebi.ac.uk/thornton-srv/m-csa/api/entries/?" + url.Values{
 		"format":                                 {"json"},
 		"entries.proteins.sequences.uniprot_ids": {unp.ID},
@@ -63,6 +64,7 @@ func GetPositions(unp *uniprot.UniProt, pdb *pdb.PDB) (*Catalytic, error) {
 	if err != nil {
 		return nil, nil // TODO: handle 404
 	}
+	msg("downloaded M-CSA data")
 
 	response := searchAPIResponse{}
 	err = json.Unmarshal(raw, &response)
@@ -71,6 +73,7 @@ func GetPositions(unp *uniprot.UniProt, pdb *pdb.PDB) (*Catalytic, error) {
 	}
 
 	if response.Count == 0 {
+		msg("no M-CSA residues found")
 		return nil, nil
 	}
 
@@ -85,6 +88,8 @@ func GetPositions(unp *uniprot.UniProt, pdb *pdb.PDB) (*Catalytic, error) {
 			}
 		}
 	}
+
+	msg(fmt.Sprintf("%d M-CSA residues found", len(cs.Residues)))
 
 	return &cs, nil
 }
