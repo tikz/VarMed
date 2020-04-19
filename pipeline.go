@@ -170,7 +170,7 @@ func (p *Pipeline) analysePDB(a *Results) *Results {
 	}
 
 	if cfg.DebugPrint.Enabled {
-		debugPrintChains(a)
+		printResults(a)
 	}
 
 	return a
