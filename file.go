@@ -8,19 +8,27 @@ import (
 	"varq/uniprot"
 )
 
+const (
+	dataDir = "data/"
+	unpDir  = dataDir + "uniprot/"
+	pdbDir  = dataDir + "pdb/"
+	jobDir  = dataDir + "jobs/"
+	fileExt = ".varq"
+)
+
 func makeDirs() {
-	os.MkdirAll("data/uniprot", os.ModePerm)
-	os.MkdirAll("data/pdb", os.ModePerm)
-	os.MkdirAll("data/jobs", os.ModePerm)
+	os.MkdirAll(dataDir+unpDir, os.ModePerm)
+	os.MkdirAll(dataDir+pdbDir, os.ModePerm)
+	os.MkdirAll(dataDir+jobDir, os.ModePerm)
 }
 
 func WriteJob(j *Job) error {
-	return write("data/jobs/"+j.ID+".varq", j)
+	return write(jobDir+j.ID+fileExt, j)
 }
 
 func LoadJob(id string) (*Job, error) {
 	j := Job{}
-	err := read("data/jobs/"+id+".varq", &j)
+	err := read(jobDir+id+fileExt, &j)
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +37,7 @@ func LoadJob(id string) (*Job, error) {
 }
 
 func LoadPDB(pdbID string) (*pdb.PDB, error) {
-	path := "data/pdb/" + pdbID + ".varq"
+	path := pdbDir + pdbID + fileExt
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
 		p, err := pdb.NewPDBFromID(pdbID)
@@ -48,7 +56,7 @@ func LoadPDB(pdbID string) (*pdb.PDB, error) {
 }
 
 func ReadPDB(pdbID string) (*pdb.PDB, error) {
-	path := "data/pdb/" + pdbID + ".varq"
+	path := pdbDir + pdbID + fileExt
 	p := new(pdb.PDB)
 	err := read(path, &p)
 	if err != nil {
@@ -60,7 +68,7 @@ func ReadPDB(pdbID string) (*pdb.PDB, error) {
 }
 
 func LoadUniProt(unpID string) (*uniprot.UniProt, error) {
-	path := "data/uniprot/" + unpID + ".varq"
+	path := unpDir + unpID + fileExt
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
 		u, err := uniprot.NewUniProt(unpID)
