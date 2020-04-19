@@ -133,7 +133,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request, j *Job) {
 		ws.Close()
 	}()
 
-	i := 0
+	i := len(j.msgs)
 	for {
 		select {
 		case <-msgTicker.C:
