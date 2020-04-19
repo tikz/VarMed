@@ -42,7 +42,7 @@ func (p *Pipeline) msg(m string) {
 
 // NewPipeline constructs a new Pipeline.
 func NewPipeline(unpID string, pdbIDs []string, msgChan chan string) (*Pipeline, error) {
-	uniprot, err := LoadUniProt(unpID)
+	uniprot, err := loadUniProt(unpID)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func (p *Pipeline) pdbWorker(pdbIDChan <-chan string, resChan chan<- *Results) {
 
 		start := time.Now()
 		p.msg(fmt.Sprintf("Loading PDB %s...", pdbID))
-		pdb, err := LoadPDB(pdbID)
+		pdb, err := loadPDB(pdbID)
 		if err != nil {
 			results.Error = fmt.Errorf("load PDB %s: %v", pdbID, err)
 			resChan <- &results
