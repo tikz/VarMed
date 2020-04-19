@@ -153,8 +153,6 @@ export default class StructureViewer extends React.Component {
   applyTheme() {
     var plugin = this.state.plugin;
     let colors = LiteMol.Core.Utils.FastMap.create();
-    // colors.set('Uniform', LiteMol.Visualization.Color.fromHex(0x095c64));
-    // colors.set('Uniform', LiteMol.Visualization.Color.fromHex(0x006e70));
     colors.set("Uniform", LiteMol.Visualization.Color.fromHex(0x006870));
     colors.set("Selection", LiteMol.Visualization.Color.fromHex(0xf15a29));
     colors.set("Highlight", LiteMol.Visualization.Color.fromHex(0xff8a2b));
