@@ -142,7 +142,9 @@ func wsHandler(w http.ResponseWriter, r *http.Request, j *Job) {
 				ws.WriteMessage(1, []byte(msg))
 				i++
 
-				if j.Status == statusDone || j.Status == statusError {
+				if j.Status == statusDone ||
+					j.Status == statusSaved ||
+					j.Status == statusError {
 					return
 				}
 			}

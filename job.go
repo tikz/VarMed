@@ -12,7 +12,8 @@ const (
 	statusPending = 0
 	statusProcess = 1
 	statusDone    = 2
-	statusError   = 3
+	statusSaved   = 3
+	statusError   = 4
 )
 
 // JobRequest represents a single job request from an user,
@@ -87,6 +88,7 @@ func (j *Job) Process() {
 	if err != nil {
 		panic(err)
 	}
+	j.Status = statusSaved
 }
 
 func (j *Job) fail(err error) {
