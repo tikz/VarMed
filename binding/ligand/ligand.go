@@ -12,7 +12,7 @@ func calculateDistance(atom1 *pdb.Atom, atom2 *pdb.Atom) float64 {
 }
 
 // ResiduesNearLigands returns a map of ligand IDs to near residues.
-func ResiduesNearLigands(p *pdb.PDB) (map[string][]*pdb.Residue, error) {
+func ResiduesNearLigands(p *pdb.PDB, msg func(string)) (map[string][]*pdb.Residue, error) {
 	// TODO: just load one time, somewhere
 	pdbBind, err := LoadPDBBind()
 	if err != nil {
@@ -55,5 +55,10 @@ func ResiduesNearLigands(p *pdb.PDB) (map[string][]*pdb.Residue, error) {
 			}
 		}
 	}
+
+	for name, res := range ligands {
+		msg(fmt.Sprintf("%d residues near ligand %s", len(res), name))
+	}
+
 	return ligands, nil
 }
