@@ -1,4 +1,32 @@
-.logo {
-    width: 50px;
-    height: 50px;
+.nav-logo {
+  width: 50px;
+  height: 50px;
+  margin-right: 12px;
+}
+
+.bar {
+  user-select: none;
+  background-color: #20232a;
+}
+
+.bar img {
+  filter: drop-shadow(0px 0px 0px rgba(33, 203, 243, 0));
+  transition: all 0.2s ease;
+}
+
+.bar img:hover {
+  filter: drop-shadow(0px 0px 7px rgba(33, 203, 243, 1));
+}
+
+.nav-title {
+  flex-grow: 1;
+}
+
+.nav {
+  flex-grow: 1;
+  margin: 0 !important;
+}
+
+.myJobs {
+  margin-right: 10px !important;
 }

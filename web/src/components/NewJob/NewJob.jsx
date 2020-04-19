@@ -18,6 +18,7 @@ import PDBPicker from "./PDBPicker";
 import SendBar from "./SendBar";
 import { UniProtInput } from "./UniProtInput";
 import { Variations } from "./Variations";
+import "../../styles/components/new-job.scss";
 
 function Alert(props) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;

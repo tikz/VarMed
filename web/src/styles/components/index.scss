@@ -1,0 +1,23 @@
+.presentation {
+  width: 100% !important;
+  min-height: 600px;
+  background: radial-gradient(circle, #1f2b2f 0%, #1c1e20 25%);
+}
+
+.hero {
+  background: linear-gradient(45deg, #2196f3 30%, #21cbf3 90%);
+  color: white;
+}
+
+.logo {
+  user-select: none;
+  width: 200px;
+  height: auto;
+}
+
+.footer {
+  color: #758694;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  background-color: #20232a;
+}

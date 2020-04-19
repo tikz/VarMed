@@ -1,7 +1,6 @@
-import { Grid, TextField } from "@material-ui/core";
+import { Grid, TextField, Button } from "@material-ui/core";
 import React from "react";
 import { QueueInfo } from "./QueueInfo";
-import SendButton from "./SendButton";
 
 export default class SendBar extends React.Component {
   constructor(props) {
@@ -34,7 +33,9 @@ export default class SendBar extends React.Component {
           <QueueInfo />
         </Grid>
         <Grid item xs={2}>
-          <SendButton submit={this.handleSubmit} />
+          <Button className="glowButton" onClick={this.handleSubmit}>
+            Send Job
+          </Button>
         </Grid>
       </Grid>
     );

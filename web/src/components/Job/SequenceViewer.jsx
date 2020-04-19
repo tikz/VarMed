@@ -1,4 +1,5 @@
 import React from "react";
+import "../../styles/components/sequence-viewer.scss";
 
 export default class SequenceViewer extends React.Component {
   constructor(props) {
