@@ -14,10 +14,10 @@ func calculateDistance(atom1 *pdb.Atom, atom2 *pdb.Atom) float64 {
 // ResiduesNearLigands returns a map of ligand IDs to near residues.
 func ResiduesNearLigands(p *pdb.PDB, msg func(string)) (map[string][]*pdb.Residue, error) {
 	// TODO: just load one time, somewhere
-	pdbBind, err := LoadPDBBind()
-	if err != nil {
-		return nil, fmt.Errorf("cannot load PDBBind data: %v", err)
-	}
+	// pdbBind, err := LoadPDBBind()
+	// if err != nil {
+	// 	return nil, fmt.Errorf("cannot load PDBBind data: %v", err)
+	// }
 
 	ligands := make(map[string][]*pdb.Residue)
 
@@ -25,9 +25,9 @@ func ResiduesNearLigands(p *pdb.PDB, msg func(string)) (map[string][]*pdb.Residu
 		ln := hetatm.Residue
 
 		// ignore ligand IDs not present in PDBBind
-		if _, exists := pdbBind[ln]; !exists {
-			continue
-		}
+		// if _, exists := pdbBind[ln]; !exists {
+		// 	continue
+		// }
 
 		for _, chain := range p.Chains {
 			for _, res := range chain {
