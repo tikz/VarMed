@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"os"
+	"strings"
 	"varq/config"
 	"varq/http"
 )
@@ -31,7 +32,7 @@ func main() {
 	flag.Parse()
 
 	if len(*uniprotID) > 0 {
-		cliRun(*uniprotID, pdbsFlag)
+		cliRun(strings.ToUpper(*uniprotID), pdbsFlag)
 	} else {
 		httpServe()
 	}
