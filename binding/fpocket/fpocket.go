@@ -22,7 +22,7 @@ type Pocket struct {
 
 // Run creates a temp file of the specified PDB structure, runs Fpocket on it and parses the results
 func Run(p *pdb.PDB, msg func(string)) (pockets []*Pocket, err error) {
-	outPath := p.LocalPath + "_out"
+	outPath := strings.Split(p.LocalPath, ".")[0] + "_out"
 
 	// Delete Fpocket result files on function exit
 	defer func() {
@@ -43,6 +43,7 @@ func Run(p *pdb.PDB, msg func(string)) (pockets []*Pocket, err error) {
 	msg("retrieving Fpocket results")
 	// Walk created folder containing pocket analysis files
 	dir := outPath + "/pockets"
+	fmt.Println(dir)
 	pockets, err = walkPocketDir(p, dir, msg)
 	if err != nil {
 		return nil, err
