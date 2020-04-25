@@ -165,6 +165,11 @@ export default class SequenceViewer extends React.Component {
       if (res.Interaction.Residues != null) {
         markResidues(this, res.Interaction.Residues, "Interaction");
       }
+      if (res.Binding.Pockets != null) {
+        res.Binding.Pockets.forEach((p) => {
+          markResidues(this, p.Residues, "Pocket");
+        });
+      }
     });
 
     // // Pfam
