@@ -43,7 +43,6 @@ func Run(p *pdb.PDB, msg func(string)) (pockets []*Pocket, err error) {
 	msg("retrieving Fpocket results")
 	// Walk created folder containing pocket analysis files
 	dir := outPath + "/pockets"
-	fmt.Println(dir)
 	pockets, err = walkPocketDir(p, dir, msg)
 	if err != nil {
 		return nil, err
