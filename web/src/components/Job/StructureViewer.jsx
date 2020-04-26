@@ -28,6 +28,48 @@ export default class StructureViewer extends React.Component {
   load(res) {
     this.clear();
     this.setState({ res: res });
+
+    let surfaceColors = LiteMol.Bootstrap.Immutable.Map()
+      .set("Uniform", LiteMol.Visualization.Color.fromHex(0x0d6273))
+      .set("Selection", LiteMol.Visualization.Color.fromHex(0xf15a29))
+      .set("Highlight", LiteMol.Visualization.Color.fromHex(0xff752b));
+
+    let hetColors = surfaceColors.set(
+      "Uniform",
+      LiteMol.Visualization.Color.fromHex(0x00fffb)
+    );
+    let polymerSurfaceStyle = {
+      type: "Surface",
+      params: {
+        probeRadius: 0.4,
+        density: 2,
+        smoothing: 3,
+        isWireframe: false,
+      },
+      theme: {
+        template:
+          LiteMol.Bootstrap.Visualization.Molecule.Default.UniformThemeTemplate,
+        transparency: { alpha: 0.2 },
+        colors: surfaceColors,
+      },
+    };
+
+    let hetSurfaceStyle = {
+      type: "Surface",
+      params: {
+        probeRadius: 0.4,
+        density: 2,
+        smoothing: 3,
+        isWireframe: false,
+      },
+      theme: {
+        template:
+          LiteMol.Bootstrap.Visualization.Molecule.Default.UniformThemeTemplate,
+        transparency: { alpha: 0.4 },
+        colors: hetColors,
+      },
+    };
+
     let id = res.PDB.ID;
     let action = Transform.build()
       .add(this.state.plugin.context.tree.root, Transformer.Data.Download, {
@@ -45,17 +87,68 @@ export default class StructureViewer extends React.Component {
         Transformer.Molecule.CreateModel,
         { modelIndex: 0 },
         { isBinding: false, ref: "model" }
+      );
+
+    let sel = action;
+    sel.then(Transformer.Molecule.CreateMacromoleculeVisual, {
+      polymer: true,
+      polymerRef: "polymer-visual",
+      het: true,
+      water: true,
+    });
+
+    sel = action;
+    sel
+      .then(
+        Transformer.Molecule.CreateSelectionFromQuery,
+        {
+          query: LiteMol.Core.Structure.Query.hetGroups(),
+          name: "Het",
+          silent: true,
+        },
+        {}
       )
-      .then(Transformer.Molecule.CreateMacromoleculeVisual, {
-        polymer: true,
-        polymerRef: "polymer-visual",
-        het: true,
-        water: true,
-      });
+      .then(
+        Transformer.Molecule.CreateVisual,
+        { style: hetSurfaceStyle },
+        { isHidden: true, ref: "surface-het" }
+      );
+
+    sel = action;
+    sel
+      .then(
+        Transformer.Molecule.CreateSelectionFromQuery,
+        {
+          query: LiteMol.Core.Structure.Query.nonHetPolymer(),
+          name: "Surface",
+          silent: true,
+        },
+        {}
+      )
+      .then(
+        Transformer.Molecule.CreateVisual,
+        { style: polymerSurfaceStyle },
+        { isHidden: true, ref: "surface" }
+      );
 
     this.state.plugin.applyTransform(action).then(() => {
       this.applyTheme();
     });
+  }
+
+  showSurface(visible) {
+    this.setVisibility("surface", visible);
+    this.setVisibility("surface-het", visible);
+  }
+
+  setVisibility(ref, visible) {
+    let entity = this.state.plugin.context.select(ref)[0];
+    console.log(entity);
+
+    LiteMol.Bootstrap.Command.Entity.SetVisibility.dispatch(
+      this.state.plugin.context,
+      { entity, visible: visible }
+    );
   }
 
   clear() {
@@ -89,9 +182,9 @@ export default class StructureViewer extends React.Component {
     residues.forEach((r) => {
       let query = LiteMol.Core.Structure.Query.sequence(
         null,
-        r.chain,
-        { seqNumber: r.pos },
-        { seqNumber: r.pos }
+        r.Chain,
+        { seqNumber: r.Position },
+        { seqNumber: r.Position }
       );
       LiteMol.Bootstrap.Command.Molecule.Highlight.dispatch(plugin.context, {
         model,
@@ -155,7 +248,7 @@ export default class StructureViewer extends React.Component {
     let colors = LiteMol.Core.Utils.FastMap.create();
     colors.set("Uniform", LiteMol.Visualization.Color.fromHex(0x006870));
     colors.set("Selection", LiteMol.Visualization.Color.fromHex(0xf15a29));
-    colors.set("Highlight", LiteMol.Visualization.Color.fromHex(0xff8a2b));
+    colors.set("Highlight", LiteMol.Visualization.Color.fromHex(0xff752b));
     let theme = LiteMol.Bootstrap.Visualization.Molecule.uniformThemeProvider(
       void 0,
       { colors }

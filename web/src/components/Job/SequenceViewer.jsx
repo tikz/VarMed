@@ -7,8 +7,6 @@ export default class SequenceViewer extends React.Component {
     super(props);
     this.state = { pos: 0 };
 
-    this.unpID = this.props.res.UniProt.ID;
-
     this.posMap = new PositionMapper(this.props.res);
 
     this.handleMouseMove = this.handleMouseMove.bind(this);
@@ -72,7 +70,7 @@ export default class SequenceViewer extends React.Component {
           },
         ],
         name: name,
-        color: "#2196F3",
+        color: "#1aacdb",
         type: "rect",
       });
 
@@ -88,7 +86,7 @@ export default class SequenceViewer extends React.Component {
               };
             }),
           name: chain.id + " - " + title,
-          color: "#2196F3",
+          color: "#1aacdb",
           type: "rect",
         });
       };
@@ -105,7 +103,7 @@ export default class SequenceViewer extends React.Component {
         });
       }
       if (res.Interaction.Residues != null) {
-        markResidues(this, res.Interaction.Residues, "Interaction");
+        markResidues(this, res.Interaction.Residues, "Interface");
       }
       if (res.Binding.Pockets != null) {
         res.Binding.Pockets.forEach((p) => {

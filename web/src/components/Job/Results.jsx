@@ -6,12 +6,13 @@ import {
   Grid,
   InputLabel,
   MenuItem,
-  Paper,
   Select,
   Typography,
 } from "@material-ui/core";
 import axios from "axios";
 import React from "react";
+import FPSStats from "react-fps-stats";
+import { Features } from "./Features";
 import SequenceViewer from "./SequenceViewer";
 import StructureViewer from "./StructureViewer";
 
@@ -26,6 +27,7 @@ export default class Results extends React.Component {
     this.select = this.select.bind(this);
     this.clearHighlight = this.clearHighlight.bind(this);
     this.pdbChange = this.pdbChange.bind(this);
+    this.showSurface = this.showSurface.bind(this);
 
     this.pdbLoad(this.props.pdbID);
   }
@@ -50,6 +52,10 @@ export default class Results extends React.Component {
     this.structureRef.current.clearHighlight();
   }
 
+  showSurface(vis) {
+    this.structureRef.current.showSurface(vis);
+  }
+
   pdbChange(e) {
     let id = e.target.value;
     this.pdbLoad(id);
@@ -69,8 +75,10 @@ export default class Results extends React.Component {
     if (this.state.res.PDB === undefined) {
       return <Box />;
     }
+
     return (
       <Box>
+        <FPSStats left="auto" top="auto" right="0" bottom="0" />
         <Container>
           <Box className="over">
             <Typography variant="h4" className="title">
@@ -111,14 +119,14 @@ export default class Results extends React.Component {
 
         <Container>
           <Box>
-            <Grid container spacing={3}>
-              <Grid item xs={5}></Grid>
-              <Grid item xs={7}>
-                <Paper></Paper>
-              </Grid>
-            </Grid>
+            <Features
+              highlightResidues={this.highlightResidues}
+              clearHighlight={this.clearHighlight}
+              res={this.state.res}
+              showSurface={this.showSurface}
+            />
           </Box>
-          <Box my={2}>
+          <Box>
             <SequenceViewer
               highlightResidues={this.highlightResidues}
               select={this.select}
