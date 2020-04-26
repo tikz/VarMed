@@ -54,8 +54,8 @@ export default class PositionMapper {
     let residues = [];
     this.mappings.forEach((chain) => {
       residues.push({
-        chain: chain.chain_id,
-        pos: pos + this.pdbOffsets[chain.chain_id],
+        Chain: chain.chain_id,
+        Position: pos + this.pdbOffsets[chain.chain_id],
       });
     });
     return residues;
