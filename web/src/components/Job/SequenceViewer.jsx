@@ -1,12 +1,15 @@
 import React from "react";
 import "../../styles/components/sequence-viewer.scss";
+import PositionMapper from "./PositionMapper";
 
 export default class SequenceViewer extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      pos: 0,
-    };
+    this.state = { pos: 0 };
+
+    this.unpID = this.props.res.UniProt.ID;
+
+    this.posMap = new PositionMapper(this.props.res);
 
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.handleMouseLeave = this.handleMouseLeave.bind(this);
@@ -16,15 +19,13 @@ export default class SequenceViewer extends React.Component {
     var posText = this.state.zoomPositionElement.innerText;
     if (posText != this.state.pos) {
       var pos = parseInt(posText.slice(0, posText.length - 1));
-      this.props.highlightResidues(this.unpToPDB(pos));
-      this.setState((state) => ({
-        pos: posText,
-      }));
+      this.props.highlightResidues(this.posMap.unpToPDB(pos));
+      this.setState(() => ({ pos: posText }));
     }
   }
 
   handleMouseLeave() {
-    this.props.highlight(0, 0);
+    this.props.clearHighlight();
   }
 
   componentDidMount() {
@@ -40,117 +41,58 @@ export default class SequenceViewer extends React.Component {
       zoomMax: 20,
     });
 
-    let selectFunc = this.props.select;
     let that = this;
     this.fv.onFeatureSelected(function (d) {
       let chain = d.detail.description.split(" ")[1];
-      console.log(d.detail.start + "->");
-      selectFunc(
+      that.props.select(
         chain,
-        d.detail.start + that.pdbOffsets[chain],
-        d.detail.end + that.pdbOffsets[chain]
+        d.detail.start + that.posMap.pdbOffsets[chain],
+        d.detail.end + that.posMap.pdbOffsets[chain]
       );
     });
 
-    this.setState((state) => ({
+    this.setState(() => ({
       zoomPositionElement: document.getElementById("zoomPosition"),
     }));
 
-    this.loadOffsets(res);
-    this.loadFeatures(res);
+    this.loadFeatures();
   }
 
-  loadOffsets(res) {
-    let unpID = res.UniProt.ID;
+  loadFeatures() {
+    let res = this.props.res;
 
-    // Calculate position offsets
-    this.seqResOffsets = res.PDB.SeqResOffsets;
-    this.chainStartResN = res.PDB.ChainStartResNumber;
-    this.unpOffsets = {};
-    res.PDB.SIFTS.UniProt[unpID].mappings.forEach((chain) => {
-      this.unpOffsets[chain.chain_id] =
-        chain.unp_start +
-        this.seqResOffsets[chain.chain_id] -
-        chain.start.residue_number -
-        this.chainStartResN[chain.chain_id] +
-        1;
-    });
-
-    this.pdbOffsets = {};
-    res.PDB.SIFTS.UniProt[unpID].mappings.forEach((chain) => {
-      this.pdbOffsets[chain.chain_id] =
-        -chain.unp_start +
-        this.seqResOffsets[chain.chain_id] -
-        this.chainStartResN[chain.chain_id] +
-        2;
-    });
-  }
-
-  pdbToUnp(chain, pos) {
-    return pos + this.unpOffsets[chain];
-  }
-
-  unpToPDB(pos) {
-    let unpID = this.props.res.UniProt.ID;
-    let residues = [];
-    this.props.res.PDB.SIFTS.UniProt[unpID].mappings.forEach((chain) => {
-      residues.push({
-        chain: chain.chain_id,
-        pos: pos + this.pdbOffsets[chain.chain_id],
-      });
-    });
-    return residues;
-  }
-
-  loadFeatures(res) {
-    let unpID = res.UniProt.ID;
-    let unpChains = []; // chains in unpID
-
-    // Chains
-    res.PDB.SIFTS.UniProt[unpID].mappings.forEach((chain) => {
-      let name = "Chain " + chain.chain_id;
-      unpChains.push(chain.chain_id);
+    this.posMap.chains.forEach((chain) => {
+      let name = "Chain " + chain.id;
       this.fv.addFeature({
         data: [
           {
-            x:
-              chain.unp_start +
-              this.seqResOffsets[chain.chain_id] -
-              chain.start.residue_number +
-              1,
-            y:
-              chain.unp_end +
-              this.seqResOffsets[chain.chain_id] -
-              chain.start.residue_number +
-              1,
+            x: chain.start,
+            y: chain.end,
             description: name,
           },
         ],
         name: name,
-        className: "test1",
         color: "#2196F3",
         type: "rect",
-        filter: "type1",
       });
 
       let markResidues = function (that, residues, title) {
         that.fv.addFeature({
           data: residues
-            .filter((r) => r.Chain == chain.chain_id)
+            .filter((r) => r.Chain == chain.id)
             .map((r) => {
               return {
-                x: that.pdbToUnp(r.Chain, r.Position),
-                y: that.pdbToUnp(r.Chain, r.Position),
+                x: that.posMap.pdbToUnp(r.Chain, r.Position),
+                y: that.posMap.pdbToUnp(r.Chain, r.Position),
                 description: name,
               };
             }),
-          name: chain.chain_id + " - " + title,
-          className: "test1",
+          name: chain.id + " - " + title,
           color: "#2196F3",
           type: "rect",
-          filter: "type1",
         });
       };
+
       if (res.Exposure.Residues != null) {
         markResidues(this, res.Exposure.Residues, "Buried");
       }
@@ -171,29 +113,6 @@ export default class SequenceViewer extends React.Component {
         });
       }
     });
-
-    // // Pfam
-    // for (const [id, fam] of Object.entries(res.PDB.SIFTS.Pfam)) {
-    //     fam.Mappings.forEach(m => {
-    //         let famsData = []
-    //         if (unpChains.includes(m.chain_id)) {
-    //             let off = this.unpOffsets[m.chain_id]
-    //             let desc = id + " - " + fam.Description
-    //             famsData.push({ x: m.start.residue_number - off, y: m.end.residue_number - off, description: desc });
-
-    //             this.fv.addFeature({
-    //                 data: famsData,
-    //                 name: "Pfam",
-    //                 className: "test1",
-    //                 color: "#2196F3",
-    //                 type: "rect",
-    //                 filter: "type1"
-    //             });
-    //         }
-    //     })
-    // }
-
-    // TODO: repeated code, refactor
   }
 
   render() {

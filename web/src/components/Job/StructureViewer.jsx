@@ -31,7 +31,7 @@ export default class StructureViewer extends React.Component {
     let id = res.PDB.ID;
     let action = Transform.build()
       .add(this.state.plugin.context.tree.root, Transformer.Data.Download, {
-        url: `/api/structure/cif/${id}`,
+        url: `http://localhost:8888/api/structure/cif/${id}`,
         type: "String",
         id,
       })
@@ -70,7 +70,7 @@ export default class StructureViewer extends React.Component {
     var plugin = this.state.plugin;
     var model = plugin.context.select("model")[0];
     let query = LiteMol.Core.Structure.Query.sequence(
-      "1",
+      null,
       chain,
       { seqNumber: start },
       { seqNumber: end }
@@ -88,7 +88,7 @@ export default class StructureViewer extends React.Component {
     var model = plugin.context.select("model")[0];
     residues.forEach((r) => {
       let query = LiteMol.Core.Structure.Query.sequence(
-        "1",
+        null,
         r.chain,
         { seqNumber: r.pos },
         { seqNumber: r.pos }
@@ -106,7 +106,7 @@ export default class StructureViewer extends React.Component {
     var model = plugin.context.select("model")[0];
     Object.keys(this.state.res.PDB.SeqResOffsets).forEach((chain) => {
       let query = LiteMol.Core.Structure.Query.sequence(
-        "1",
+        null,
         chain,
         { seqNumber: 1 },
         { seqNumber: this.state.res.PDB.TotalLength }
@@ -123,7 +123,7 @@ export default class StructureViewer extends React.Component {
     var plugin = this.state.plugin;
     var model = plugin.context.select("model")[0];
     let query = LiteMol.Core.Structure.Query.sequence(
-      "1",
+      null,
       chain,
       { seqNumber: start },
       { seqNumber: end }
@@ -139,7 +139,7 @@ export default class StructureViewer extends React.Component {
     var plugin = this.state.plugin;
     var model = plugin.context.select("model")[0];
     let query = LiteMol.Core.Structure.Query.sequence(
-      "1",
+      null,
       chain,
       { seqNumber: start },
       { seqNumber: end }

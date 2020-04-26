@@ -22,15 +22,13 @@ export default class Results extends React.Component {
 
     this.state = { pdbID: this.props.pdbID, jobID: this.props.jobID, res: {} };
 
-    this.highlightStructure = this.highlightStructure.bind(this);
     this.highlightResidues = this.highlightResidues.bind(this);
-    this.selectStructure = this.selectStructure.bind(this);
+    this.select = this.select.bind(this);
+    this.clearHighlight = this.clearHighlight.bind(this);
     this.pdbChange = this.pdbChange.bind(this);
 
     this.pdbLoad(this.props.pdbID);
   }
-
-  componentDidMount() {}
 
   highlightResidues(residues) {
     if (residues.length == 0) {
@@ -40,20 +38,16 @@ export default class Results extends React.Component {
     }
   }
 
-  highlightStructure(start, end) {
-    if (start == 0 && end == 0) {
-      this.structureRef.current.clearHighlight();
-    } else {
-      this.structureRef.current.highlight(start + 18, end + 18);
-    }
-  }
-
-  selectStructure(chain, start, end) {
+  select(chain, start, end) {
     this.structureRef.current.focus(chain, start, end);
     this.structureRef.current.highlight(chain, start, end);
     if (start - end == 0) {
       this.structureRef.current.select(chain, start, end);
     }
+  }
+
+  clearHighlight() {
+    this.structureRef.current.clearHighlight();
   }
 
   pdbChange(e) {
@@ -64,7 +58,7 @@ export default class Results extends React.Component {
   pdbLoad(id) {
     let that = this;
     axios
-      .get("/api/job/" + this.state.jobID + "/" + id)
+      .get("http://localhost:8888/api/job/" + this.state.jobID + "/" + id)
       .then(function (response) {
         that.setState({ res: response.data, pdb: id });
         that.structureRef.current.load(response.data);
@@ -127,8 +121,8 @@ export default class Results extends React.Component {
           <Box my={2}>
             <SequenceViewer
               highlightResidues={this.highlightResidues}
-              highlight={this.highlightStructure}
-              select={this.selectStructure}
+              select={this.select}
+              clearHighlight={this.clearHighlight}
               res={this.state.res}
               key={this.state.res.PDB.ID}
             />
