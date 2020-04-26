@@ -17,9 +17,11 @@ export default class Job extends React.Component {
 
   loadResults() {
     let that = this;
-    axios.get("/api/job/" + this.jobID).then(function (response) {
-      that.setState({ results: response.data });
-    });
+    axios
+      .get("http://localhost:8888/api/job/" + this.jobID)
+      .then(function (response) {
+        that.setState({ results: response.data });
+      });
   }
 
   render() {
