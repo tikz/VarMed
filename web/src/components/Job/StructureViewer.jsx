@@ -197,18 +197,11 @@ export default class StructureViewer extends React.Component {
   clearHighlight() {
     var plugin = this.state.plugin;
     var model = plugin.context.select("model")[0];
-    Object.keys(this.state.res.PDB.SeqResOffsets).forEach((chain) => {
-      let query = LiteMol.Core.Structure.Query.sequence(
-        null,
-        chain,
-        { seqNumber: 1 },
-        { seqNumber: this.state.res.PDB.TotalLength }
-      );
-      LiteMol.Bootstrap.Command.Molecule.Highlight.dispatch(plugin.context, {
-        model,
-        query,
-        isOn: false,
-      });
+    let query = LiteMol.Core.Structure.Query.everything();
+    LiteMol.Bootstrap.Command.Molecule.Highlight.dispatch(plugin.context, {
+      model,
+      query,
+      isOn: false,
     });
   }
 

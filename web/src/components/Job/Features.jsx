@@ -34,9 +34,10 @@ export class Features extends React.Component {
           {interaction}
           {buried}
           {catalytic}
-          {res.Binding.Pockets.map((pocket) => {
-            return chip("Pocket", pocket.Residues);
-          })}
+          {res.Binding.Pockets !== null &&
+            res.Binding.Pockets.map((pocket) => {
+              return chip("Pocket", pocket.Residues);
+            })}
           {Object.keys(res.Binding.Ligands).map((ligand) => {
             return chip("Near " + ligand, res.Binding.Ligands[ligand]);
           })}

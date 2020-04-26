@@ -91,21 +91,21 @@ export default class SequenceViewer extends React.Component {
         });
       };
 
-      if (res.Exposure.Residues != null) {
+      if (res.Exposure.Residues !== null) {
         markResidues(this, res.Exposure.Residues, "Buried");
       }
-      if (res.Binding.Catalytic != null) {
+      if (res.Binding.Catalytic.Residues !== null) {
         markResidues(this, res.Binding.Catalytic.Residues, "Catalytic");
       }
-      if (Object.keys(res.Binding.Ligands).length !== 0) {
+      if (Object.keys(res.Binding.Ligands).length != 0) {
         Object.keys(res.Binding.Ligands).forEach((lig) => {
           markResidues(this, res.Binding.Ligands[lig], "Near " + lig);
         });
       }
-      if (res.Interaction.Residues != null) {
+      if (res.Interaction.Residues !== null) {
         markResidues(this, res.Interaction.Residues, "Interface");
       }
-      if (res.Binding.Pockets != null) {
+      if (res.Binding.Pockets !== null) {
         res.Binding.Pockets.forEach((p) => {
           markResidues(this, p.Residues, "Pocket");
         });
