@@ -9,7 +9,7 @@ import (
 	"varq/uniprot"
 )
 
-// CatalyticResidues holds the protein's residues that have catalytic activity according to M-CSA.
+// Catalytic holds the protein's residues that have catalytic activity according to M-CSA.
 type Catalytic struct {
 	UniProtPositions []int64
 	Residues         []*pdb.Residue // Pointers to original residues in the requested structure.
@@ -72,12 +72,12 @@ func GetPositions(unp *uniprot.UniProt, pdb *pdb.PDB, msg func(string)) (*Cataly
 		return nil, err
 	}
 
+	cs := Catalytic{}
 	if response.Count == 0 {
 		msg("no M-CSA residues found")
-		return nil, nil
+		return &cs, nil
 	}
 
-	cs := Catalytic{}
 	for _, res := range response.Results[0].Residues {
 		for _, seq := range res.ResidueSequences {
 			cs.UniProtPositions = append(cs.UniProtPositions, seq.ResID)
