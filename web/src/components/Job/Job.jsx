@@ -10,7 +10,7 @@ export default class Job extends React.Component {
     super(props);
 
     this.jobID = this.props.match.params.id;
-    this.state = { results: {} };
+    this.state = { results: {}, error: 0 };
     this.loadResults = this.loadResults.bind(this);
     this.loadResults();
   }
@@ -20,11 +20,24 @@ export default class Job extends React.Component {
     axios
       .get("http://localhost:8888/api/job/" + this.jobID)
       .then(function (response) {
-        that.setState({ results: response.data });
+        that.setState({ results: response.data, error: 0 });
+      })
+      .catch(function (error) {
+        that.setState({ error: error });
       });
   }
 
   render() {
+    if (this.state.error != 0) {
+      return (
+        <Box>
+          <NavBar />
+          <Toolbar />
+          <h3>{this.state.error.message}</h3>
+        </Box>
+      );
+    }
+
     return (
       <Box>
         <NavBar />
