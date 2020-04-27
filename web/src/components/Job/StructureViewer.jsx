@@ -143,7 +143,6 @@ export default class StructureViewer extends React.Component {
 
   setVisibility(ref, visible) {
     let entity = this.state.plugin.context.select(ref)[0];
-    console.log(entity);
 
     LiteMol.Bootstrap.Command.Entity.SetVisibility.dispatch(
       this.state.plugin.context,
@@ -176,7 +175,6 @@ export default class StructureViewer extends React.Component {
   }
 
   highlightResidues(residues) {
-    console.log(residues);
     this.clearHighlight();
     var plugin = this.state.plugin;
     var model = plugin.context.select("model")[0];
