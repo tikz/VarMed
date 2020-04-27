@@ -63,7 +63,7 @@ func printNearLigands(r *Results) {
 		for name, res := range r.Binding.Ligands {
 			var residues []string
 			for _, r := range res {
-				residues = append(residues, r.Chain+"-"+r.Abbrv3+strconv.FormatInt(r.Position, 10))
+				residues = append(residues, r.Chain+"-"+r.Name3+strconv.FormatInt(r.StructPosition, 10))
 			}
 			fmt.Println("Ligand", aurora.BrightGreen(name), "-", aurora.Red(strings.Join(residues, " ")))
 		}
@@ -85,7 +85,7 @@ func printSiteRecords(r *Results) {
 		for site, desc := range r.PDB.BindingSiteDesc {
 			var residues []string
 			for _, res := range r.PDB.BindingSite[site] {
-				residues = append(residues, res.Chain+"-"+res.Abbrv3+strconv.FormatInt(res.Position, 10))
+				residues = append(residues, res.Chain+"-"+res.Name3+strconv.FormatInt(res.StructPosition, 10))
 			}
 			fmt.Print(aurora.BrightGreen(site), " (", aurora.Red(strings.Join(residues, " ")), "): ", desc, " | ")
 		}
@@ -165,7 +165,7 @@ func printResultsBlock(name string, unp *uniprot.UniProt, pdb *pdb.PDB, res []*p
 			fmt.Print(" ")
 		}
 		for _, r := range residues {
-			fmt.Printf(r.Abbrv1)
+			fmt.Printf(r.Name1)
 		}
 		fmt.Println()
 
@@ -193,9 +193,9 @@ func printResultsBlock(name string, unp *uniprot.UniProt, pdb *pdb.PDB, res []*p
 			r, ok := pdb.SeqResChains[mapping.ChainID][int64(i)]
 			if ok {
 				if residueExists(r, res) {
-					fmt.Print(aurora.BgRed(aurora.Bold(aurora.Yellow(r.Abbrv1))))
+					fmt.Print(aurora.BgRed(aurora.Bold(aurora.Yellow(r.Name1))))
 				} else {
-					fmt.Print(r.Abbrv1)
+					fmt.Print(r.Name1)
 				}
 			} else {
 				fmt.Print(" ")

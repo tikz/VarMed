@@ -11,11 +11,7 @@ export default class PositionMapper {
     this.unpOffsets = {};
     this.mappings.forEach((chain) => {
       this.unpOffsets[chain.chain_id] =
-        chain.unp_start +
-        this.seqResOffsets[chain.chain_id] -
-        chain.start.residue_number -
-        this.chainStartResN[chain.chain_id] +
-        1;
+        chain.unp_start - chain.start.residue_number;
     });
 
     this.pdbOffsets = {};

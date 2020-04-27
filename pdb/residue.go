@@ -32,12 +32,13 @@ var residueNames = [...][3]string{
 
 // Residue represents a single residue from the PDB structure.
 type Residue struct {
-	Chain    string
-	Position int64
-	Name     string
-	Abbrv1   string
-	Abbrv3   string
-	Atoms    []*Atom `json:"-"`
+	Chain          string
+	StructPosition int64
+	Position       int64
+	Name           string `json:"-"`
+	Name1          string
+	Name3          string  `json:"-"`
+	Atoms          []*Atom `json:"-"`
 }
 
 // NewResidue constructs a new residue given a chain, position and aminoacid name.
@@ -46,11 +47,11 @@ func NewResidue(chain string, pos int64, input string) *Residue {
 	name, abbrv3, abbrv1 := matchName(input)
 
 	res := &Residue{
-		Chain:    chain,
-		Position: pos,
-		Name:     name,
-		Abbrv3:   abbrv3,
-		Abbrv1:   abbrv1,
+		Chain:          chain,
+		StructPosition: pos,
+		Name:           name,
+		Name1:          abbrv1,
+		Name3:          abbrv3,
 	}
 
 	return res

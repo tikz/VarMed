@@ -21,7 +21,7 @@ func (pdb *PDB) extractSites() error {
 				chain := strings.TrimSpace(string(s[i+4]))
 				pos, _ := strconv.ParseInt(strings.TrimSpace(s[i+5:i+10]), 10, 64)
 				if res, ok := pdb.Chains[chain][pos]; ok {
-					if strings.ToUpper(res.Abbrv3) == residueName {
+					if strings.ToUpper(res.Name3) == residueName {
 						sites[siteName] = append(sites[siteName], res)
 					}
 				}

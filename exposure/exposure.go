@@ -132,7 +132,7 @@ func parseLine(line []string) (chain string, pos int64, bFactor float64, exposur
 func buriedResidues(pdb *pdb.PDB, chains map[string]map[int64]*ResidueExposure) (buriedResidues []*pdb.Residue) {
 	for chainName, chain := range chains {
 		for pos, resExp := range chain {
-			if resExp.ExposureP < 0.5 && resExp.Residue.Abbrv1 != "G" {
+			if resExp.ExposureP < 0.5 && resExp.Residue.Name1 != "G" {
 				buriedResidues = append(buriedResidues, pdb.Chains[chainName][pos])
 			}
 		}

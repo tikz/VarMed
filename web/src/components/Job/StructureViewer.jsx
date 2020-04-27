@@ -176,6 +176,7 @@ export default class StructureViewer extends React.Component {
   }
 
   highlightResidues(residues) {
+    console.log(residues);
     this.clearHighlight();
     var plugin = this.state.plugin;
     var model = plugin.context.select("model")[0];

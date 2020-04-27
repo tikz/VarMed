@@ -54,7 +54,7 @@ func (pdb *PDB) calculateChainsOffset() {
 			score := 0
 			for pos, res := range pdb.Chains[chain] {
 				seqResPos := pos + int64(offset) - minPos
-				if res.Abbrv1 == pdb.SeqRes[chain][seqResPos].Abbrv1 {
+				if res.Name1 == pdb.SeqRes[chain][seqResPos].Name1 {
 					score++
 				}
 			}
@@ -65,6 +65,9 @@ func (pdb *PDB) calculateChainsOffset() {
 		}
 
 		pdb.SeqResOffsets[chain] = int64(bestOffset)
+		for _, res := range pdb.Chains[chain] {
+			res.Position = res.StructPosition - pdb.ChainStartResNumber[chain] + int64(bestOffset) + 1
+		}
 	}
 }
 
