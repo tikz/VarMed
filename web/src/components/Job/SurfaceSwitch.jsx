@@ -1,6 +1,5 @@
-import { Box, Grid, Switch, FormControlLabel } from "@material-ui/core";
+import { FormControlLabel, Switch } from "@material-ui/core";
 import React from "react";
-import FeatureChip from "./FeatureChip";
 
 export class SurfaceSwitch extends React.Component {
   constructor(props) {

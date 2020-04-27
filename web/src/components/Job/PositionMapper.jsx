@@ -21,10 +21,7 @@ export default class PositionMapper {
     this.pdbOffsets = {};
     this.mappings.forEach((chain) => {
       this.pdbOffsets[chain.chain_id] =
-        -chain.unp_start +
-        this.seqResOffsets[chain.chain_id] -
-        this.chainStartResN[chain.chain_id] +
-        2;
+        -chain.unp_start + chain.start.residue_number;
     });
   }
 

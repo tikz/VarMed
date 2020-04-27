@@ -26,4 +26,9 @@
   height: 500px;
   padding-top: 84px;
   border-bottom: solid 1px #272727;
+  transition: all 0.2s ease;
+}
+
+#litemol .open {
+  height: 500px;
 }
