@@ -31,6 +31,18 @@ export class Features extends React.Component {
     return (
       <Grid container className="features">
         <Grid item xs className="chips">
+          {/* {Object.keys(res.PDB.SIFTS.UniProt).map((unpID) => {
+            return chip(
+              unpID,
+              res.PDB.SIFTS.UniProt[unpID].mappings.map((chain) => {
+                return {
+                  Chain: chain.chain_id,
+                  Position: 1,
+                  PositionEnd: res.PDB.ChainEndResNumber[chain.chain_id],
+                };
+              })
+            );
+          })} */}
           {interaction}
           {buried}
           {catalytic}

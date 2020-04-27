@@ -184,7 +184,9 @@ export default class StructureViewer extends React.Component {
         null,
         r.Chain,
         { seqNumber: r.Position },
-        { seqNumber: r.Position }
+        {
+          seqNumber: r.PositionEnd !== undefined ? r.PositionEnd : r.Position,
+        }
       );
       LiteMol.Bootstrap.Command.Molecule.Highlight.dispatch(plugin.context, {
         model,
