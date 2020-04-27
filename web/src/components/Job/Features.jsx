@@ -31,7 +31,8 @@ export class Features extends React.Component {
     return (
       <Grid container className="features">
         <Grid item xs className="chips">
-          {/* {Object.keys(res.PDB.SIFTS.UniProt).map((unpID) => {
+          {/* TODO: refactor into streamlined ways to do things like this */}
+          {Object.keys(res.PDB.SIFTS.UniProt).map((unpID) => {
             return chip(
               unpID,
               res.PDB.SIFTS.UniProt[unpID].mappings.map((chain) => {
@@ -42,7 +43,7 @@ export class Features extends React.Component {
                 };
               })
             );
-          })} */}
+          })}
           {interaction}
           {buried}
           {catalytic}
