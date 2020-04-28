@@ -39,10 +39,10 @@ func main() {
 }
 
 func makeSampleResults() {
-	_, err := os.Stat(jobDir + "fe2423053f1a75a300e4074b1609ed972e3e2eaeae149f21d9c5fd79b4ef3d5c" + fileExt)
+	_, err := os.Stat(jobDir + "aa2725a483568c283274c6e551b83ac1c34548736c0dbb2581ba770bb0de21eb" + fileExt)
 	if os.IsNotExist(err) {
 		log.Println("Running pipeline to populate sample results...")
-		j := NewJob(&JobRequest{UniProtID: "P00390", PDBIDs: []string{"2GH5"}})
+		j := NewJob(&JobRequest{UniProtID: "P01112", PDBIDs: []string{"1LFD"}})
 		j.Process()
 	}
 }

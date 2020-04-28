@@ -31,6 +31,7 @@ func (pdb *PDB) extractPDBATMRecords(recordName string) ([]*Atom, error) {
 		return atoms, errors.New("atoms not found")
 	}
 
+	var lastRes string
 	for _, match := range matches {
 		var atom Atom
 
@@ -44,6 +45,19 @@ func (pdb *PDB) extractPDBATMRecords(recordName string) ([]*Atom, error) {
 		atom.Z, _ = strconv.ParseFloat(strings.TrimSpace(match[46:54]), 64)
 
 		atoms = append(atoms, &atom)
+
+		if recordName == "HETATM" && atom.Residue != lastRes {
+			lastRes = atom.Residue
+			exists := false
+			for _, het := range pdb.HetGroups {
+				if het == lastRes {
+					exists = true
+				}
+			}
+			if !exists {
+				pdb.HetGroups = append(pdb.HetGroups, lastRes)
+			}
+		}
 	}
 
 	return atoms, nil

@@ -195,6 +195,18 @@ export default class StructureViewer extends React.Component {
     });
   }
 
+  highlightHet(id) {
+    this.clearHighlight();
+    var plugin = this.state.plugin;
+    var model = plugin.context.select("model")[0];
+    let query = LiteMol.Core.Structure.Query.residuesByName(id);
+    LiteMol.Bootstrap.Command.Molecule.Highlight.dispatch(plugin.context, {
+      model,
+      query,
+      isOn: true,
+    });
+  }
+
   clearHighlight() {
     var plugin = this.state.plugin;
     var model = plugin.context.select("model")[0];
