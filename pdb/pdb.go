@@ -20,8 +20,9 @@ type PDB struct {
 	Resolution  float64    // method resolution
 	TotalLength int64      // total length as sum of residues of all chains in the structure
 
-	Atoms    []*Atom `json:"-"` // ATOM records in the structure
-	HetAtoms []*Atom `json:"-"` // HETATM records in the structure
+	Atoms     []*Atom  `json:"-"` // ATOM records in the structure
+	HetAtoms  []*Atom  `json:"-"` // HETATM records in the structure
+	HetGroups []string // HET groups in the structure
 
 	// Position mapping
 	SIFTS               *SIFTS           // EBI SIFTS data for residue position mapping

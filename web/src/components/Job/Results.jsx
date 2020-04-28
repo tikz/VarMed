@@ -24,6 +24,7 @@ export default class Results extends React.Component {
     this.state = { pdbID: this.props.pdbID, jobID: this.props.jobID, res: {} };
 
     this.highlightResidues = this.highlightResidues.bind(this);
+    this.highlightHet = this.highlightHet.bind(this);
     this.select = this.select.bind(this);
     this.clearHighlight = this.clearHighlight.bind(this);
     this.pdbChange = this.pdbChange.bind(this);
@@ -38,6 +39,10 @@ export default class Results extends React.Component {
     } else {
       this.structureRef.current.highlightResidues(residues);
     }
+  }
+
+  highlightHet(id) {
+    this.structureRef.current.highlightHet(id);
   }
 
   select(chain, start, end) {
@@ -121,6 +126,7 @@ export default class Results extends React.Component {
           <Box>
             <Features
               highlightResidues={this.highlightResidues}
+              highlightHet={this.highlightHet}
               clearHighlight={this.clearHighlight}
               res={this.state.res}
               showSurface={this.showSurface}
