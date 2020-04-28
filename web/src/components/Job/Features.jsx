@@ -4,6 +4,7 @@ import "../../styles/components/features.scss";
 import ChipRes from "./ChipRes";
 import ChipHet from "./ChipHet";
 import { SurfaceSwitch } from "./SurfaceSwitch";
+import { ResultsContext } from "./ResultsContext";
 
 export class Features extends React.Component {
   constructor(props) {
@@ -11,17 +12,10 @@ export class Features extends React.Component {
   }
 
   render() {
-    const props = this.props;
-    const res = props.res;
+    const res = this.context.results;
     const chip = function (label, residues) {
       return residues !== null ? (
-        <ChipRes
-          label={label}
-          key={label}
-          highlightResidues={props.highlightResidues}
-          clearHighlight={props.clearHighlight}
-          residues={residues}
-        />
+        <ChipRes label={label} key={label} residues={residues} />
       ) : null;
     };
 
@@ -63,15 +57,7 @@ export class Features extends React.Component {
 
     const hets = res.PDB.HetGroups.map((hetID) => {
       if (hetID != "HOH") {
-        return (
-          <ChipHet
-            label={hetID}
-            key={hetID}
-            highlightHet={props.highlightHet}
-            clearHighlight={props.clearHighlight}
-            hetID={hetID}
-          />
-        );
+        return <ChipHet label={hetID} key={hetID} hetID={hetID} />;
       }
     });
 
@@ -81,32 +67,35 @@ export class Features extends React.Component {
 
     return (
       <Grid container className="features">
-        <Grid container className="chips" wrap="wrap">
-          {fams}
-          <Divider orientation="vertical" flexItem />
-          {unpChains.map((unp, index) => {
-            return unp.concat(
-              <Divider key={index} orientation="vertical" flexItem />
-            );
-          })}
-          <Divider orientation="vertical" flexItem />
-          {hets}
-          <Divider orientation="vertical" flexItem />
-          {interaction}
-          {buried}
-          {catalytic}
-          {res.Binding.Pockets !== null &&
-            res.Binding.Pockets.map((pocket) => {
-              return chip("Pocket", pocket.Residues);
+        <Grid item xs>
+          <Grid container className="chips" wrap="wrap">
+            {fams}
+            <Divider orientation="vertical" flexItem />
+            {unpChains.map((unp, index) => {
+              return unp.concat(
+                <Divider key={index} orientation="vertical" flexItem />
+              );
             })}
-          {Object.keys(res.Binding.Ligands).map((ligand) => {
-            return chip("Near " + ligand, res.Binding.Ligands[ligand]);
-          })}
+            <Divider orientation="vertical" flexItem />
+            {hets}
+            <Divider orientation="vertical" flexItem />
+            {interaction}
+            {buried}
+            {catalytic}
+            {res.Binding.Pockets !== null &&
+              res.Binding.Pockets.map((pocket) => {
+                return chip("Pocket", pocket.Residues);
+              })}
+            {Object.keys(res.Binding.Ligands).map((ligand) => {
+              return chip("Near " + ligand, res.Binding.Ligands[ligand]);
+            })}
+          </Grid>
         </Grid>
         <Grid item xs={1}>
-          <SurfaceSwitch showSurface={this.props.showSurface} />
+          <SurfaceSwitch />
         </Grid>
       </Grid>
     );
   }
 }
+Features.contextType = ResultsContext;

@@ -1,5 +1,6 @@
 import { Chip } from "@material-ui/core";
 import React from "react";
+import { ResultsContext } from "./ResultsContext";
 
 export default class ChipRes extends React.Component {
   constructor(props) {
@@ -9,11 +10,11 @@ export default class ChipRes extends React.Component {
   }
 
   handleMouseEnter() {
-    this.props.highlightResidues(this.props.residues);
+    this.context.structure.current.highlightResidues(this.props.residues);
   }
 
   handleMouseLeave() {
-    this.props.clearHighlight();
+    this.context.structure.current.clearHighlight();
   }
 
   render() {
@@ -29,3 +30,4 @@ export default class ChipRes extends React.Component {
     );
   }
 }
+ChipRes.contextType = ResultsContext;
