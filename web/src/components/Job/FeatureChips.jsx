@@ -2,7 +2,7 @@ import { Chip } from "@material-ui/core";
 import React from "react";
 import { ResultsContext } from "./ResultsContext";
 
-export default class ChipRes extends React.Component {
+class FeatureChip extends React.Component {
   constructor(props) {
     super(props);
     this.handleMouseEnter = this.handleMouseEnter.bind(this);
@@ -30,4 +30,25 @@ export default class ChipRes extends React.Component {
     );
   }
 }
+
+export class ChipRes extends FeatureChip {
+  constructor(props) {
+    super(props);
+  }
+
+  handleMouseEnter() {
+    this.context.structure.current.highlightResidues(this.props.residues);
+  }
+}
 ChipRes.contextType = ResultsContext;
+
+export class ChipHet extends FeatureChip {
+  constructor(props) {
+    super(props);
+  }
+
+  handleMouseEnter() {
+    this.context.structure.current.highlightHet(this.props.hetID);
+  }
+}
+ChipHet.contextType = ResultsContext;
