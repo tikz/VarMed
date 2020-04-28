@@ -13,13 +13,9 @@ export default class StatusConsole extends React.Component {
   constructor(props) {
     super(props);
     let protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-    // this.ws = new WebSocket(
-    //   protocol +
-    //     window.location.host +
-    //     "ws://localhost:8888/api/ws/" +
-    //     this.props.jobID
-    // );
-    this.ws = new WebSocket("ws://localhost:8888/ws/" + this.props.jobID);
+    this.ws = new WebSocket(
+      protocol + window.location.host + "/ws/" + this.props.jobID
+    );
 
     this.state = { messages: [], connected: false };
   }

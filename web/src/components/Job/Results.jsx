@@ -69,7 +69,7 @@ export default class Results extends React.Component {
   pdbLoad(id) {
     let that = this;
     axios
-      .get("http://localhost:8888/api/job/" + this.state.jobID + "/" + id)
+      .get("/api/job/" + this.state.jobID + "/" + id)
       .then(function (response) {
         that.setState({ res: response.data, pdb: id });
         that.structureRef.current.load(response.data);

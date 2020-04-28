@@ -39,7 +39,7 @@ export class UniProtInput extends React.Component {
         loading: true,
       });
       axios
-        .get("http://localhost:8888/api/uniprot/" + e.target.value)
+        .get("/api/uniprot/" + e.target.value)
         .then(function (response) {
           let data = response.data;
           that.setState({
