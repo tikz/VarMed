@@ -12,10 +12,14 @@ import "../../styles/components/status-console.scss";
 export default class StatusConsole extends React.Component {
   constructor(props) {
     super(props);
-    let protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-    this.ws = new WebSocket(
-      protocol + window.location.host + "/ws/" + this.props.jobID
-    );
+    var url;
+    if (API_URL == "") {
+      let protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+      url = protocol + window.location.host + "/ws/" + this.props.jobID;
+    } else {
+      url = API_URL + "/ws/" + this.props.jobID;
+    }
+    this.ws = new WebSocket(url);
 
     this.state = { messages: [], connected: false };
   }
