@@ -56,7 +56,6 @@ func walkPocketDir(crystal *pdb.PDB, dir string, msg func(string)) (pockets []*P
 		n := 0
 		// For each Fpocket result PDB file
 		if strings.Contains(file, "_atm.pdb") {
-			msg(fmt.Sprintf("parsing Fpocket %s", file))
 			data, err := ioutil.ReadFile(file)
 			if err != nil {
 				return err
