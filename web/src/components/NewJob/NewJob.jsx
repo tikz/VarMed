@@ -67,7 +67,7 @@ export default class NewJob extends React.Component {
   submit(email) {
     let that = this;
     axios
-      .post("/api/new-job", {
+      .post(API_URL + "/api/new-job", {
         uniprot_id: this.state.unpData.id,
         pdbs: this.state.pdbs,
         email: email,

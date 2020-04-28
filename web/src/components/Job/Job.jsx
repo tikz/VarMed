@@ -18,7 +18,7 @@ export default class Job extends React.Component {
   loadResults() {
     let that = this;
     axios
-      .get("/api/job/" + this.jobID)
+      .get(API_URL + "/api/job/" + this.jobID)
       .then(function (response) {
         that.setState({ results: response.data, error: 0 });
       })
