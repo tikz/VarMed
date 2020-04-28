@@ -1,13 +1,11 @@
 import React from "react";
 import "../../styles/components/sequence-viewer.scss";
-import PositionMapper from "./PositionMapper";
+import { ResultsContext } from "./ResultsContext";
 
 export default class SequenceViewer extends React.Component {
   constructor(props) {
     super(props);
     this.state = { pos: 0 };
-
-    this.posMap = new PositionMapper(this.props.res);
 
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.handleMouseLeave = this.handleMouseLeave.bind(this);
@@ -17,19 +15,23 @@ export default class SequenceViewer extends React.Component {
     var posText = this.state.zoomPositionElement.innerText;
     if (posText != this.state.pos) {
       var pos = parseInt(posText.slice(0, posText.length - 1));
-      this.props.highlightResidues(this.posMap.unpToPDB(pos));
+      this.context.structure.current.highlightResidues(
+        this.context.posMap.unpToPDB(pos)
+      );
       this.setState(() => ({ pos: posText }));
     }
   }
 
   handleMouseLeave() {
-    this.props.clearHighlight();
+    this.context.structure.current.clearHighlight();
   }
 
   componentDidMount() {
-    let res = this.props.res;
+    const structure = this.context.structure.current;
+    const res = this.context.results;
+    const posMap = this.context.posMap;
 
-    var FeatureViewer = require("feature-viewer");
+    const FeatureViewer = require("feature-viewer");
     this.fv = new FeatureViewer(res.UniProt.Sequence, "#fv", {
       showAxis: true,
       showSequence: true,
@@ -39,13 +41,12 @@ export default class SequenceViewer extends React.Component {
       zoomMax: 20,
     });
 
-    let that = this;
     this.fv.onFeatureSelected(function (d) {
-      let chain = d.detail.description.split(" ")[1];
-      that.props.select(
+      const chain = d.detail.description.split(" ")[1];
+      structure.selectFocus(
         chain,
-        d.detail.start + that.posMap.pdbOffsets[chain],
-        d.detail.end + that.posMap.pdbOffsets[chain]
+        d.detail.start + posMap.pdbOffsets[chain],
+        d.detail.end + posMap.pdbOffsets[chain]
       );
     });
 
@@ -57,9 +58,10 @@ export default class SequenceViewer extends React.Component {
   }
 
   loadFeatures() {
-    let res = this.props.res;
+    const posMap = this.context.posMap;
+    const res = this.context.results;
 
-    this.posMap.chains.forEach((chain) => {
+    posMap.chains.forEach((chain) => {
       let name = "Chain " + chain.id;
       this.fv.addFeature({
         data: [
@@ -80,8 +82,8 @@ export default class SequenceViewer extends React.Component {
             .filter((r) => r.Chain == chain.id)
             .map((r) => {
               return {
-                x: that.posMap.pdbToUnp(r.Chain, r.Position),
-                y: that.posMap.pdbToUnp(r.Chain, r.Position),
+                x: posMap.pdbToUnp(r.Chain, r.Position),
+                y: posMap.pdbToUnp(r.Chain, r.Position),
                 description: name,
               };
             }),
@@ -123,3 +125,4 @@ export default class SequenceViewer extends React.Component {
     );
   }
 }
+SequenceViewer.contextType = ResultsContext;

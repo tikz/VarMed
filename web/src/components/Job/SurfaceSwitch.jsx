@@ -1,5 +1,6 @@
 import { FormControlLabel, Switch } from "@material-ui/core";
 import React from "react";
+import { ResultsContext } from "./ResultsContext";
 
 export class SurfaceSwitch extends React.Component {
   constructor(props) {
@@ -9,7 +10,7 @@ export class SurfaceSwitch extends React.Component {
   }
   handleChange(e) {
     this.setState({ surface: e.target.checked });
-    this.props.showSurface(e.target.checked);
+    this.context.structure.current.showSurface(e.target.checked);
   }
   render() {
     return (
@@ -22,3 +23,4 @@ export class SurfaceSwitch extends React.Component {
     );
   }
 }
+SurfaceSwitch.contextType = ResultsContext;

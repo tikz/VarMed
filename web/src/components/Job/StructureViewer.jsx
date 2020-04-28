@@ -9,7 +9,7 @@ let Transform = LiteMol.Bootstrap.Tree.Transform;
 export default class StructureViewer extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { plugin: {}, res: {} };
+    this.state = { plugin: {} };
   }
 
   componentDidMount() {
@@ -27,8 +27,25 @@ export default class StructureViewer extends React.Component {
 
   load(res) {
     this.clear();
-    this.setState({ res: res });
 
+    function surfaceStyle(colors) {
+      return {
+        type: "Surface",
+        params: {
+          probeRadius: 0.4,
+          density: 2,
+          smoothing: 3,
+          isWireframe: false,
+        },
+        theme: {
+          template:
+            LiteMol.Bootstrap.Visualization.Molecule.Default
+              .UniformThemeTemplate,
+          transparency: { alpha: 0.2 },
+          colors: colors,
+        },
+      };
+    }
     let surfaceColors = LiteMol.Bootstrap.Immutable.Map()
       .set("Uniform", LiteMol.Visualization.Color.fromHex(0x0d6273))
       .set("Selection", LiteMol.Visualization.Color.fromHex(0xf15a29))
@@ -38,37 +55,9 @@ export default class StructureViewer extends React.Component {
       "Uniform",
       LiteMol.Visualization.Color.fromHex(0x00fffb)
     );
-    let polymerSurfaceStyle = {
-      type: "Surface",
-      params: {
-        probeRadius: 0.4,
-        density: 2,
-        smoothing: 3,
-        isWireframe: false,
-      },
-      theme: {
-        template:
-          LiteMol.Bootstrap.Visualization.Molecule.Default.UniformThemeTemplate,
-        transparency: { alpha: 0.2 },
-        colors: surfaceColors,
-      },
-    };
 
-    let hetSurfaceStyle = {
-      type: "Surface",
-      params: {
-        probeRadius: 0.4,
-        density: 2,
-        smoothing: 3,
-        isWireframe: false,
-      },
-      theme: {
-        template:
-          LiteMol.Bootstrap.Visualization.Molecule.Default.UniformThemeTemplate,
-        transparency: { alpha: 0.4 },
-        colors: hetColors,
-      },
-    };
+    let polymerSurfaceStyle = surfaceStyle(surfaceColors);
+    let hetSurfaceStyle = surfaceStyle(hetColors);
 
     let id = res.PDB.ID;
     let action = Transform.build()
@@ -157,23 +146,6 @@ export default class StructureViewer extends React.Component {
     );
   }
 
-  highlight(chain, start, end) {
-    this.clearHighlight();
-    var plugin = this.state.plugin;
-    var model = plugin.context.select("model")[0];
-    let query = LiteMol.Core.Structure.Query.sequence(
-      null,
-      chain,
-      { seqNumber: start },
-      { seqNumber: end }
-    );
-    LiteMol.Bootstrap.Command.Molecule.Highlight.dispatch(plugin.context, {
-      model,
-      query,
-      isOn: true,
-    });
-  }
-
   highlightResidues(residues) {
     this.clearHighlight();
     var plugin = this.state.plugin;
@@ -247,6 +219,16 @@ export default class StructureViewer extends React.Component {
       plugin.context,
       { entity: model, query: query }
     );
+  }
+
+  selectFocus(chain, start, end) {
+    this.focus(chain, start, end);
+    this.highlightResidues([
+      { Chain: chain, Position: start, PositionEnd: end },
+    ]);
+    if (start - end == 0) {
+      this.select(chain, start, end);
+    }
   }
 
   applyTheme() {
