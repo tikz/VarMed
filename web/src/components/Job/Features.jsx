@@ -1,8 +1,7 @@
 import { Divider, Grid } from "@material-ui/core";
 import React from "react";
 import "../../styles/components/features.scss";
-import ChipRes from "./ChipRes";
-import ChipHet from "./ChipHet";
+import { ChipRes, ChipHet } from "./FeatureChips";
 import { SurfaceSwitch } from "./SurfaceSwitch";
 import { ResultsContext } from "./ResultsContext";
 
