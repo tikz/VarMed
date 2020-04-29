@@ -3,8 +3,8 @@ import LiteMol from "litemol";
 import "litemol/dist/css/LiteMol-plugin.css";
 import "../../styles/components/structure-viewer.scss";
 
-let Transformer = LiteMol.Bootstrap.Entity.Transformer;
-let Transform = LiteMol.Bootstrap.Tree.Transform;
+const Transformer = LiteMol.Bootstrap.Entity.Transformer;
+const Transform = LiteMol.Bootstrap.Tree.Transform;
 
 export default class StructureViewer extends React.Component {
   constructor(props) {
@@ -27,37 +27,6 @@ export default class StructureViewer extends React.Component {
 
   load(res) {
     this.clear();
-
-    function surfaceStyle(colors) {
-      return {
-        type: "Surface",
-        params: {
-          probeRadius: 0.4,
-          density: 2,
-          smoothing: 3,
-          isWireframe: false,
-        },
-        theme: {
-          template:
-            LiteMol.Bootstrap.Visualization.Molecule.Default
-              .UniformThemeTemplate,
-          transparency: { alpha: 0.2 },
-          colors: colors,
-        },
-      };
-    }
-    let surfaceColors = LiteMol.Bootstrap.Immutable.Map()
-      .set("Uniform", LiteMol.Visualization.Color.fromHex(0x0d6273))
-      .set("Selection", LiteMol.Visualization.Color.fromHex(0xf15a29))
-      .set("Highlight", LiteMol.Visualization.Color.fromHex(0xff752b));
-
-    let hetColors = surfaceColors.set(
-      "Uniform",
-      LiteMol.Visualization.Color.fromHex(0x00fffb)
-    );
-
-    let polymerSurfaceStyle = surfaceStyle(surfaceColors);
-    let hetSurfaceStyle = surfaceStyle(hetColors);
 
     let id = res.PDB.ID;
     let action = Transform.build()
@@ -86,6 +55,21 @@ export default class StructureViewer extends React.Component {
       water: true,
     });
 
+    let surfaceStyle = {
+      type: "Surface",
+      params: {
+        probeRadius: 0.4,
+        density: 2,
+        smoothing: 3,
+        isWireframe: false,
+      },
+      theme: {
+        template:
+          LiteMol.Bootstrap.Visualization.Molecule.Default.UniformThemeTemplate,
+        transparency: { alpha: 0.2 },
+      },
+    };
+
     sel = action;
     sel
       .then(
@@ -99,7 +83,7 @@ export default class StructureViewer extends React.Component {
       )
       .then(
         Transformer.Molecule.CreateVisual,
-        { style: hetSurfaceStyle },
+        { style: surfaceStyle },
         { isHidden: true, ref: "surface-het" }
       );
 
@@ -116,13 +100,69 @@ export default class StructureViewer extends React.Component {
       )
       .then(
         Transformer.Molecule.CreateVisual,
-        { style: polymerSurfaceStyle },
+        { style: surfaceStyle },
         { isHidden: true, ref: "surface" }
       );
 
     this.state.plugin.applyTransform(action).then(() => {
-      this.applyTheme();
+      this.applyTheme("polymer-visual", this.createTheme());
+      this.applyTheme("surface", this.createTheme(0.2, 0x0d6273));
+      this.applyTheme("surface-het", this.createTheme(0.4, 0x00fffb));
     });
+
+    this.state.plugin.command(LiteMol.Bootstrap.Command.Layout.SetState, {
+      collapsedControlsLayout:
+        LiteMol.Bootstrap.Components.CollapsedControlsLayout.Landscape,
+      hideControls: true,
+    });
+  }
+
+  applyTheme(ref, theme) {
+    var plugin = this.state.plugin;
+
+    const visuals = plugin.selectEntities(
+      LiteMol.Bootstrap.Tree.Selection.byRef(ref)
+        .subtree()
+        .ofType(LiteMol.Bootstrap.Entity.Molecule.Visual)
+    );
+
+    for (const v of visuals) {
+      plugin.command(LiteMol.Bootstrap.Command.Visual.UpdateBasicTheme, {
+        visual: v,
+        theme,
+      });
+    }
+  }
+
+  createTheme(alpha = 1, uniform = 0x006870) {
+    var plugin = this.state.plugin;
+    let model = plugin.context.select("model")[0];
+
+    const fallbackColor = LiteMol.Visualization.Color.fromHex(uniform);
+    const selectionColor = LiteMol.Visualization.Color.fromHex(0xf15a29);
+    const highlightColor = LiteMol.Visualization.Color.fromHex(0xff752b);
+    const mutedColor = LiteMol.Visualization.Color.fromHex(0x163d40);
+
+    let colors = new Map();
+    colors.set("A", mutedColor);
+    colors.set("C", mutedColor);
+    colors.set("Uniform", fallbackColor);
+    colors.set("Selection", selectionColor);
+    colors.set("Highlight", highlightColor);
+
+    let theme = LiteMol.Bootstrap.Visualization.Molecule.createColorMapThemeProvider(
+      (m) => ({
+        index: m.data.atoms.chainIndex,
+        property: m.data.chains.asymId,
+      }),
+      colors,
+      fallbackColor
+    )(model, {
+      colors: colors,
+      transparency: { alpha: alpha },
+      isSticky: true,
+    });
+    return theme;
   }
 
   showSurface(visible) {
@@ -229,35 +269,6 @@ export default class StructureViewer extends React.Component {
     if (start - end == 0) {
       this.select(chain, start, end);
     }
-  }
-
-  applyTheme() {
-    var plugin = this.state.plugin;
-    let colors = LiteMol.Core.Utils.FastMap.create();
-    colors.set("Uniform", LiteMol.Visualization.Color.fromHex(0x006870));
-    colors.set("Selection", LiteMol.Visualization.Color.fromHex(0xf15a29));
-    colors.set("Highlight", LiteMol.Visualization.Color.fromHex(0xff752b));
-    let theme = LiteMol.Bootstrap.Visualization.Molecule.uniformThemeProvider(
-      void 0,
-      { colors }
-    );
-
-    const visuals = plugin.selectEntities(
-      LiteMol.Bootstrap.Tree.Selection.byRef("polymer-visual")
-        .subtree()
-        .ofType(LiteMol.Bootstrap.Entity.Molecule.Visual)
-    );
-    for (const v of visuals) {
-      plugin.command(LiteMol.Bootstrap.Command.Visual.UpdateBasicTheme, {
-        visual: v,
-        theme,
-      });
-    }
-    plugin.command(LiteMol.Bootstrap.Command.Layout.SetState, {
-      collapsedControlsLayout:
-        LiteMol.Bootstrap.Components.CollapsedControlsLayout.Landscape,
-      hideControls: true,
-    });
   }
 
   render() {
