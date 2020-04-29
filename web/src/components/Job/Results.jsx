@@ -22,30 +22,40 @@ export default class Results extends React.Component {
   constructor(props) {
     super(props);
     this.structureRef = React.createRef();
+    this.sequenceRef = React.createRef();
 
-    this.state = {
-      pdbID: this.props.pdbID,
-      jobID: this.props.jobID,
-      results: {},
-    };
+    this.state = { results: {} };
 
-    this.pdbChange = this.pdbChange.bind(this);
-
-    this.pdbLoad(this.props.pdbID);
+    this.handlePDBChange = this.handlePDBChange.bind(this);
   }
 
-  pdbChange(e) {
-    let id = e.target.value;
-    this.pdbLoad(id);
+  componentDidMount() {
+    this.pdbLoadFirst();
   }
 
-  pdbLoad(id) {
+  componentDidUpdate(prevProps) {
+    if (this.props.jobID != prevProps.jobID) {
+      this.pdbLoadFirst();
+    }
+  }
+
+  pdbLoadFirst() {
+    this.pdbLoad(this.props.jobResults.Request.pdbs[0]);
+  }
+
+  handlePDBChange(e) {
+    this.pdbLoad(e.target.value);
+  }
+
+  pdbLoad(pdbID) {
+    const jobID = this.props.jobID;
     let that = this;
     axios
-      .get(API_URL + "/api/job/" + this.state.jobID + "/" + id)
+      .get(API_URL + "/api/job/" + jobID + "/" + pdbID)
       .then(function (response) {
-        that.setState({ results: response.data, pdb: id });
+        that.setState({ results: response.data, pdb: pdbID });
         that.structureRef.current.load(response.data);
+        that.sequenceRef.current.load();
       });
   }
 
@@ -76,9 +86,9 @@ export default class Results extends React.Component {
                   <Select
                     label="PDB"
                     value={this.state.pdb}
-                    onChange={this.pdbChange}
+                    onChange={this.handlePDBChange}
                   >
-                    {this.props.results.Request.pdbs.map((pdbID, index) => {
+                    {this.props.jobResults.Request.pdbs.map((pdbID, index) => {
                       return (
                         <MenuItem key={index} value={pdbID}>
                           {pdbID}
@@ -95,18 +105,14 @@ export default class Results extends React.Component {
           </Box>
         </Container>
 
-        <StructureViewer
-          ref={this.structureRef}
-          pdbID={this.state.pdbID}
-          res={this.state.results}
-        />
+        <StructureViewer ref={this.structureRef} />
 
         <Container>
           <Box>
             <Features />
           </Box>
           <Box>
-            <SequenceViewer />
+            <SequenceViewer ref={this.sequenceRef} />
           </Box>
         </Container>
       </ResultsContext.Provider>

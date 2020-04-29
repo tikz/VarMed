@@ -26,10 +26,10 @@ export default class StructureViewer extends React.Component {
     });
   }
 
-  load(res) {
+  load() {
     this.clear();
 
-    let id = res.PDB.ID;
+    let id = this.context.results.PDB.ID;
     let action = Transform.build()
       .add(this.state.plugin.context.tree.root, Transformer.Data.Download, {
         url: API_URL + `/api/structure/cif/${id}`,

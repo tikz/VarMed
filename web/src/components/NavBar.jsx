@@ -2,6 +2,7 @@ import { AppBar, Button, Toolbar, Typography } from "@material-ui/core";
 import React from "react";
 import { Link } from "react-router-dom";
 import "../styles/components/nav-bar.scss";
+import MyJobs from "./MyJobs";
 
 export default function NavBar() {
   return (
@@ -14,10 +15,7 @@ export default function NavBar() {
           <Typography variant="h6" className="nav-title">
             VarQ
           </Typography>
-
-          <Button className="myJobs" variant="outlined" color="inherit">
-            My Jobs
-          </Button>
+          <MyJobs />
           <Link to="/new-job">
             <Button className="glowButton">New Job</Button>
           </Link>
