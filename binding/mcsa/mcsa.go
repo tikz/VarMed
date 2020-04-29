@@ -46,6 +46,7 @@ type residueChain struct {
 	DomainName        string `json:"domain_name"`
 	DomainCathID      string `json:"domain_cath_id"`
 }
+
 type residueSequence struct {
 	UniProtID   string `json:"uniprot_id"`
 	Code        string `json:"code"`
@@ -55,6 +56,7 @@ type residueSequence struct {
 
 // GetPositions queries M-CSA and fetches catalytic residue UniProt positions for the given PDB.
 func GetPositions(unp *uniprot.UniProt, pdb *pdb.PDB, msg func(string)) (*Catalytic, error) {
+	cs := &Catalytic{}
 	url := "https://www.ebi.ac.uk/thornton-srv/m-csa/api/entries/?" + url.Values{
 		"format":                                 {"json"},
 		"entries.proteins.sequences.uniprot_ids": {unp.ID},
@@ -62,20 +64,19 @@ func GetPositions(unp *uniprot.UniProt, pdb *pdb.PDB, msg func(string)) (*Cataly
 
 	raw, err := http.Get(url)
 	if err != nil {
-		return nil, nil // TODO: handle 404
+		return cs, nil // TODO: handle 404
 	}
 	msg("downloaded M-CSA data")
 
 	response := searchAPIResponse{}
 	err = json.Unmarshal(raw, &response)
 	if err != nil {
-		return nil, err
+		return cs, err
 	}
 
-	cs := Catalytic{}
 	if response.Count == 0 {
 		msg("no M-CSA residues found")
-		return &cs, nil
+		return cs, nil
 	}
 
 	for _, res := range response.Results[0].Residues {
@@ -91,5 +92,5 @@ func GetPositions(unp *uniprot.UniProt, pdb *pdb.PDB, msg func(string)) (*Cataly
 
 	msg(fmt.Sprintf("%d M-CSA residues found", len(cs.Residues)))
 
-	return &cs, nil
+	return cs, nil
 }
