@@ -52,8 +52,8 @@ func Run(p *pdb.PDB, msg func(string)) (pockets []*Pocket, err error) {
 }
 
 func walkPocketDir(crystal *pdb.PDB, dir string, msg func(string)) (pockets []*Pocket, err error) {
+	n := 0
 	err = filepath.Walk(dir, func(file string, info os.FileInfo, err error) error {
-		n := 0
 		// For each Fpocket result PDB file
 		if strings.Contains(file, "_atm.pdb") {
 			data, err := ioutil.ReadFile(file)
@@ -91,9 +91,9 @@ func walkPocketDir(crystal *pdb.PDB, dir string, msg func(string)) (pockets []*P
 			n++
 		}
 
-		msg(fmt.Sprintf("found %d pockets, %d suitable", n, len(pockets)))
 		return nil
 	})
+	msg(fmt.Sprintf("found %d pockets, %d suitable", n, len(pockets)))
 
 	return pockets, err
 }
