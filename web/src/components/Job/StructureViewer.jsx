@@ -1,7 +1,8 @@
-import React from "react";
 import LiteMol from "litemol";
 import "litemol/dist/css/LiteMol-plugin.css";
+import React from "react";
 import "../../styles/components/structure-viewer.scss";
+import { ResultsContext } from "./ResultsContext";
 
 const Transformer = LiteMol.Bootstrap.Entity.Transformer;
 const Transform = LiteMol.Bootstrap.Tree.Transform;
@@ -144,8 +145,21 @@ export default class StructureViewer extends React.Component {
     const mutedColor = LiteMol.Visualization.Color.fromHex(0x163d40);
 
     let colors = new Map();
-    colors.set("A", mutedColor);
-    colors.set("C", mutedColor);
+
+    let res = this.context.results;
+    let SIFTSUnp = res.PDB.SIFTS.UniProt;
+    let unpID = res.UniProt.ID;
+    Object.keys(SIFTSUnp)
+      .filter((k) => {
+        return unpID != k;
+      })
+      .forEach((id) => {
+        SIFTSUnp[id].mappings.forEach((chain) => {
+          console.log(chain);
+          colors.set(chain.chain_id, mutedColor);
+        });
+      });
+
     colors.set("Uniform", fallbackColor);
     colors.set("Selection", selectionColor);
     colors.set("Highlight", highlightColor);
@@ -275,3 +289,4 @@ export default class StructureViewer extends React.Component {
     return <div id="litemol" />;
   }
 }
+StructureViewer.contextType = ResultsContext;
