@@ -146,16 +146,13 @@ export default class StructureViewer extends React.Component {
 
     let colors = new Map();
 
-    let res = this.context.results;
-    let SIFTSUnp = res.PDB.SIFTS.UniProt;
-    let unpID = res.UniProt.ID;
+    let SIFTSUnp = this.context.results.PDB.SIFTS.UniProt;
     Object.keys(SIFTSUnp)
       .filter((k) => {
-        return unpID != k;
+        return this.context.results.UniProt.ID != k;
       })
       .forEach((id) => {
         SIFTSUnp[id].mappings.forEach((chain) => {
-          console.log(chain);
           colors.set(chain.chain_id, mutedColor);
         });
       });
