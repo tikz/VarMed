@@ -54,11 +54,7 @@ export class Features extends React.Component {
       );
     });
 
-    const hets = res.PDB.HetGroups.map((hetID) => {
-      if (hetID != "HOH") {
-        return <ChipHet label={hetID} key={hetID} hetID={hetID} />;
-      }
-    });
+    const hets = res.PDB.HetGroups;
 
     const interaction = chip("Interface", res.Interaction.Residues);
     const buried = chip("Buried", res.Exposure.Residues);
@@ -76,7 +72,12 @@ export class Features extends React.Component {
               );
             })}
             <Divider orientation="vertical" flexItem />
-            {hets}
+            {hets &&
+              hets.map((hetID) => {
+                if (hetID != "HOH") {
+                  return <ChipHet label={hetID} key={hetID} hetID={hetID} />;
+                }
+              })}
             <Divider orientation="vertical" flexItem />
             {interaction}
             {buried}
