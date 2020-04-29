@@ -1,9 +1,10 @@
-import { createMuiTheme, ThemeProvider } from "@material-ui/core";
+import { createMuiTheme, ThemeProvider, Toolbar } from "@material-ui/core";
 import React from "react";
 import { Route, Switch } from "react-router-dom";
 import Index from "./Index";
 import NewJob from "./NewJob/NewJob";
 import Job from "./Job/Job";
+import NavBar from "./NavBar";
 
 const theme = createMuiTheme({
   palette: {
@@ -22,6 +23,8 @@ export default class App extends React.Component {
   render() {
     return (
       <ThemeProvider theme={theme}>
+        <NavBar />
+        <Toolbar />
         <Switch>
           <Route exact path="/" component={Index} />
           <Route path="/new-job" component={NewJob} />

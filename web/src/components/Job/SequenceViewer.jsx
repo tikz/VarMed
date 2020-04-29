@@ -2,6 +2,8 @@ import React from "react";
 import "../../styles/components/sequence-viewer.scss";
 import { ResultsContext } from "./ResultsContext";
 
+const FeatureViewer = require("feature-viewer");
+
 export default class SequenceViewer extends React.Component {
   constructor(props) {
     super(props);
@@ -26,12 +28,16 @@ export default class SequenceViewer extends React.Component {
     this.context.structure.current.clearHighlight();
   }
 
-  componentDidMount() {
+  load() {
+    let div = document.getElementById("fv");
+    if (div !== null) {
+      div.innerHTML = "";
+    }
+
     const structure = this.context.structure.current;
     const res = this.context.results;
     const posMap = this.context.posMap;
 
-    const FeatureViewer = require("feature-viewer");
     this.fv = new FeatureViewer(res.UniProt.Sequence, "#fv", {
       showAxis: true,
       showSequence: true,
@@ -53,13 +59,6 @@ export default class SequenceViewer extends React.Component {
     this.setState(() => ({
       zoomPositionElement: document.getElementById("zoomPosition"),
     }));
-
-    this.loadFeatures();
-  }
-
-  loadFeatures() {
-    const posMap = this.context.posMap;
-    const res = this.context.results;
 
     posMap.chains.forEach((chain) => {
       let name = "Chain " + chain.id;

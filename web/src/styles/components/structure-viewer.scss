@@ -22,6 +22,11 @@
 
 .lm-overlay {
   background: #1c1e20 !important;
+  z-index: 99 !important;
+}
+
+.lm-task-state {
+  margin-top: 100px !important;
 }
 
 #litemol {

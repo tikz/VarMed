@@ -5,7 +5,6 @@ import {
   Grid,
   Grow,
   Snackbar,
-  Toolbar,
   Typography,
 } from "@material-ui/core";
 import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos";
@@ -13,16 +12,15 @@ import MuiAlert from "@material-ui/lab/Alert";
 import axios from "axios";
 import React from "react";
 import { Redirect } from "react-router-dom";
-import NavBar from "../NavBar";
 import PDBPicker from "./PDBPicker";
 import SendBar from "./SendBar";
 import { UniProtInput } from "./UniProtInput";
 import { Variations } from "./Variations";
-import "../../styles/components/new-job.scss";
 
 function Alert(props) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
 }
+
 export default class NewJob extends React.Component {
   constructor(props) {
     super(props);
@@ -103,8 +101,6 @@ export default class NewJob extends React.Component {
       (this.state.variations.length > 0 || this.state.clinvar);
     return (
       <Box>
-        <NavBar />
-        <Toolbar />
         <Container>
           <Typography variant="h2" gutterBottom className="title">
             New Job
