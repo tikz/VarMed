@@ -1,3 +1,6 @@
+import { Box, IconButton } from "@material-ui/core";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import LiteMol from "litemol";
 import "litemol/dist/css/LiteMol-plugin.css";
 import React from "react";
@@ -10,7 +13,9 @@ const Transform = LiteMol.Bootstrap.Tree.Transform;
 export default class StructureViewer extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { plugin: {} };
+    this.litemolRef = React.createRef();
+    this.state = { plugin: {}, collapsed: false };
+    this.collapse = this.collapse.bind(this);
   }
 
   componentDidMount() {
@@ -282,8 +287,24 @@ export default class StructureViewer extends React.Component {
     }
   }
 
+  collapse() {
+    this.setState({ collapsed: this.state.collapsed ? false : true });
+    this.litemolRef.current.classList.toggle("collapsed");
+  }
+
   render() {
-    return <div id="litemol" />;
+    return (
+      <Box>
+        <div id="litemol" ref={this.litemolRef} />
+        <IconButton
+          aria-label="collapse"
+          className="collapse-button"
+          onClick={this.collapse}
+        >
+          {this.state.collapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+        </IconButton>
+      </Box>
+    );
   }
 }
 StructureViewer.contextType = ResultsContext;

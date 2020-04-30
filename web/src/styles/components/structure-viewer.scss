@@ -38,6 +38,13 @@
   transition: all 0.2s ease;
 }
 
-#litemol .open {
-  height: 500px;
+.collapsed {
+  height: 100px !important;
+}
+
+.collapse-button {
+  right: 10px;
+  float: right;
+  position: relative;
+  top: -60px;
 }
