@@ -19,6 +19,7 @@ const (
 // JobRequest represents a single job request from an user,
 // contains the inputs and extra client data.
 type JobRequest struct {
+	Name          string   `json:"name"`
 	UniProtID     string   `json:"uniprot_id"`
 	PDBIDs        []string `json:"pdbs"`
 	ClinVar       bool     `json:"clinvar"`

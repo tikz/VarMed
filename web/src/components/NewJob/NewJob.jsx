@@ -6,6 +6,7 @@ import {
   Grow,
   Snackbar,
   Typography,
+  Toolbar,
 } from "@material-ui/core";
 import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos";
 import MuiAlert from "@material-ui/lab/Alert";
@@ -16,6 +17,7 @@ import PDBPicker from "./PDBPicker";
 import SendBar from "./SendBar";
 import { UniProtInput } from "./UniProtInput";
 import { Variations } from "./Variations";
+import NavBar from "../NavBar";
 
 function Alert(props) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -66,6 +68,7 @@ export default class NewJob extends React.Component {
     let that = this;
     axios
       .post(API_URL + "/api/new-job", {
+        name: this.state.unpData.entryName,
         uniprot_id: this.state.unpData.id,
         pdbs: this.state.pdbs,
         email: email,
@@ -101,6 +104,8 @@ export default class NewJob extends React.Component {
       (this.state.variations.length > 0 || this.state.clinvar);
     return (
       <Box>
+        <NavBar />
+        <Toolbar />
         <Container>
           <Typography variant="h2" gutterBottom className="title">
             New Job
