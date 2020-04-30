@@ -4,7 +4,7 @@ const CopyPlugin = require("copy-webpack-plugin");
 
 const API_URL = {
   production: JSON.stringify(""),
-  development: JSON.stringify("http://localhost:8888"),
+  development: JSON.stringify(""),
 };
 
 const environment =
