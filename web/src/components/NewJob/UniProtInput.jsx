@@ -42,8 +42,10 @@ export class UniProtInput extends React.Component {
         .get(API_URL + "/api/uniprot/" + e.target.value)
         .then(function (response) {
           let data = response.data;
+          let entryName = [data.gene, data.name, data.organism].join(" - ");
+          data.entryName = entryName;
           that.setState({
-            entryName: [data.gene, data.name, data.organism].join(" - "),
+            entryName: entryName,
             unpData: data,
           });
           that.props.setUnpData(data);

@@ -1,19 +1,31 @@
-import { DialogContent, Grid } from "@material-ui/core";
-import Avatar from "@material-ui/core/Avatar";
-import Button from "@material-ui/core/Button";
-import Dialog from "@material-ui/core/Dialog";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemAvatar from "@material-ui/core/ListItemAvatar";
-import Typography from "@material-ui/core/Typography";
+import {
+  Avatar,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemIcon,
+  ListItemSecondaryAction,
+  Typography,
+} from "@material-ui/core";
+import DeleteIcon from "@material-ui/icons/Delete";
 import NotesIcon from "@material-ui/icons/Notes";
 import moment from "moment";
 import React from "react";
 import { withRouter } from "react-router-dom";
 
 function MyJobsDialog(props) {
+  const getJobs = () => {
+    return JSON.parse(window.localStorage.getItem("jobs"));
+  };
+
   const { onClose, open } = props;
+  const [render, setRender] = React.useState(0);
 
   const handleClose = () => {
     onClose();
@@ -23,16 +35,30 @@ function MyJobsDialog(props) {
     onClose("/job/" + jobID);
   };
 
-  let jobs = JSON.parse(window.localStorage.getItem("jobs"));
-  var jobsList;
-  if (jobs === null) {
+  const deleteJob = (jobID) => {
+    let jobsStorage = getJobs();
+    window.localStorage.removeItem("jobs");
+    window.localStorage.setItem(
+      "jobs",
+      JSON.stringify(
+        jobsStorage.filter((j) => {
+          return j.id != jobID;
+        })
+      )
+    );
+    setRender(render + 1);
+  };
+
+  const jobs = getJobs();
+  let jobsList;
+  if (jobs === null || jobs.length == 0) {
     jobsList = (
       <DialogContent>
         <Typography variant="button" display="block" gutterBottom>
           No jobs found.
         </Typography>
         <Typography variant="caption" display="block" gutterBottom>
-          Start a new job or open a results page and it will show up here.
+          Start a new job or open a results page, it will show up here.
         </Typography>
       </DialogContent>
     );
@@ -44,23 +70,22 @@ function MyJobsDialog(props) {
           onClick={() => handleListItemClick(job.id)}
           key={job.id}
         >
-          <Grid container>
-            <Grid item>
-              <Grid container direction="column">
-                <Grid item>
-                  <ListItemAvatar>
-                    <Avatar>
-                      <NotesIcon />
-                    </Avatar>
-                  </ListItemAvatar>
-                </Grid>
-                <Grid item>
-                  <Typography variant="caption">
-                    {job.id.slice(0, 6)}
-                  </Typography>
-                </Grid>
+          <ListItemIcon>
+            <Grid container direction="column">
+              <Grid item>
+                <ListItemAvatar>
+                  <Avatar>
+                    <NotesIcon />
+                  </Avatar>
+                </ListItemAvatar>
+              </Grid>
+              <Grid item>
+                <Typography variant="caption">{job.id.slice(0, 6)}</Typography>
               </Grid>
             </Grid>
+          </ListItemIcon>
+          <Grid container>
+            <Grid item></Grid>
             <Grid item>
               <Grid container direction="column">
                 <Grid item>
@@ -79,13 +104,19 @@ function MyJobsDialog(props) {
               </Grid>
             </Grid>
           </Grid>
+
+          <ListItemSecondaryAction>
+            <IconButton aria-label="delete" onClick={() => deleteJob(job.id)}>
+              <DeleteIcon />
+            </IconButton>
+          </ListItemSecondaryAction>
         </ListItem>
       );
     });
   }
 
   return (
-    <Dialog onClose={handleClose} open={open}>
+    <Dialog onClose={handleClose} open={open} maxWidth="xs" fullWidth={true}>
       <DialogTitle>My jobs</DialogTitle>
       <List>{jobsList}</List>
     </Dialog>

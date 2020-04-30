@@ -1,9 +1,10 @@
-import { Box, Snackbar } from "@material-ui/core";
+import { Box, Snackbar, Toolbar } from "@material-ui/core";
 import MuiAlert from "@material-ui/lab/Alert";
 import axios from "axios";
 import React from "react";
 import Results from "./Results";
 import StatusConsole from "./StatusConsole";
+import NavBar from "../NavBar";
 
 function Alert(props) {
   return <MuiAlert elevation={11} variant="filled" {...props} />;
@@ -59,9 +60,9 @@ export default class Job extends React.Component {
     const req = this.state.results.Request;
     jobs.unshift({
       id: jobID,
-      name: req.uniprot_id,
+      name: req.name,
       pdbs: req.pdbs,
-      date: req.Time,
+      date: Date.now(),
     });
 
     this.setState({ added: true });
@@ -83,6 +84,8 @@ export default class Job extends React.Component {
     if (this.state.results != {}) {
       return (
         <Box>
+          <NavBar />
+          <Toolbar />
           {(this.state.results.Status == 0 ||
             this.state.results.Status == 1) && (
             <StatusConsole jobID={jobID} reload={this.loadResults} />
