@@ -18,7 +18,10 @@ type Atom struct {
 	X             float64
 	Y             float64
 	Z             float64
-	// TODO: add remaining
+	Occupancy     float64
+	TempFactor    float64
+	Element       string
+	Charge        string
 }
 
 // extractPDBATMRecords extracts either ATOM or HETATM records.
@@ -43,6 +46,10 @@ func (pdb *PDB) extractPDBATMRecords(recordName string) ([]*Atom, error) {
 		atom.X, _ = strconv.ParseFloat(strings.TrimSpace(match[30:38]), 64)
 		atom.Y, _ = strconv.ParseFloat(strings.TrimSpace(match[38:46]), 64)
 		atom.Z, _ = strconv.ParseFloat(strings.TrimSpace(match[46:54]), 64)
+		atom.Occupancy, _ = strconv.ParseFloat(strings.TrimSpace(match[54:60]), 64)
+		atom.TempFactor, _ = strconv.ParseFloat(strings.TrimSpace(match[60:66]), 64)
+		atom.Element = strings.TrimSpace(match[76:78])
+		atom.Charge = strings.TrimSpace(match[78:80])
 
 		atoms = append(atoms, &atom)
 
