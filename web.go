@@ -11,8 +11,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// ResponseUniProt represents some basic data from an UniProt accession.
-// It is used to validate the user input in the New Job form.
+// ResponseUniProt contains important fields from an UniProt entry.
 type ResponseUniProt struct {
 	ID       string   `json:"id"`
 	Sequence string   `json:"sequence"`
@@ -23,6 +22,7 @@ type ResponseUniProt struct {
 }
 
 // UniProtEndpoint handles GET /api/uniprot/:unpID
+// Fetches and returns fields from an UniProt entry.
 func UniProtEndpoint(c *gin.Context) {
 	id := c.Param("unpID")
 
@@ -45,7 +45,7 @@ func UniProtEndpoint(c *gin.Context) {
 }
 
 // JobEndpoint handles GET /api/job/:jobID
-// Returns general info about a job.
+// Returns general status and request info about a job.
 func JobEndpoint(c *gin.Context) {
 	id := c.Param("jobID")
 	queue := c.MustGet("queue").(*Queue)
@@ -86,6 +86,7 @@ func JobPDBEndpoint(c *gin.Context) {
 }
 
 // NewJobEndpoint handles POST /api/new-job
+// Starts a new job.
 func NewJobEndpoint(c *gin.Context) {
 	req := JobRequest{}
 	c.BindJSON(&req)
@@ -182,11 +183,11 @@ func httpServe() {
 
 	// API endpoints
 	r.GET("/api/uniprot/:unpID", UniProtEndpoint)
-	r.POST("/api/new-job", NewJobEndpoint)
 	r.GET("/api/job/:jobID", JobEndpoint)
 	r.GET("/api/job/:jobID/:pdbID", JobPDBEndpoint)
 	r.GET("/api/structure/cif/:pdbID", CIFEndpoint)
 	r.GET("/ws/:jobID", WSProcessEndpoint)
+	r.POST("/api/new-job", NewJobEndpoint)
 
 	// Let React Router manage all root paths not declared here
 	r.NoRoute(func(c *gin.Context) {
