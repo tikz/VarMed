@@ -56,9 +56,9 @@ func NewPDBFromID(pdbID string) (PDB, error) {
 	return pdb, err
 }
 
-// NewPDBNoMetadata constructs a new instance from raw bytes, and only extracts ATOM records.
+// NewPDBFromRaw constructs a new instance from raw bytes, and only extracts ATOM records.
 // This is useful for parsing PDB output files generated from external tools.
-func NewPDBNoMetadata(raw []byte) (*PDB, error) {
+func NewPDBFromRaw(raw []byte) (*PDB, error) {
 	pdb := PDB{RawPDB: raw}
 
 	err := pdb.ExtractResidues()
