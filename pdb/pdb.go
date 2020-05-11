@@ -84,6 +84,7 @@ func (pdb *PDB) Load() error {
 	return nil
 }
 
+// Parse parses the raw PDB text.
 func (pdb *PDB) Parse() error {
 	err := pdb.Extract()
 	if err != nil {

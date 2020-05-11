@@ -16,8 +16,8 @@ const (
 	statusError   = 4
 )
 
-// JobRequest represents a single job request from an user,
-// contains the inputs and extra client data.
+// JobRequest represents a job request from an user.
+// Contains the user input and additional details.
 type JobRequest struct {
 	Name          string   `json:"name"`
 	UniProtID     string   `json:"uniprot_id"`
@@ -31,6 +31,7 @@ type JobRequest struct {
 	Time  time.Time
 }
 
+// Job represents the input and outputs of a single job ran by the pipeline.
 type Job struct {
 	ID       string
 	Request  *JobRequest
@@ -55,6 +56,7 @@ func (j *Job) generateID() string { // TODO: include variations in hash after im
 	return hex.EncodeToString(hash[:])
 }
 
+// NewJob returns a new job instance.
 func NewJob(request *JobRequest) Job {
 	j := Job{Request: request}
 
@@ -63,6 +65,7 @@ func NewJob(request *JobRequest) Job {
 	return j
 }
 
+// Process runs the pipeline for the job.
 func (j *Job) Process() {
 	j.Status = statusProcess
 	j.Started = time.Now()
@@ -92,6 +95,7 @@ func (j *Job) Process() {
 	j.Status = statusSaved
 }
 
+// fail handles the given error message and updates the status.
 func (j *Job) fail(err error) {
 	j.msgs = append(j.msgs, err.Error())
 	j.Status = statusError

@@ -7,8 +7,6 @@ import (
 	"time"
 )
 
-// TODO: maybe interface Job and package this
-
 // Queue represents a job queue.
 type Queue struct {
 	jobs     []*Job
@@ -39,32 +37,12 @@ func NewQueue(workers int) *Queue {
 	return &queue
 }
 
-// posMsg informs all jobs in the queue with a message of their position.
-func (q *Queue) posMsg() {
-	for _, j := range q.jobs {
-		pos := q.GetJobPosition(j) - q.nWorkers + 1
-		if pos > 0 {
-			t := time.Now().Format("15:04:05-0700")
-			m := fmt.Sprintf(t+" "+"Awaiting in queue. Position #%d", pos)
-			j.msgs = append(j.msgs, m)
-		}
-	}
-}
-
-func (q *Queue) worker() {
-	for j := range q.jobsCh {
-		j.Process()
-		q.Delete(j)
-		q.posMsg()
-	}
-}
-
 // Length returns the number of pending jobs currently in the queue.
 func (q *Queue) Length() int {
 	return len(q.jobs)
 }
 
-// Add adds a new job at the end of the queue.
+// Add inserts a new job at the end of the queue.
 func (q *Queue) Add(job *Job) {
 	q.mux.Lock()
 	q.jobs = append(q.jobs, job)
@@ -90,7 +68,7 @@ func (q *Queue) GetJobPosition(job *Job) int {
 	return -1
 }
 
-// GetJob returns a job in the queue, given an ID.
+// GetJob returns a job in the queue, given a job ID.
 func (q *Queue) GetJob(id string) (*Job, error) {
 	for _, j := range q.jobs {
 		if j.ID == id {
@@ -98,4 +76,25 @@ func (q *Queue) GetJob(id string) (*Job, error) {
 		}
 	}
 	return nil, errors.New("not found")
+}
+
+// posMsg informs all jobs in the queue with a message of their position.
+func (q *Queue) posMsg() {
+	for _, j := range q.jobs {
+		pos := q.GetJobPosition(j) - q.nWorkers + 1
+		if pos > 0 {
+			t := time.Now().Format("15:04:05-0700")
+			m := fmt.Sprintf(t+" "+"Awaiting in queue. Position #%d", pos)
+			j.msgs = append(j.msgs, m)
+		}
+	}
+}
+
+// worker does the processing of jobs in the queue.
+func (q *Queue) worker() {
+	for j := range q.jobsCh {
+		j.Process()
+		q.Delete(j)
+		q.posMsg()
+	}
 }
