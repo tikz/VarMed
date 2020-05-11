@@ -24,7 +24,7 @@ export default class Job extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.state.results = {};
+    this.setState({ results: {} });
     this.loadResults(nextProps);
   }
 
@@ -81,31 +81,27 @@ export default class Job extends React.Component {
       return <h3>{this.state.error.message}</h3>;
     }
 
-    if (this.state.results != {}) {
-      return (
-        <Box>
-          <NavBar />
-          <Toolbar />
-          {(this.state.results.Status == 0 ||
-            this.state.results.Status == 1) && (
-            <StatusConsole jobID={jobID} reload={this.loadResults} />
-          )}
-          {(this.state.results.Status == 2 ||
-            this.state.results.Status == 3) && (
-            <Results jobID={jobID} jobResults={this.state.results} />
-          )}
-          <Snackbar
-            open={this.state.added}
-            autoHideDuration={3000}
-            onClose={this.handleAddedClose}
-            anchorOrigin={{ vertical: "top", horizontal: "center" }}
-          >
-            <Alert onClose={this.handleAddedClose} severity="success">
-              Added to My Jobs
-            </Alert>
-          </Snackbar>
-        </Box>
-      );
-    }
+    return (
+      <Box>
+        <NavBar />
+        <Toolbar />
+        {(this.state.results.Status == 0 || this.state.results.Status == 1) && (
+          <StatusConsole jobID={jobID} reload={this.loadResults} />
+        )}
+        {(this.state.results.Status == 2 || this.state.results.Status == 3) && (
+          <Results jobID={jobID} jobResults={this.state.results} />
+        )}
+        <Snackbar
+          open={this.state.added}
+          autoHideDuration={3000}
+          onClose={this.handleAddedClose}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <Alert onClose={this.handleAddedClose} severity="success">
+            Added to My Jobs
+          </Alert>
+        </Snackbar>
+      </Box>
+    );
   }
 }

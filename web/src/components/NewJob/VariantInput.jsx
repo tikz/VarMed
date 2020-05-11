@@ -1,13 +1,5 @@
-import {
-  Grid,
-  Box,
-  Chip,
-  TextField,
-  IconButton,
-  Select,
-  MenuItem,
-} from "@material-ui/core";
-import { Add, FilterTiltShiftSharp } from "@material-ui/icons";
+import { Box, Grid, IconButton, TextField } from "@material-ui/core";
+import { Add } from "@material-ui/icons";
 import React from "react";
 import ChipArray from "./ChipArray";
 
