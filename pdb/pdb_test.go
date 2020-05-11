@@ -143,7 +143,6 @@ func TestMappings(t *testing.T) {
 
 	pdb.ID = "1mso"
 	uniProtID := "P01308"
-	// uniProtSequence := "MALWMRLLPLLALLALWGPDPAAAFVNQHLCGSHLVEALYLVCGERGFFYTPKTRREAEDLQVGQVELGGGPGAGSLQPLALEGSLQKRGIVEQCCTSICSLYQLENYCN"
 
 	err = pdb.getSIFTSMappings()
 	if err != nil {
