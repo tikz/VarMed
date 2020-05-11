@@ -76,7 +76,6 @@ export default class StructureViewer extends React.Component {
       },
     };
 
-    sel = action;
     sel
       .then(
         Transformer.Molecule.CreateSelectionFromQuery,
@@ -93,7 +92,6 @@ export default class StructureViewer extends React.Component {
         { isHidden: true, ref: "surface-het" }
       );
 
-    sel = action;
     sel
       .then(
         Transformer.Molecule.CreateSelectionFromQuery,
