@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 	"varq/http"
 )
@@ -19,6 +20,15 @@ type UniProt struct {
 	Sequence string   // canonical sequence
 	Raw      []byte   `json:"-"` // TXT API raw bytes.
 	PDBIDs   []string // PDB IDs
+	Variants []*Variant
+}
+
+// Variant represents a single reference extracted from a TXT VARIANT tag
+type Variant struct {
+	Position int64
+	Note     string
+	Evidence string
+	ID       string
 }
 
 // NewUniProt constructs an instance from an UniProt accession ID and a list of target PDB IDs
@@ -61,6 +71,11 @@ func (u *UniProt) extract() error {
 	err = u.extractNames()
 	if err != nil {
 		return fmt.Errorf("extracting names from UniProt TXT: %v", err)
+	}
+
+	err = u.extractVariants()
+	if err != nil {
+		return fmt.Errorf("extracting variants from UniProt TXT: %v", err)
 	}
 
 	return nil
@@ -124,6 +139,47 @@ func (u *UniProt) extractNames() error {
 		return errors.New("organism name not found")
 	}
 	u.Organism = matches[0][1]
+
+	return nil
+}
+
+// extractVariants parses the TXT for variant references
+func (u *UniProt) extractVariants() error {
+	var variants []*Variant
+
+	// https://regex101.com/r/BpJ3QB/1
+	r, _ := regexp.Compile("(?s)FT[ ]*VARIANT[ ]*([0-9]*)(.*?)id=\"(.*?)\"")
+	matches := r.FindAllStringSubmatch(string(u.Raw), -1)
+
+	for _, variant := range matches {
+		pos, err := strconv.ParseInt(variant[1], 10, 64)
+		if err != nil {
+			return fmt.Errorf("cannot parse variant position int: %s", variant[1])
+		}
+
+		data := variant[2]
+		s := regexp.MustCompile("\nFT \\s+")
+		d := s.ReplaceAllString(data, " ")
+
+		r, _ := regexp.Compile("(?s)/note=\"(.*?)\"")
+		n := r.FindAllStringSubmatch(d, -1)
+		note := n[0][1]
+
+		r, _ = regexp.Compile("(?s)/evidence=\"(.*?)\"")
+		e := r.FindAllStringSubmatch(d, -1)
+		evidence := e[0][1]
+
+		id := variant[3]
+
+		variants = append(variants, &Variant{
+			Position: pos,
+			ID:       id,
+			Note:     note,
+			Evidence: evidence,
+		})
+	}
+
+	u.Variants = variants
 
 	return nil
 }
