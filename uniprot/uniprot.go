@@ -23,7 +23,7 @@ type UniProt struct {
 	Variants []*Variant
 }
 
-// Variant represents a single reference extracted from a TXT VARIANT tag
+// Variant represents a single variant extracted the TXT.
 type Variant struct {
 	Position int64
 	Note     string
@@ -56,7 +56,7 @@ func NewUniProt(uniprotID string) (*UniProt, error) {
 	return u, nil
 }
 
-// extract launches all the parsing to be done in the TXT response.
+// extract parses the TXT response.
 func (u *UniProt) extract() error {
 	err := u.extractSequence()
 	if err != nil {
@@ -81,7 +81,7 @@ func (u *UniProt) extract() error {
 	return nil
 }
 
-// extractPDBs parses the TXT for PDB IDs, and populates UniProt.PDBs
+// extractPDBs parses the TXT for PDB IDs and populates UniProt.PDBs
 func (u *UniProt) extractPDBs() error {
 	// Regex match all PDB IDs in the UniProt TXT entry. X-ray only, ignore others (NMR, etc).
 	// https://regex101.com/r/BpJ3QB/1
@@ -96,7 +96,7 @@ func (u *UniProt) extractPDBs() error {
 	return nil
 }
 
-// extractSequence parses the TXT for the canonical sequence.
+// extractSequence parses the canonical sequence.
 func (u *UniProt) extractSequence() error {
 	r, _ := regexp.Compile("(?ms)^SQ.*?$(.*?)//") // https://regex101.com/r/ZTOYaJ/1
 	matches := r.FindAllStringSubmatch(string(u.Raw), -1)
@@ -114,7 +114,7 @@ func (u *UniProt) extractSequence() error {
 	return nil
 }
 
-// extractNames parses the TXT for protein, gene and organism names
+// extractNames parses protein, gene and organism names
 func (u *UniProt) extractNames() error {
 	r, _ := regexp.Compile("(?m)^DE[ ]+RecName.*?Full=(.*?)(;| {)")
 	matches := r.FindAllStringSubmatch(string(u.Raw), -1)
@@ -143,7 +143,7 @@ func (u *UniProt) extractNames() error {
 	return nil
 }
 
-// extractVariants parses the TXT for variant references
+// extractVariants parses for variant references
 func (u *UniProt) extractVariants() error {
 	var variants []*Variant
 
