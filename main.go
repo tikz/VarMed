@@ -22,7 +22,6 @@ func init() {
 	http.Cfg = c
 
 	makeDirs()
-	makeSampleResults()
 }
 
 func main() {
@@ -34,6 +33,7 @@ func main() {
 	if len(*uniprotID) > 0 {
 		cliRun(strings.ToUpper(*uniprotID), pdbsFlag)
 	} else {
+		makeSampleResults()
 		httpServe()
 	}
 }
