@@ -11,6 +11,12 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// StatusEndpoint handles GET /api/status
+// Returns the API status.
+func StatusEndpoint(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"status": "online"})
+}
+
 // ResponseUniProt contains important fields from an UniProt entry.
 type ResponseUniProt struct {
 	ID       string   `json:"id"`
@@ -182,11 +188,13 @@ func httpServe() {
 	// TODO: embed web/output files inside binary
 
 	// API endpoints
+	r.GET("/api/status", StatusEndpoint)
 	r.GET("/api/uniprot/:unpID", UniProtEndpoint)
 	r.GET("/api/job/:jobID", JobEndpoint)
 	r.GET("/api/job/:jobID/:pdbID", JobPDBEndpoint)
 	r.GET("/api/structure/cif/:pdbID", CIFEndpoint)
 	r.GET("/ws/:jobID", WSProcessEndpoint)
+
 	r.POST("/api/new-job", NewJobEndpoint)
 
 	// Let React Router manage all root paths not declared here
