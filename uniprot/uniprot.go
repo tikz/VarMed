@@ -116,7 +116,7 @@ func (u *UniProt) extractSequence() error {
 
 // extractNames parses protein, gene and organism names
 func (u *UniProt) extractNames() error {
-	r, _ := regexp.Compile("(?m)^DE[ ]+RecName.*?Full=(.*?)(;| {)")
+	r, _ := regexp.Compile("(?m)^DE.*?Name.*?Full=(.*?)(;| {)")
 	matches := r.FindAllStringSubmatch(string(u.Raw), -1)
 
 	if len(matches) == 0 {
