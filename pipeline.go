@@ -13,12 +13,12 @@ import (
 
 // Results represents a group of results from each one of the available analysis steps.
 type Results struct {
-	UniProt     *uniprot.UniProt
-	PDB         *pdb.PDB
-	Binding     *binding.Results
-	Interaction *interaction.Results
-	Exposure    *exposure.Results
-	Error       error `json:"-"`
+	UniProt     *uniprot.UniProt     `json:"uniprot"`
+	PDB         *pdb.PDB             `json:"pdb"`
+	Binding     *binding.Results     `json:"binding"`
+	Interaction *interaction.Results `json:"interaction"`
+	Exposure    *exposure.Results    `json:"exposure"`
+	Error       error                `json:"-"`
 }
 
 // Pipeline represents a single run of the VarQ pipeline.

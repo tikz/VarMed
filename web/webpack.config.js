@@ -3,12 +3,9 @@ const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 
 const API_URL = {
-  production: JSON.stringify(""),
-  development: JSON.stringify(""),
+  prod: JSON.stringify(""),
+  dev: JSON.stringify("http://localhost:8888"),
 };
-
-const environment =
-  process.env.NODE_ENV === "production" ? "production" : "development";
 
 module.exports = {
   entry: path.resolve(__dirname, "src", "index.jsx"),
@@ -25,7 +22,7 @@ module.exports = {
       { from: "src/assets/favicons/", to: "./" },
     ]),
     new webpack.DefinePlugin({
-      API_URL: API_URL[environment],
+      API_URL: API_URL[process.env.NODE_ENV === "dev" ? "dev" : "prod"],
     }),
   ],
   module: {

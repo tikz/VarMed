@@ -34,33 +34,33 @@ export default class Results extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.jobID != prevProps.jobID) {
+    if (this.props.jobId != prevProps.jobId) {
       this.pdbLoadFirst();
     }
   }
 
   pdbLoadFirst() {
-    this.pdbLoad(this.props.jobResults.Request.pdbs[0]);
+    this.pdbLoad(this.props.jobResults.request.pdbIds[0]);
   }
 
   handlePDBChange(e) {
     this.pdbLoad(e.target.value);
   }
 
-  pdbLoad(pdbID) {
-    const jobID = this.props.jobID;
+  pdbLoad(pdbId) {
+    const jobId = this.props.jobId;
     let that = this;
     axios
-      .get(API_URL + "/api/job/" + jobID + "/" + pdbID)
+      .get(API_URL + "/api/job/" + jobId + "/" + pdbId)
       .then(function (response) {
-        that.setState({ results: response.data, pdb: pdbID });
+        that.setState({ results: response.data, pdb: pdbId });
         that.structureRef.current.load(response.data);
         that.sequenceRef.current.load();
       });
   }
 
   render() {
-    if (this.state.results.PDB === undefined) {
+    if (this.state.results.pdb === undefined) {
       return <Box />;
     }
 
@@ -76,7 +76,7 @@ export default class Results extends React.Component {
         <Container>
           <Box className="over">
             <Typography variant="h4" className="title">
-              {this.state.results.UniProt.Name}
+              {this.state.results.uniprot.name}
             </Typography>
             <Divider />
             <Grid container spacing={2} alignItems="center">
@@ -88,18 +88,20 @@ export default class Results extends React.Component {
                     value={this.state.pdb}
                     onChange={this.handlePDBChange}
                   >
-                    {this.props.jobResults.Request.pdbs.map((pdbID, index) => {
-                      return (
-                        <MenuItem key={index} value={pdbID}>
-                          {pdbID}
-                        </MenuItem>
-                      );
-                    })}
+                    {this.props.jobResults.request.pdbIds.map(
+                      (pdbId, index) => {
+                        return (
+                          <MenuItem key={index} value={pdbId}>
+                            {pdbId}
+                          </MenuItem>
+                        );
+                      }
+                    )}
                   </Select>
                 </FormControl>
               </Grid>
               <Grid item>
-                <Typography>{this.state.results.PDB.Title}</Typography>
+                <Typography>{this.state.results.pdb.title}</Typography>
               </Grid>
             </Grid>
           </Box>

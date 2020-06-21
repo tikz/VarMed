@@ -17,16 +17,6 @@ func StatusEndpoint(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "online"})
 }
 
-// ResponseUniProt contains important fields from an UniProt entry.
-type ResponseUniProt struct {
-	ID       string   `json:"id"`
-	Sequence string   `json:"sequence"`
-	PDBs     []string `json:"pdbs"`
-	Name     string   `json:"name"`
-	Gene     string   `json:"gene"`
-	Organism string   `json:"organism"`
-}
-
 // UniProtEndpoint handles GET /api/uniprot/:unpID
 // Fetches and returns fields from an UniProt entry.
 func UniProtEndpoint(c *gin.Context) {
@@ -40,14 +30,7 @@ func UniProtEndpoint(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, ResponseUniProt{
-		ID:       u.ID,
-		Sequence: u.Sequence,
-		PDBs:     u.PDBIDs,
-		Name:     u.Name,
-		Gene:     u.Gene,
-		Organism: u.Organism,
-	})
+	c.JSON(http.StatusOK, u)
 }
 
 // JobEndpoint handles GET /api/job/:jobID

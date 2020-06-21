@@ -12,11 +12,11 @@ import (
 
 // Results holds the collected data in the binding analysis step
 type Results struct {
-	Pockets   []*fpocket.Pocket         // pockets with Fpocket drug score of >0.5
-	Catalytic *mcsa.Catalytic           // catalytic residues in M-CSA
-	Ligands   map[string][]*pdb.Residue // ligand ID to near residues
-	Duration  time.Duration
-	Error     error
+	Pockets   []*fpocket.Pocket         `json:"pockets"`   // pockets with Fpocket drug score of >0.5
+	Catalytic *mcsa.Catalytic           `json:"catalytic"` // catalytic residues in M-CSA
+	Ligands   map[string][]*pdb.Residue `json:"ligands"`   // ligand ID to near residues
+	Duration  time.Duration             `json:"duration"`
+	Error     error                     `json:"error"`
 }
 
 // Run starts the binding analysis step

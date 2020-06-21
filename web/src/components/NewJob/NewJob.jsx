@@ -69,11 +69,11 @@ export default class NewJob extends React.Component {
     axios
       .post(API_URL + "/api/new-job", {
         name: this.state.unpData.entryName,
-        uniprot_id: this.state.unpData.id,
-        pdbs: this.state.pdbs,
+        uniprotId: this.state.unpData.id,
+        pdbIds: this.state.pdbs,
         email: email,
-        variations_pos: this.state.variations.map((x) => x.pos),
-        variations_aa: this.state.variations.map((x) => x.aa),
+        variationsPos: this.state.variations.map((x) => x.pos),
+        variationsAa: this.state.variations.map((x) => x.aa),
         clinvar: this.state.clinvar,
       })
       .then(function (response) {
@@ -123,7 +123,7 @@ export default class NewJob extends React.Component {
                       {unpOk && (
                         <PDBPicker
                           unpID={this.state.unpData.id}
-                          pdbs={this.state.unpData.pdbs}
+                          pdbs={this.state.unpData.pdbIds}
                           setPDBs={this.setPDBs}
                         />
                       )}

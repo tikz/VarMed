@@ -40,6 +40,6 @@
   },
   "scripts": {
     "build": "webpack -p",
-    "dev": "webpack-dev-server --hot --inline --history-api-fallback --host 0.0.0.0"
+    "dev": "NODE_ENV=dev webpack-dev-server --hot --inline --history-api-fallback --host 0.0.0.0"
   }
 }

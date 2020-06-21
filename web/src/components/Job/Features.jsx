@@ -20,28 +20,28 @@ export class Features extends React.Component {
 
     const resRange = function (chain, start, end) {
       return {
-        Chain: chain,
-        Position: start,
-        PositionEnd: end,
+        chain: chain,
+        position: start,
+        positionEnd: end,
       };
     };
 
     const unpChains = [];
-    Object.keys(res.PDB.SIFTS.UniProt).forEach((unpID) => {
-      const unp = res.PDB.SIFTS.UniProt[unpID];
+    Object.keys(res.pdb.SIFTS.UniProt).forEach((unpID) => {
+      const unp = res.pdb.SIFTS.UniProt[unpID];
       const chains = unp.mappings.map((chain) => {
         return resRange(chain.chain_id, 1, chain.end.residue_number);
       });
       unpChains.push(
         [chip(unpID + " " + unp.identifier.replace("_", " "), chains)].concat(
           chains.map((chain) => {
-            return chip("Chain " + chain.Chain, [chain]);
+            return chip("Chain " + chain.chain, [chain]);
           })
         )
       );
     });
 
-    const fams = Object.values(res.PDB.SIFTS.Pfam).map((fam) => {
+    const fams = Object.values(res.pdb.SIFTS.Pfam).map((fam) => {
       return chip(
         fam.Identifier,
         fam.Mappings.map((chain) => {
@@ -54,11 +54,11 @@ export class Features extends React.Component {
       );
     });
 
-    const hets = res.PDB.HetGroups;
+    const hets = res.pdb.hetGroups;
 
-    const interaction = chip("Interface", res.Interaction.Residues);
-    const buried = chip("Buried", res.Exposure.Residues);
-    const catalytic = chip("Catalytic", res.Binding.Catalytic.Residues);
+    const interaction = chip("Interface", res.interaction.residues);
+    const buried = chip("Buried", res.exposure.residues);
+    const catalytic = chip("Catalytic", res.binding.catalytic.residues);
 
     return (
       <Grid container className="features">
@@ -73,21 +73,21 @@ export class Features extends React.Component {
             })}
             <Divider orientation="vertical" flexItem />
             {hets &&
-              hets.map((hetID) => {
-                if (hetID != "HOH") {
-                  return <ChipHet label={hetID} key={hetID} hetID={hetID} />;
+              hets.map((hetId) => {
+                if (hetId != "HOH") {
+                  return <ChipHet label={hetId} key={hetId} hetID={hetId} />;
                 }
               })}
             <Divider orientation="vertical" flexItem />
             {interaction}
             {buried}
             {catalytic}
-            {res.Binding.Pockets !== null &&
-              res.Binding.Pockets.map((pocket) => {
-                return chip("Pocket", pocket.Residues);
+            {res.binding.pockets !== null &&
+              res.binding.pockets.map((pocket, index) => {
+                return chip("Pocket " + index, pocket.residues);
               })}
-            {Object.keys(res.Binding.Ligands).map((ligand) => {
-              return chip("Near " + ligand, res.Binding.Ligands[ligand]);
+            {Object.keys(res.binding.ligands).map((ligand) => {
+              return chip("Near " + ligand, res.binding.ligands[ligand]);
             })}
           </Grid>
         </Grid>

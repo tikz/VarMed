@@ -11,24 +11,24 @@ import (
 
 // UniProt contains relevant protein data for a single accession.
 type UniProt struct {
-	ID       string   // accession ID
-	URL      string   // page URL for the entry
-	TXTURL   string   // TXT API URL for the entry.
-	Name     string   // protein name
-	Gene     string   // gene code
-	Organism string   // organism
-	Sequence string   // canonical sequence
-	Raw      []byte   `json:"-"` // TXT API raw bytes.
-	PDBIDs   []string // PDB IDs
-	Variants []*Variant
+	ID       string     `json:"id"`       // accession ID
+	URL      string     `json:"url"`      // page URL for the entry
+	TXTURL   string     `json:"txtUrl"`   // TXT API URL for the entry.
+	Name     string     `json:"name"`     // protein name
+	Gene     string     `json:"gene"`     // gene code
+	Organism string     `json:"organism"` // organism
+	Sequence string     `json:"sequence"` // canonical sequence
+	PDBIDs   []string   `json:"pdbIds"`   // PDB IDs
+	Variants []*Variant `json:"variants"` // dbSNP variants
+	Raw      []byte     `json:"-"`        // TXT API raw bytes.
 }
 
 // Variant represents a single variant extracted the TXT.
 type Variant struct {
-	Position int64
-	Note     string
-	Evidence string
-	ID       string
+	Position int64  `json:"position"`
+	Note     string `json:"note"`
+	Evidence string `json:"evidence"`
+	ID       string `json:"id"`
 }
 
 // NewUniProt constructs an instance from an UniProt accession ID and a list of target PDB IDs

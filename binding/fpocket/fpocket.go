@@ -15,9 +15,9 @@ import (
 
 //Pocket represents a single pocket found with Fpocket (pocketN_atm.pdb)
 type Pocket struct {
-	Name      string
-	DrugScore float64
-	Residues  []*pdb.Residue // pointers to original residues in the requested structure
+	Name      string         `json:"name"`
+	DrugScore float64        `json:"drugScore"`
+	Residues  []*pdb.Residue `json:"residues"` // pointers to original residues in the requested structure
 }
 
 // Run creates a temp file of the specified PDB structure, runs Fpocket on it and parses the results

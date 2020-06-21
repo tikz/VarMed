@@ -19,27 +19,25 @@ const (
 // JobRequest represents a job request from an user.
 // Contains the user input and additional details.
 type JobRequest struct {
-	Name          string   `json:"name"`
-	UniProtID     string   `json:"uniprot_id"`
-	PDBIDs        []string `json:"pdbs"`
-	ClinVar       bool     `json:"clinvar"`
-	VariationsPos []int    `json:"variations_pos"`
-	VariationsAA  []string `json:"variations_aa"`
-
-	IP    string
-	Email string
-	Time  time.Time
+	Name          string    `json:"name"`
+	UniProtID     string    `json:"uniprotId"`
+	PDBIDs        []string  `json:"pdbIds"`
+	ClinVar       bool      `json:"clinvar"`
+	VariationsPos []int     `json:"variationsPos"`
+	VariationsAA  []string  `json:"variationsAa"`
+	IP            string    `json:"ip"`
+	Email         string    `json:"email"`
+	Time          time.Time `json:"time"`
 }
 
 // Job represents the input and outputs of a single job ran by the pipeline.
 type Job struct {
-	ID       string
-	Request  *JobRequest
-	Pipeline *Pipeline `json:"-"`
-
-	Status  int
-	Started time.Time
-	Ended   time.Time
+	ID       string      `json:"id"`
+	Request  *JobRequest `json:"request"`
+	Pipeline *Pipeline   `json:"-"`
+	Status   int         `json:"status"`
+	Started  time.Time   `json:"started"`
+	Ended    time.Time   `json:"ended"`
 
 	msgs  []string
 	Error error `json:"-"`

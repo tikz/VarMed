@@ -38,7 +38,7 @@ export default class SequenceViewer extends React.Component {
     const res = this.context.results;
     const posMap = this.context.posMap;
 
-    this.fv = new FeatureViewer(res.UniProt.Sequence, "#fv", {
+    this.fv = new FeatureViewer(res.uniprot.sequence, "#fv", {
       showAxis: true,
       showSequence: true,
       brushActive: true,
@@ -78,11 +78,11 @@ export default class SequenceViewer extends React.Component {
       let markResidues = function (that, residues, title) {
         that.fv.addFeature({
           data: residues
-            .filter((r) => r.Chain == chain.id)
+            .filter((r) => r.chain == chain.id)
             .map((r) => {
               return {
-                x: posMap.pdbToUnp(r.Chain, r.Position),
-                y: posMap.pdbToUnp(r.Chain, r.Position),
+                x: posMap.pdbToUnp(r.chain, r.position),
+                y: posMap.pdbToUnp(r.chain, r.position),
                 description: name,
               };
             }),
@@ -92,23 +92,23 @@ export default class SequenceViewer extends React.Component {
         });
       };
 
-      if (res.Exposure.Residues !== null) {
-        markResidues(this, res.Exposure.Residues, "Buried");
+      if (res.exposure.residues !== null) {
+        markResidues(this, res.exposure.residues, "Buried");
       }
-      if (res.Binding.Catalytic.Residues !== null) {
-        markResidues(this, res.Binding.Catalytic.Residues, "Catalytic");
+      if (res.binding.catalytic.residues !== null) {
+        markResidues(this, res.binding.catalytic.residues, "Catalytic");
       }
-      if (Object.keys(res.Binding.Ligands).length != 0) {
-        Object.keys(res.Binding.Ligands).forEach((lig) => {
-          markResidues(this, res.Binding.Ligands[lig], "Near " + lig);
+      if (Object.keys(res.binding.ligands).length != 0) {
+        Object.keys(res.binding.ligands).forEach((lig) => {
+          markResidues(this, res.binding.ligands[lig], "Near " + lig);
         });
       }
-      if (res.Interaction.Residues !== null) {
-        markResidues(this, res.Interaction.Residues, "Interface");
+      if (res.interaction.residues !== null) {
+        markResidues(this, res.interaction.residues, "Interface");
       }
-      if (res.Binding.Pockets !== null) {
-        res.Binding.Pockets.forEach((p) => {
-          markResidues(this, p.Residues, "Pocket");
+      if (res.binding.pockets !== null) {
+        res.binding.pockets.forEach((p) => {
+          markResidues(this, p.residues, "Pocket");
         });
       }
     });
