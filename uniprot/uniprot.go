@@ -148,7 +148,7 @@ func (u *UniProt) extractVariants() error {
 	var variants []*Variant
 
 	// https://regex101.com/r/BpJ3QB/1
-	r, _ := regexp.Compile("(?s)FT[ ]*VARIANT[ ]*([0-9]*)(.*?)id=\"(.*?)\"")
+	r, _ := regexp.Compile("(?ms)^FT[ ]*VARIANT[ ]*([0-9]*)$(.*?)id=\"(.*?)\"")
 	matches := r.FindAllStringSubmatch(string(u.Raw), -1)
 
 	for _, variant := range matches {
@@ -167,7 +167,10 @@ func (u *UniProt) extractVariants() error {
 
 		r, _ = regexp.Compile("(?s)/evidence=\"(.*?)\"")
 		e := r.FindAllStringSubmatch(d, -1)
-		evidence := e[0][1]
+		var evidence string
+		if len(e) > 0 {
+			evidence = e[0][1]
+		}
 
 		id := variant[3]
 
