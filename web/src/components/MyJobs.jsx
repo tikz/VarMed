@@ -19,7 +19,6 @@ import moment from "moment";
 import React from "react";
 import { withRouter } from "react-router-dom";
 
-console.log(JOBS_KEY);
 function MyJobsDialog(props) {
   const getJobs = () => {
     return JSON.parse(window.localStorage.getItem(JOBS_KEY));
