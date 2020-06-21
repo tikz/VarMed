@@ -9,24 +9,24 @@ import (
 
 // Results holds the collected data in the interaction analysis step
 type Results struct {
-	ChainsInteractions []*ChainsPair
-	Residues           []*pdb.Residue
-	Duration           time.Duration
-	Error              error
+	ChainsInteractions []*ChainsPair  `json:"chainsInteractions"`
+	Residues           []*pdb.Residue `json:"residues"`
+	Duration           time.Duration  `json:"duration"`
+	Error              error          `json:"error"`
 }
 
 // ChainsPair holds all residue interactions between two chains.
 type ChainsPair struct {
-	Chain1               string
-	Chain2               string
-	ResiduesInteractions []*ResiduesPair
+	Chain1               string          `json:"chain1"`
+	Chain2               string          `json:"chain2"`
+	ResiduesInteractions []*ResiduesPair `json:"residuesInteractions"`
 }
 
 // ResiduesPair holds all interaction parameters between two residues.
 type ResiduesPair struct {
-	Distance float64
-	Residue1 *pdb.Residue
-	Residue2 *pdb.Residue
+	Distance float64      `json:"distance"`
+	Residue1 *pdb.Residue `json:"residue1"`
+	Residue2 *pdb.Residue `json:"residue2"`
 }
 
 // Run starts the interaction analysis step

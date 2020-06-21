@@ -10,13 +10,13 @@ import (
 )
 
 type Results struct {
-	Residues []*pdb.Residue
-	Duration time.Duration
-	Error    error
+	Residues []*pdb.Residue `json:"residues"`
+	Duration time.Duration  `json:"duration"`
+	Error    error          `json:"error"`
 }
 type ResidueExposure struct {
-	BFactor   float64
-	ExposureP float64
+	BFactor   float64      `json:"bFactor"`
+	ExposureP float64      `json:"exposureP"`
 	Residue   *pdb.Residue `json:"-"`
 }
 

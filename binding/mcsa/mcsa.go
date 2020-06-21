@@ -11,8 +11,8 @@ import (
 
 // Catalytic holds the protein's residues that have catalytic activity according to M-CSA.
 type Catalytic struct {
-	UniProtPositions []int64
-	Residues         []*pdb.Residue // Pointers to original residues in the requested structure.
+	UniProtPositions []int64        `json:"uniprotPositions"`
+	Residues         []*pdb.Residue `json:"residues"` // Pointers to original residues in the requested structure.
 }
 
 type searchAPIResponse struct {

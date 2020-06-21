@@ -34,7 +34,7 @@ export default class StructureViewer extends React.Component {
   load() {
     this.clear();
 
-    let id = this.context.results.PDB.ID;
+    let id = this.context.results.pdb.id;
     let action = Transform.build()
       .add(this.state.plugin.context.tree.root, Transformer.Data.Download, {
         url: API_URL + `/api/structure/cif/${id}`,
@@ -149,10 +149,10 @@ export default class StructureViewer extends React.Component {
 
     let colors = new Map();
 
-    let SIFTSUnp = this.context.results.PDB.SIFTS.UniProt;
+    let SIFTSUnp = this.context.results.pdb.SIFTS.UniProt;
     Object.keys(SIFTSUnp)
       .filter((k) => {
-        return this.context.results.UniProt.ID != k;
+        return this.context.results.uniprot.id != k;
       })
       .forEach((id) => {
         SIFTSUnp[id].mappings.forEach((chain) => {
@@ -207,10 +207,10 @@ export default class StructureViewer extends React.Component {
     residues.forEach((r) => {
       let query = LiteMol.Core.Structure.Query.sequence(
         null,
-        r.Chain,
-        { seqNumber: r.Position },
+        r.chain,
+        { seqNumber: r.position },
         {
-          seqNumber: r.PositionEnd !== undefined ? r.PositionEnd : r.Position,
+          seqNumber: r.positionEnd !== undefined ? r.positionEnd : r.position,
         }
       );
       LiteMol.Bootstrap.Command.Molecule.Highlight.dispatch(plugin.context, {
@@ -278,7 +278,7 @@ export default class StructureViewer extends React.Component {
   selectFocus(chain, start, end) {
     this.focus(chain, start, end);
     this.highlightResidues([
-      { Chain: chain, Position: start, PositionEnd: end },
+      { chain: chain, position: start, positionEnd: end },
     ]);
     if (start - end == 0) {
       this.select(chain, start, end);

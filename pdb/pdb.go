@@ -9,26 +9,26 @@ import (
 
 // PDB represents a single PDB entry.
 type PDB struct {
-	ID     string // PDB ID
-	URL    string // RCSB web page URL
-	PDBURL string // RCSB download URL for the PDB file
-	CIFURL string // RCSB download URL for the CIF file
+	ID     string `json:"id"`     // PDB ID
+	URL    string `json:"url"`    // RCSB web page URL
+	PDBURL string `json:"pdbUrl"` // RCSB download URL for the PDB file
+	CIFURL string `json:"cifUrl"` // RCSB download URL for the CIF file
 
-	Title       string     // publication title
-	Date        *time.Time // publication date
-	Method      string     // experimental method used
-	Resolution  float64    // method resolution
-	TotalLength int64      // total length as sum of residues of all chains in the structure
+	Title       string     `json:"title"`       // publication title
+	Date        *time.Time `json:"date"`        // publication date
+	Method      string     `json:"method"`      // experimental method used
+	Resolution  float64    `json:"resolution"`  // method resolution
+	TotalLength int64      `json:"totalLength"` // total length as sum of residues of all chains in the structure
 
-	Atoms     []*Atom  `json:"-"` // ATOM records in the structure
-	HetAtoms  []*Atom  `json:"-"` // HETATM records in the structure
-	HetGroups []string // HET groups in the structure
+	Atoms     []*Atom  `json:"-"`         // ATOM records in the structure
+	HetAtoms  []*Atom  `json:"-"`         // HETATM records in the structure
+	HetGroups []string `json:"hetGroups"` // HET groups in the structure
 
 	// Position mapping
 	SIFTS               *SIFTS           // EBI SIFTS data for residue position mapping
-	SeqResOffsets       map[string]int64 // Chain ID to SEQRES position offsets
-	ChainStartResNumber map[string]int64 // Chain ID to First residue number as informed in ATOM column.
-	ChainEndResNumber   map[string]int64 // Chain ID to Last residue number as informed in ATOM column.
+	SeqResOffsets       map[string]int64 `json:"seqResOffsets"`       // Chain ID to SEQRES position offsets
+	ChainStartResNumber map[string]int64 `json:"chainStartResNumber"` // Chain ID to First residue number as informed in ATOM column.
+	ChainEndResNumber   map[string]int64 `json:"chainEndResNumber"`   // Chain ID to Last residue number as informed in ATOM column.
 
 	SeqRes           map[string][]*Residue           `json:"-"` // PDB SEQRES chain ID to residue pointers
 	SeqResChains     map[string]map[int64]*Residue   `json:"-"` // PDB SEQRES chain ID and PDB ATOM position to residue in structure
@@ -37,10 +37,10 @@ type PDB struct {
 
 	// Extra data
 	// SITE records
-	BindingSite map[string][]*Residue // binding site identifier to residues compromising it
+	BindingSite map[string][]*Residue `json:"bindingSite"` // binding site identifier to residues compromising it
 
 	// REMARK 800 site descriptions
-	BindingSiteDesc map[string]string // binding site identifier to description
+	BindingSiteDesc map[string]string `json:"bindingSiteDesc"` // binding site identifier to description
 
 	RawPDB []byte `json:"-"` // PDB file raw data
 	RawCIF []byte `json:"-"` // CIF file raw data

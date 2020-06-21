@@ -13,6 +13,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
 	golang.org/x/sys v0.0.0-20200509044756-6aff5f38e54f // indirect
-	golang.org/x/tools v0.0.0-20200616215726-b7b89dcb8101 // indirect
+	golang.org/x/tools v0.0.0-20200619210111-0f592d2728bb // indirect
 	gopkg.in/yaml.v2 v2.2.8
 )

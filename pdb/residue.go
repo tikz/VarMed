@@ -32,11 +32,11 @@ var residueNames = [...][3]string{
 
 // Residue represents a single residue from the PDB structure.
 type Residue struct {
-	Chain          string
-	StructPosition int64
-	Position       int64
-	Name           string `json:"-"`
-	Name1          string
+	Chain          string  `json:"chain"`
+	StructPosition int64   `json:"structPosition"`
+	Position       int64   `json:"position"`
+	Name           string  `json:"-"`
+	Name1          string  `json:"name1"`
 	Name3          string  `json:"-"`
 	Atoms          []*Atom `json:"-"`
 }

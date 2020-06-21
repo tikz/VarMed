@@ -31,18 +31,18 @@ function MyJobsDialog(props) {
     onClose();
   };
 
-  const handleListItemClick = (jobID) => {
-    onClose("/job/" + jobID);
+  const handleListItemClick = (jobId) => {
+    onClose("/job/" + jobId);
   };
 
-  const deleteJob = (jobID) => {
+  const deleteJob = (jobId) => {
     let jobsStorage = getJobs();
     window.localStorage.removeItem("jobs");
     window.localStorage.setItem(
       "jobs",
       JSON.stringify(
         jobsStorage.filter((j) => {
-          return j.id != jobID;
+          return j.id != jobId;
         })
       )
     );
@@ -93,7 +93,7 @@ function MyJobsDialog(props) {
                 </Grid>
                 <Grid item>
                   <Typography variant="overline">
-                    {job.pdbs.join(", ")}
+                    {job.pdbIds.join(", ")}
                   </Typography>
                 </Grid>
                 <Grid item>

@@ -1,8 +1,8 @@
 export default class PositionMapper {
   constructor(res) {
-    this.seqResOffsets = res.PDB.SeqResOffsets;
-    this.chainStartResN = res.PDB.ChainStartResNumber;
-    this.mappings = res.PDB.SIFTS.UniProt[res.UniProt.ID].mappings;
+    this.seqResOffsets = res.pdb.seqResOffsets;
+    this.chainStartResN = res.pdb.chainStartResNumber;
+    this.mappings = res.pdb.SIFTS.UniProt[res.uniprot.id].mappings;
     this.loadOffsets();
     this.loadChains();
   }
@@ -47,8 +47,8 @@ export default class PositionMapper {
     let residues = [];
     this.mappings.forEach((chain) => {
       residues.push({
-        Chain: chain.chain_id,
-        Position: pos + this.pdbOffsets[chain.chain_id],
+        chain: chain.chain_id,
+        position: pos + this.pdbOffsets[chain.chain_id],
       });
     });
     return residues;

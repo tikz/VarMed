@@ -44,24 +44,24 @@ export default class Job extends React.Component {
   }
 
   addToMyJobs() {
-    const jobID = this.props.match.params.id;
+    const jobId = this.props.match.params.id;
     let jobs = JSON.parse(window.localStorage.getItem("jobs"));
     if (jobs === null) {
       jobs = [];
     }
     if (
       jobs.filter((j) => {
-        return j.id == jobID;
+        return j.id == jobId;
       }).length > 0
     ) {
       return;
     }
 
-    const req = this.state.results.Request;
+    const req = this.state.results.request;
     jobs.unshift({
-      id: jobID,
+      id: jobId,
       name: req.name,
-      pdbs: req.pdbs,
+      pdbIds: req.pdbIds,
       date: Date.now(),
     });
 
@@ -75,7 +75,7 @@ export default class Job extends React.Component {
   }
 
   render() {
-    const jobID = this.props.match.params.id;
+    const jobId = this.props.match.params.id;
 
     if (this.state.error != 0) {
       return <h3>{this.state.error.message}</h3>;
@@ -85,11 +85,11 @@ export default class Job extends React.Component {
       <Box>
         <NavBar />
         <Toolbar />
-        {(this.state.results.Status == 0 || this.state.results.Status == 1) && (
-          <StatusConsole jobID={jobID} reload={this.loadResults} />
+        {(this.state.results.status == 0 || this.state.results.status == 1) && (
+          <StatusConsole jobId={jobId} reload={this.loadResults} />
         )}
-        {(this.state.results.Status == 2 || this.state.results.Status == 3) && (
-          <Results jobID={jobID} jobResults={this.state.results} />
+        {(this.state.results.status == 2 || this.state.results.status == 3) && (
+          <Results jobId={jobId} jobResults={this.state.results} />
         )}
         <Snackbar
           open={this.state.added}
