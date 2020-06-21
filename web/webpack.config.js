@@ -1,5 +1,6 @@
 const webpack = require("webpack");
 const path = require("path");
+const package = require("./package.json");
 const CopyPlugin = require("copy-webpack-plugin");
 
 const API_URL = {
@@ -23,6 +24,7 @@ module.exports = {
     ]),
     new webpack.DefinePlugin({
       API_URL: API_URL[process.env.NODE_ENV === "dev" ? "dev" : "prod"],
+      JOBS_KEY: JSON.stringify("jobs-" + package.version),
     }),
   ],
   module: {

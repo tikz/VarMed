@@ -19,9 +19,10 @@ import moment from "moment";
 import React from "react";
 import { withRouter } from "react-router-dom";
 
+console.log(JOBS_KEY);
 function MyJobsDialog(props) {
   const getJobs = () => {
-    return JSON.parse(window.localStorage.getItem("jobs"));
+    return JSON.parse(window.localStorage.getItem(JOBS_KEY));
   };
 
   const { onClose, open } = props;
@@ -37,9 +38,9 @@ function MyJobsDialog(props) {
 
   const deleteJob = (jobId) => {
     let jobsStorage = getJobs();
-    window.localStorage.removeItem("jobs");
+    window.localStorage.removeItem(JOBS_KEY);
     window.localStorage.setItem(
-      "jobs",
+      JOBS_KEY,
       JSON.stringify(
         jobsStorage.filter((j) => {
           return j.id != jobId;

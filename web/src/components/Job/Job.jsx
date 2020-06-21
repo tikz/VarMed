@@ -45,7 +45,7 @@ export default class Job extends React.Component {
 
   addToMyJobs() {
     const jobId = this.props.match.params.id;
-    let jobs = JSON.parse(window.localStorage.getItem("jobs"));
+    let jobs = JSON.parse(window.localStorage.getItem(JOBS_KEY));
     if (jobs === null) {
       jobs = [];
     }
@@ -66,8 +66,8 @@ export default class Job extends React.Component {
     });
 
     this.setState({ added: true });
-    window.localStorage.removeItem("jobs");
-    window.localStorage.setItem("jobs", JSON.stringify(jobs));
+    window.localStorage.removeItem(JOBS_KEY);
+    window.localStorage.setItem(JOBS_KEY, JSON.stringify(jobs));
   }
 
   handleAddedClose() {
