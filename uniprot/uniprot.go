@@ -11,24 +11,32 @@ import (
 
 // UniProt contains relevant protein data for a single accession.
 type UniProt struct {
-	ID       string     `json:"id"`       // accession ID
-	URL      string     `json:"url"`      // page URL for the entry
-	TXTURL   string     `json:"txtUrl"`   // TXT API URL for the entry.
-	Name     string     `json:"name"`     // protein name
-	Gene     string     `json:"gene"`     // gene code
-	Organism string     `json:"organism"` // organism
-	Sequence string     `json:"sequence"` // canonical sequence
-	PDBIDs   []string   `json:"pdbIds"`   // PDB IDs
-	Variants []*Variant `json:"variants"` // dbSNP variants
-	Raw      []byte     `json:"-"`        // TXT API raw bytes.
+	ID       string          `json:"id"`       // accession ID
+	URL      string          `json:"url"`      // page URL for the entry
+	TXTURL   string          `json:"txtUrl"`   // TXT API URL for the entry.
+	Name     string          `json:"name"`     // protein name
+	Gene     string          `json:"gene"`     // gene code
+	Organism string          `json:"organism"` // organism
+	Sequence string          `json:"sequence"` // canonical sequence
+	PDBIDs   []string        `json:"pdbIds"`   // PDB IDs
+	Variants []*VariantEntry `json:"variants"` // dbSNP variants
+	Raw      []byte          `json:"-"`        // TXT API raw bytes.
 }
 
-// Variant represents a single variant extracted the TXT.
-type Variant struct {
+// VariantEntry represents a single variant entry extracted from the TXT.
+type VariantEntry struct {
 	Position int64  `json:"position"`
 	Note     string `json:"note"`
 	Evidence string `json:"evidence"`
 	ID       string `json:"id"`
+	SAS      *SAS   `json:"sas"`
+}
+
+// SAS represents a single aminoacid substitution.
+type SAS struct {
+	Position int64  `json:"position"`
+	FromAa   string `json:"fromAa"`
+	ToAa     string `json:"toAa"`
 }
 
 // NewUniProt constructs an instance from an UniProt accession ID and a list of target PDB IDs
@@ -145,7 +153,7 @@ func (u *UniProt) extractNames() error {
 
 // extractVariants parses for variant references
 func (u *UniProt) extractVariants() error {
-	var variants []*Variant
+	var variants []*VariantEntry
 
 	// https://regex101.com/r/BpJ3QB/1
 	r, _ := regexp.Compile("(?ms)^FT[ ]*VARIANT[ ]*([0-9]*)$(.*?)id=\"(.*?)\"")
@@ -174,7 +182,7 @@ func (u *UniProt) extractVariants() error {
 
 		id := variant[3]
 
-		variants = append(variants, &Variant{
+		variants = append(variants, &VariantEntry{
 			Position: pos,
 			ID:       id,
 			Note:     note,

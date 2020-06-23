@@ -10,13 +10,14 @@ import (
 	"strconv"
 	"strings"
 	"varq/pdb"
+	"varq/uniprot"
 )
 
-type Variant struct {
-	Position int64   `json:"position"`
-	FromAa   string  `json:"fromAa"`
-	ToAa     string  `json:"toAa"`
-	DeltadG  float64 `json:"ddG"`
+// SASEnergyDiff represents the ddG energy difference between an original
+// and a mutated structure with a single aminoacid substitution.
+type SASEnergyDiff struct {
+	SAS *uniprot.SAS
+	ddG float64 // kcal/mol
 }
 
 func fileNotExist(path string) bool {
@@ -51,7 +52,7 @@ func Repair(p *pdb.PDB, foldxDir string, msg func(string)) error {
 
 		if !strings.Contains(string(out), "run OK") || fileNotExist(path) {
 			fmt.Println(string(out))
-			return errors.New("FoldX RepairPDB failed")
+			return errors.New("RepairPDB failed")
 		}
 	} else {
 		msg("found existing FoldX PDB")
@@ -62,25 +63,26 @@ func Repair(p *pdb.PDB, foldxDir string, msg func(string)) error {
 
 // formatMut receives a given mutation in UniProt position and returns
 // the corresponding PDB positions in FoldX format, i.e.: KA42I,KB42I;
-func formatMut(unpID string, p *pdb.PDB, pos int, aa string) string {
+func formatMut(unpID string, p *pdb.PDB, pos int64, aa string) string {
 	var muts []string
 	for _, res := range p.UniProtPositions[unpID][int64(pos)] {
-		muts = append(muts, res.Name1+res.Chain+strconv.Itoa(pos)+aa)
+		muts = append(muts, res.Name1+res.Chain+strconv.FormatInt(pos, 64)+aa)
 	}
 	return strings.Join(muts, ",") + ";"
 }
 
-func Run(variants map[int]string, unpID string,
-	p *pdb.PDB, foldxDir string, msg func(string)) error {
+func Run(sasList []*uniprot.SAS, unpID string,
+	p *pdb.PDB, foldxDir string, msg func(string)) ([]*SASEnergyDiff, error) {
 	err := Repair(p, foldxDir, msg)
 	if err != nil {
-		return fmt.Errorf("FoldX repair: %v", err)
+		return nil, fmt.Errorf("repair: %v", err)
 	}
 
-	variants[108] = "G"
-
-	for pos, aa := range variants {
-		name := p.ID + strconv.Itoa(pos) + aa
+	var results []*SASEnergyDiff
+	for _, sas := range sasList {
+		pos := sas.Position
+		aa := sas.ToAa
+		name := p.ID + strconv.FormatInt(pos, 64) + aa
 
 		// Create FoldX job output dir
 		os.MkdirAll("bin/"+name, os.ModePerm)
@@ -91,7 +93,7 @@ func Run(variants map[int]string, unpID string,
 
 		// Remove job files on scope exit
 		defer func() {
-			// os.RemoveAll("bin/" + name)
+			os.RemoveAll("bin/" + name)
 			os.RemoveAll("bin/" + mutantFile)
 		}()
 
@@ -104,19 +106,24 @@ func Run(variants map[int]string, unpID string,
 
 		out, err := cmd.CombinedOutput()
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		if !strings.Contains(string(out), "run OK") {
 			fmt.Println(string(out))
-			return errors.New("FoldX BuildModel failed")
+			return nil, errors.New("BuildModel failed")
 		}
 
 		ddG, err := extractddG("bin/" + name + "/Dif_" + p.ID + ".fxout")
+		if err != nil {
+			return nil, fmt.Errorf("extract results: %v", err)
+		}
+
+		results = append(results, &SASEnergyDiff{SAS: sas, ddG: ddG})
 		fmt.Println(p.ID, ddG)
 	}
 
-	return nil
+	return results, nil
 }
 
 func extractddG(path string) (ddG float64, err error) {
@@ -125,7 +132,7 @@ func extractddG(path string) (ddG float64, err error) {
 		return ddG, err
 	}
 
-	// Parse first column
+	// First column contains the ddG
 	// https://regex101.com/r/BGcps6/1
 	r, _ := regexp.Compile("pdb\t(.*?)\t")
 	ddG, err = strconv.ParseFloat(r.FindAllStringSubmatch(string(data), -1)[0][1], 64)
