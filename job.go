@@ -19,15 +19,15 @@ const (
 // JobRequest represents a job request from an user.
 // Contains the user input and additional details.
 type JobRequest struct {
-	Name          string    `json:"name"`
-	UniProtID     string    `json:"uniprotId"`
-	PDBIDs        []string  `json:"pdbIds"`
-	ClinVar       bool      `json:"clinvar"`
-	VariationsPos []int     `json:"variationsPos"`
-	VariationsAA  []string  `json:"variationsAa"`
-	IP            string    `json:"ip"`
-	Email         string    `json:"email"`
-	Time          time.Time `json:"time"`
+	Name        string    `json:"name"`
+	UniProtID   string    `json:"uniprotId"`
+	PDBIDs      []string  `json:"pdbIds"`
+	ClinVar     bool      `json:"clinvar"`
+	VariantsPos []int     `json:"variantsPos"`
+	VariantsAa  []string  `json:"variantsAa"`
+	IP          string    `json:"ip"`
+	Email       string    `json:"email"`
+	Time        time.Time `json:"time"`
 }
 
 // Job represents the input and outputs of a single job ran by the pipeline.
@@ -68,8 +68,13 @@ func (j *Job) Process() {
 	j.Status = statusProcess
 	j.Started = time.Now()
 
+	variants := make(map[int]string)
+	for i, pos := range j.Request.VariantsPos {
+		variants[pos] = j.Request.VariantsAa[i]
+	}
+
 	msgChan := make(chan string, 100)
-	j.Pipeline, _ = NewPipeline(j.Request.UniProtID, j.Request.PDBIDs, msgChan)
+	j.Pipeline, _ = NewPipeline(j.Request.UniProtID, j.Request.PDBIDs, variants, msgChan)
 
 	go func() {
 		for m := range msgChan {
