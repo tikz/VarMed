@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 	"varq/binding"
+	"varq/energy"
 	"varq/exposure"
 	"varq/interaction"
 	"varq/pdb"
@@ -18,12 +19,14 @@ type Results struct {
 	Binding     *binding.Results     `json:"binding"`
 	Interaction *interaction.Results `json:"interaction"`
 	Exposure    *exposure.Results    `json:"exposure"`
+	Energy      *energy.Results      `json:"energy"`
 	Error       error                `json:"-"`
 }
 
 // Pipeline represents a single run of the VarQ pipeline.
 type Pipeline struct {
 	UniProt  *uniprot.UniProt
+	Variants map[int]string
 	Results  map[string]*Results // PDB ID to results
 	Duration time.Duration
 
@@ -37,17 +40,18 @@ func (p *Pipeline) msg(m string) {
 }
 
 // NewPipeline constructs a new Pipeline.
-func NewPipeline(unpID string, pdbIDs []string, msgChan chan string) (*Pipeline, error) {
+func NewPipeline(unpID string, pdbIDs []string, variants map[int]string, msgChan chan string) (*Pipeline, error) {
 	uniprot, err := loadUniProt(unpID)
 	if err != nil {
 		return nil, err
 	}
 
 	p := Pipeline{
-		UniProt: uniprot,
-		msgChan: msgChan,
-		pdbIDs:  pdbIDs,
-		Results: make(map[string]*Results),
+		UniProt:  uniprot,
+		Variants: variants,
+		msgChan:  msgChan,
+		pdbIDs:   pdbIDs,
+		Results:  make(map[string]*Results),
 	}
 
 	return &p, nil
@@ -109,12 +113,10 @@ func (p *Pipeline) pdbWorker(pdbIDChan <-chan string, resChan chan<- *Results) {
 }
 
 // analysePDB runs each available analysis in parallel for a single structure.
-func (p *Pipeline) analysePDB(a *Results) *Results {
+func (p *Pipeline) analysePDB(r *Results) *Results {
 	// Create temp PDB on filesystem for analysis with external tools
-	filename := "varq_" + a.PDB.ID
-	path := "/tmp/" + filename + ".pdb"
-	a.PDB.WriteFile(path)
-	// TODO: don't hardcode paths, cross platform
+	path := "bin/" + r.PDB.ID + ".pdb"
+	r.PDB.WriteFile(path)
 
 	defer func() {
 		os.Remove(path)
@@ -123,60 +125,74 @@ func (p *Pipeline) analysePDB(a *Results) *Results {
 	bindingChan := make(chan *binding.Results)
 	interactionChan := make(chan *interaction.Results)
 	exposureChan := make(chan *exposure.Results)
+	energyChan := make(chan *energy.Results)
 
-	idStr := fmt.Sprintf("PDB %s ", a.PDB.ID)
+	idStr := fmt.Sprintf("PDB %s ", r.PDB.ID)
 	msgPDB := func(msg string) {
 		p.msg(idStr + msg)
 	}
 
 	if cfg.VarQ.Pipeline.EnableSteps.Binding {
-		go binding.Run(a.UniProt, a.PDB, bindingChan, msgPDB)
+		go binding.Run(r.UniProt, r.PDB, bindingChan, msgPDB)
 		msgPDB("started binding analysis")
 	}
 	if cfg.VarQ.Pipeline.EnableSteps.Interaction {
-		go interaction.Run(a.PDB, interactionChan, msgPDB)
+		go interaction.Run(r.PDB, interactionChan, msgPDB)
 		msgPDB("started interaction analysis")
 	}
 	if cfg.VarQ.Pipeline.EnableSteps.Exposure {
-		go exposure.Run(a.PDB, exposureChan, msgPDB)
+		go exposure.Run(r.PDB, exposureChan, msgPDB)
 		msgPDB("started exposure analysis")
 	}
+	if cfg.VarQ.Pipeline.EnableSteps.Energy {
+		go energy.Run(p.Variants, r.UniProt, r.PDB, foldxDir, energyChan, msgPDB)
+		msgPDB("started energy analysis")
+	}
 
-	// TODO: refactor these repeated patterns when all analyses
-	// result data types become somewhat unchanging.
+	// TODO: refactor these repeated patterns
 	if cfg.VarQ.Pipeline.EnableSteps.Binding {
 		bindingRes := <-bindingChan
 		if bindingRes.Error != nil {
-			a.Error = fmt.Errorf("binding analysis: %v", bindingRes.Error)
-			return a
+			r.Error = fmt.Errorf("binding analysis: %v", bindingRes.Error)
+			return r
 		}
-		a.Binding = bindingRes
+		r.Binding = bindingRes
 		msgPDB(fmt.Sprintf("binding analysis done in %.3f secs", bindingRes.Duration.Seconds()))
 	}
 
 	if cfg.VarQ.Pipeline.EnableSteps.Interaction {
 		interactionRes := <-interactionChan
 		if interactionRes.Error != nil {
-			a.Error = fmt.Errorf("interaction analysis: %v", interactionRes.Error)
-			return a
+			r.Error = fmt.Errorf("interaction analysis: %v", interactionRes.Error)
+			return r
 		}
-		a.Interaction = interactionRes
+		r.Interaction = interactionRes
 		msgPDB(fmt.Sprintf("interaction analysis done in %.3f secs", interactionRes.Duration.Seconds()))
 	}
 
 	if cfg.VarQ.Pipeline.EnableSteps.Exposure {
 		exposureRes := <-exposureChan
 		if exposureRes.Error != nil {
-			a.Error = fmt.Errorf("exposure analysis: %v", exposureRes.Error)
-			return a
+			r.Error = fmt.Errorf("exposure analysis: %v", exposureRes.Error)
+			return r
 		}
-		a.Exposure = exposureRes
+		r.Exposure = exposureRes
 		msgPDB(fmt.Sprintf("exposure analysis done in %.3f secs", exposureRes.Duration.Seconds()))
 	}
 
-	if cfg.DebugPrint.Enabled {
-		printResults(a)
+	if cfg.VarQ.Pipeline.EnableSteps.Energy {
+		energyRes := <-energyChan
+		if energyRes.Error != nil {
+			r.Error = fmt.Errorf("energy analysis: %v", energyRes.Error)
+			return r
+		}
+		r.Energy = energyRes
+		msgPDB(fmt.Sprintf("energy analysis done in %.3f secs", energyRes.Duration.Seconds()))
 	}
 
-	return a
+	if cfg.DebugPrint.Enabled {
+		printResults(r)
+	}
+
+	return r
 }

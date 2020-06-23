@@ -25,7 +25,8 @@ func cliRun(uniprotID string, pdbFlags arrayFlags) {
 		}
 	}()
 
-	p, err := NewPipeline(uniprotID, pdbFlags, msgs)
+	variants := make(map[int]string)
+	p, err := NewPipeline(uniprotID, pdbFlags, variants, msgs)
 	if err != nil {
 		log.Fatal(err)
 	}
