@@ -5,10 +5,10 @@ import (
 	"os"
 	"time"
 	"varq/binding"
-	"varq/energy"
 	"varq/exposure"
 	"varq/interaction"
 	"varq/pdb"
+	"varq/stability"
 	"varq/uniprot"
 )
 
@@ -19,7 +19,7 @@ type Results struct {
 	Binding     *binding.Results     `json:"binding"`
 	Interaction *interaction.Results `json:"interaction"`
 	Exposure    *exposure.Results    `json:"exposure"`
-	Energy      *energy.Results      `json:"energy"`
+	Stability   *stability.Results   `json:"stability"`
 	Error       error                `json:"-"`
 }
 
@@ -125,7 +125,7 @@ func (p *Pipeline) analysePDB(r *Results) *Results {
 	bindingChan := make(chan *binding.Results)
 	interactionChan := make(chan *interaction.Results)
 	exposureChan := make(chan *exposure.Results)
-	energyChan := make(chan *energy.Results)
+	stabilityChan := make(chan *stability.Results)
 
 	idStr := fmt.Sprintf("PDB %s ", r.PDB.ID)
 	msgPDB := func(msg string) {
@@ -144,9 +144,9 @@ func (p *Pipeline) analysePDB(r *Results) *Results {
 		go exposure.Run(r.PDB, exposureChan, msgPDB)
 		msgPDB("started exposure analysis")
 	}
-	if cfg.VarQ.Pipeline.EnableSteps.Energy {
-		go energy.Run(p.Variants, r.UniProt, r.PDB, foldxDir, energyChan, msgPDB)
-		msgPDB("started energy analysis")
+	if cfg.VarQ.Pipeline.EnableSteps.Stability {
+		go stability.Run(p.Variants, r.UniProt, r.PDB, foldxDir, stabilityChan, msgPDB)
+		msgPDB("started stability analysis")
 	}
 
 	// TODO: refactor these repeated patterns
@@ -180,14 +180,14 @@ func (p *Pipeline) analysePDB(r *Results) *Results {
 		msgPDB(fmt.Sprintf("exposure analysis done in %.3f secs", exposureRes.Duration.Seconds()))
 	}
 
-	if cfg.VarQ.Pipeline.EnableSteps.Energy {
-		energyRes := <-energyChan
-		if energyRes.Error != nil {
-			r.Error = fmt.Errorf("energy analysis: %v", energyRes.Error)
+	if cfg.VarQ.Pipeline.EnableSteps.Stability {
+		stabilityRes := <-stabilityChan
+		if stabilityRes.Error != nil {
+			r.Error = fmt.Errorf("stability analysis: %v", stabilityRes.Error)
 			return r
 		}
-		r.Energy = energyRes
-		msgPDB(fmt.Sprintf("energy analysis done in %.3f secs", energyRes.Duration.Seconds()))
+		r.Stability = stabilityRes
+		msgPDB(fmt.Sprintf("stability analysis done in %.3f secs", stabilityRes.Duration.Seconds()))
 	}
 
 	if cfg.DebugPrint.Enabled {

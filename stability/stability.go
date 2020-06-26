@@ -1,21 +1,21 @@
-package energy
+package stability
 
 import (
 	"fmt"
 	"time"
-	"varq/energy/foldx"
 	"varq/pdb"
+	"varq/stability/foldx"
 	"varq/uniprot"
 )
 
-// Results holds the collected data in the energy analysis step
+// Results holds the collected data in the stability analysis step
 type Results struct {
 	FoldX    []*foldx.SASEnergyDiff `json:"foldx"`
 	Duration time.Duration          `json:"duration"`
 	Error    error                  `json:"error"`
 }
 
-// Run starts the energy analysis step
+// Run starts the stability analysis step
 func Run(sasList []*uniprot.SAS, unp *uniprot.UniProt, pdb *pdb.PDB, foldxDir string,
 	results chan<- *Results, msg func(string)) {
 	start := time.Now()
