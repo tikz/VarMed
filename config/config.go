@@ -26,7 +26,7 @@ type Config struct {
 				Binding     bool `yaml:"binding"`
 				Exposure    bool `yaml:"exposure"`
 				Interaction bool `yaml:"interaction"`
-				Energy      bool `yaml:"energy"`
+				Stability   bool `yaml:"stability"`
 			} `yaml:"enable-steps"`
 		} `yaml:"pipeline"`
 	} `yaml:"varq"`

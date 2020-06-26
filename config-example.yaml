@@ -13,7 +13,7 @@ varq:
       binding: true
       exposure: true
       interaction: true
-      energy: true
+      stability: true
 
 debug-print:
   enabled: true
