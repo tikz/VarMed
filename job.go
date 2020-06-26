@@ -70,14 +70,13 @@ func (j *Job) generateID() string {
 // NewJob returns a new job instance.
 func NewJob(request *JobRequest) Job {
 	j := Job{Request: request}
-
 	j.ID = j.generateID()
 
 	return j
 }
 
 // Process runs the pipeline for the job.
-func (j *Job) Process() {
+func (j *Job) Process(cli bool) {
 	j.Status = statusProcess
 	j.Started = time.Now()
 
@@ -100,7 +99,11 @@ func (j *Job) Process() {
 
 	go func() {
 		for m := range msgChan {
-			j.msgs = append(j.msgs, m)
+			if cli {
+				fmt.Println(m)
+			} else {
+				j.msgs = append(j.msgs, m)
+			}
 		}
 	}()
 

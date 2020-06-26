@@ -93,7 +93,7 @@ func (q *Queue) posMsg() {
 // worker does the processing of jobs in the queue.
 func (q *Queue) worker() {
 	for j := range q.jobsCh {
-		j.Process()
+		j.Process(false)
 		q.Delete(j)
 		q.posMsg()
 	}
