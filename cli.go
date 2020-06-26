@@ -17,7 +17,7 @@ func (i *arrayFlags) Set(value string) error {
 	return nil
 }
 
-func cliRun(uniprotID string, pdbFlags arrayFlags) {
+func cliRun(uniprotID string, pdbFlags arrayFlags, sas []string) {
 	msgs := make(chan string)
 	go func() {
 		for m := range msgs {
@@ -25,19 +25,28 @@ func cliRun(uniprotID string, pdbFlags arrayFlags) {
 		}
 	}()
 
-	variants := make(map[int]string)
-	p, err := NewPipeline(uniprotID, pdbFlags, variants, msgs)
-	if err != nil {
-		log.Fatal(err)
+	j := NewJob(&JobRequest{
+		UniProtID: uniprotID,
+		PDBIDs:    pdbFlags,
+		SAS:       sas,
+	})
+
+	fmt.Println("VarQ CLI")
+	fmt.Println()
+	fmt.Printf("UniProt ID: \t %s\n", uniprotID)
+	fmt.Printf("PDB IDs: \t %s\n", pdbFlags)
+	fmt.Printf("SAS: \t\t %s\n", sas)
+	fmt.Printf("Job hash: \t %s...\n", j.ID[:10])
+	fmt.Println()
+
+	j.Process()
+	if j.Error != nil {
+		log.Fatal(j.Error)
 	}
 
-	if len(pdbFlags) == 0 {
-		p.pdbIDs = p.UniProt.PDBIDs
-	}
+	// if len(pdbFlags) == 0 {
+	// 	p.pdbIDs = p.UniProt.PDBIDs
+	// }
 
-	err = p.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
 	close(msgs)
 }
