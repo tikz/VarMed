@@ -41,6 +41,16 @@ type Residue struct {
 	Atoms          []*Atom `json:"-"`
 }
 
+// IsAminoacid returns true if the given letter is an aminoacid, false otherwise.
+func IsAminoacid(letter string) bool {
+	for _, res := range residueNames {
+		if res[2] == letter {
+			return true
+		}
+	}
+	return false
+}
+
 // NewResidue constructs a new residue given a chain, position and aminoacid name.
 // The name is case-insensitive and can be either a full aminoacid name, one or three letter abbreviation.
 func NewResidue(chain string, pos int64, input string) *Residue {
