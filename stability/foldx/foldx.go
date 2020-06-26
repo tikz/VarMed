@@ -13,11 +13,11 @@ import (
 	"varq/uniprot"
 )
 
-// SASEnergyDiff represents the ddG energy difference between an original
+// SASDiff represents the ddG energy difference between an original
 // and a mutated structure with a single aminoacid substitution.
-type SASEnergyDiff struct {
+type SASDiff struct {
 	SAS *uniprot.SAS
-	ddG float64 // kcal/mol
+	DdG float64 // kcal/mol
 }
 
 func fileNotExist(path string) bool {
@@ -66,23 +66,23 @@ func Repair(p *pdb.PDB, foldxDir string, msg func(string)) error {
 func formatMut(unpID string, p *pdb.PDB, pos int64, aa string) string {
 	var muts []string
 	for _, res := range p.UniProtPositions[unpID][int64(pos)] {
-		muts = append(muts, res.Name1+res.Chain+strconv.FormatInt(pos, 64)+aa)
+		muts = append(muts, res.Name1+res.Chain+strconv.FormatInt(pos, 10)+aa)
 	}
 	return strings.Join(muts, ",") + ";"
 }
 
 func Run(sasList []*uniprot.SAS, unpID string,
-	p *pdb.PDB, foldxDir string, msg func(string)) ([]*SASEnergyDiff, error) {
+	p *pdb.PDB, foldxDir string, msg func(string)) ([]*SASDiff, error) {
 	err := Repair(p, foldxDir, msg)
 	if err != nil {
 		return nil, fmt.Errorf("repair: %v", err)
 	}
 
-	var results []*SASEnergyDiff
+	var results []*SASDiff
 	for _, sas := range sasList {
 		pos := sas.Position
 		aa := sas.ToAa
-		name := p.ID + strconv.FormatInt(pos, 64) + aa
+		name := p.ID + strconv.FormatInt(pos, 10) + aa
 
 		// Create FoldX job output dir
 		os.MkdirAll("bin/"+name, os.ModePerm)
@@ -119,8 +119,7 @@ func Run(sasList []*uniprot.SAS, unpID string,
 			return nil, fmt.Errorf("extract results: %v", err)
 		}
 
-		results = append(results, &SASEnergyDiff{SAS: sas, ddG: ddG})
-		fmt.Println(p.ID, ddG)
+		results = append(results, &SASDiff{SAS: sas, DdG: ddG})
 	}
 
 	return results, nil
@@ -132,7 +131,7 @@ func extractddG(path string) (ddG float64, err error) {
 		return ddG, err
 	}
 
-	// First column contains the ddG
+	// First column contains ddG
 	// https://regex101.com/r/BGcps6/1
 	r, _ := regexp.Compile("pdb\t(.*?)\t")
 	ddG, err = strconv.ParseFloat(r.FindAllStringSubmatch(string(data), -1)[0][1], 64)
