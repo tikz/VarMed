@@ -18,13 +18,6 @@ func (i *arrayFlags) Set(value string) error {
 }
 
 func cliRun(uniprotID string, pdbFlags arrayFlags, sas []string) {
-	msgs := make(chan string)
-	go func() {
-		for m := range msgs {
-			fmt.Println(m)
-		}
-	}()
-
 	j := NewJob(&JobRequest{
 		UniProtID: uniprotID,
 		PDBIDs:    pdbFlags,
@@ -39,14 +32,8 @@ func cliRun(uniprotID string, pdbFlags arrayFlags, sas []string) {
 	fmt.Printf("Job hash: \t %s...\n", j.ID[:10])
 	fmt.Println()
 
-	j.Process()
+	j.Process(true)
 	if j.Error != nil {
 		log.Fatal(j.Error)
 	}
-
-	// if len(pdbFlags) == 0 {
-	// 	p.pdbIDs = p.UniProt.PDBIDs
-	// }
-
-	close(msgs)
 }

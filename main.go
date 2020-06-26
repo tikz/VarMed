@@ -47,6 +47,6 @@ func makeSampleResults() {
 			UniProtID: "P01112",
 			PDBIDs:    []string{"6D5H"},
 		})
-		j.Process()
+		j.Process(false)
 	}
 }
