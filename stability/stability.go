@@ -10,9 +10,9 @@ import (
 
 // Results holds the collected data in the stability analysis step
 type Results struct {
-	FoldX    []*foldx.SASEnergyDiff `json:"foldx"`
-	Duration time.Duration          `json:"duration"`
-	Error    error                  `json:"error"`
+	FoldX    []*foldx.SASDiff `json:"foldx"`
+	Duration time.Duration    `json:"duration"`
+	Error    error            `json:"error"`
 }
 
 // Run starts the stability analysis step
