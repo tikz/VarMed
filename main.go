@@ -31,9 +31,9 @@ func main() {
 	flag.Parse()
 
 	if len(*uniprotID) > 0 {
-		cliRun(strings.ToUpper(*uniprotID), pdbsFlag)
+		cliRun(strings.ToUpper(*uniprotID), pdbsFlag, flag.Args())
 	} else {
-		makeSampleResults()
+		// makeSampleResults()
 		httpServe()
 	}
 }
