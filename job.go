@@ -4,8 +4,15 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
+	"fmt"
+	"regexp"
+	"sort"
+	"strconv"
 	"strings"
 	"time"
+	"varq/pdb"
+	"varq/uniprot"
 )
 
 const (
@@ -19,15 +26,14 @@ const (
 // JobRequest represents a job request from an user.
 // Contains the user input and additional details.
 type JobRequest struct {
-	Name        string    `json:"name"`
-	UniProtID   string    `json:"uniprotId"`
-	PDBIDs      []string  `json:"pdbIds"`
-	ClinVar     bool      `json:"clinvar"`
-	VariantsPos []int     `json:"variantsPos"`
-	VariantsAa  []string  `json:"variantsAa"`
-	IP          string    `json:"ip"`
-	Email       string    `json:"email"`
-	Time        time.Time `json:"time"`
+	Name      string    `json:"name"`
+	UniProtID string    `json:"uniprotId"`
+	PDBIDs    []string  `json:"pdbIds"`
+	ClinVar   bool      `json:"clinvar"`
+	SAS       []string  `json:"sas"`
+	IP        string    `json:"ip"`
+	Email     string    `json:"email"`
+	Time      time.Time `json:"time"`
 }
 
 // Job represents the input and outputs of a single job ran by the pipeline.
@@ -43,12 +49,19 @@ type Job struct {
 	Error error `json:"-"`
 }
 
-// generateID returns a SHA256 hash of UniProtID+joined PDBIDs
-func (j *Job) generateID() string { // TODO: include variations in hash after implementing that
-
+// generateID returns a SHA256 hash of UniProtID+sorted PDBIDs+sorted SASs.
+func (j *Job) generateID() string {
 	unpID := []byte(j.Request.UniProtID)
-	pdbIDs := []byte(strings.Join(j.Request.PDBIDs, ""))
-	b := bytes.Join([][]byte{unpID, pdbIDs}, []byte(""))
+
+	pdbIDs := j.Request.PDBIDs
+	sort.Strings(pdbIDs)
+	pdbBytes := []byte(strings.Join(pdbIDs, ""))
+
+	sas := j.Request.SAS
+	sort.Strings(sas)
+	sasBytes := []byte(strings.Join(sas, ""))
+
+	b := bytes.Join([][]byte{unpID, pdbBytes, sasBytes}, []byte(""))
 	hash := sha256.Sum256(b)
 
 	return hex.EncodeToString(hash[:])
@@ -68,13 +81,22 @@ func (j *Job) Process() {
 	j.Status = statusProcess
 	j.Started = time.Now()
 
-	variants := make(map[int]string)
-	for i, pos := range j.Request.VariantsPos {
-		variants[pos] = j.Request.VariantsAa[i]
+	unp, err := loadUniProt(j.Request.UniProtID)
+	if err != nil {
+		j.fail(err)
+		return
+	}
+
+	substs, err := loadSAS(unp.Sequence, j.Request.SAS)
+	if len(substs) == 0 {
+		j.fail(errors.New("no aminoacid substitutions entered"))
+	}
+	if err != nil {
+		j.fail(fmt.Errorf("parse SAS list: %v", err))
 	}
 
 	msgChan := make(chan string, 100)
-	j.Pipeline, _ = NewPipeline(j.Request.UniProtID, j.Request.PDBIDs, variants, msgChan)
+	j.Pipeline, _ = NewPipeline(unp, j.Request.PDBIDs, substs, msgChan)
 
 	go func() {
 		for m := range msgChan {
@@ -82,7 +104,7 @@ func (j *Job) Process() {
 		}
 	}()
 
-	err := j.Pipeline.Run()
+	err = j.Pipeline.Run()
 	if err != nil {
 		j.fail(err)
 		return
@@ -101,5 +123,53 @@ func (j *Job) Process() {
 // fail handles the given error message and updates the status.
 func (j *Job) fail(err error) {
 	j.msgs = append(j.msgs, err.Error())
+	j.Error = err
 	j.Status = statusError
+}
+
+// loadSAS parses and validates a slice of formatted SAS strings.
+func loadSAS(seq string, sas []string) ([]*uniprot.SAS, error) {
+	var parsedSAS []*uniprot.SAS
+
+	for _, s := range sas {
+		r, _ := regexp.Compile("(.)([0-9]*)(.)")
+		m := r.FindStringSubmatch(s)
+		if m == nil {
+			return nil, errors.New("bad SAS format:" + s)
+		}
+
+		from := m[1]
+		pos, _ := strconv.ParseInt(m[2], 10, 64)
+		to := m[3]
+
+		if pos <= 0 {
+			return nil, errors.New(s + " position must be 1 or greater")
+		}
+
+		if !pdb.IsAminoacid(from) {
+			return nil, errors.New(s + " not an aminoacid: " + from)
+		}
+		if !pdb.IsAminoacid(to) {
+			return nil, errors.New(s + " not an aminoacid: " + to)
+		}
+
+		if from == to {
+			return nil, errors.New(s + " has same aminoacids, not a SAS")
+		}
+
+		unpAa := string(seq[pos-1])
+		if from != unpAa {
+			errStr := fmt.Sprintf("SAS %s: position %d in UniProt seq has Aa %s, not %s",
+				s, pos, unpAa, from)
+			return nil, errors.New(errStr)
+		}
+
+		parsedSAS = append(parsedSAS, &uniprot.SAS{
+			Position: pos,
+			FromAa:   from,
+			ToAa:     to,
+		})
+	}
+
+	return parsedSAS, nil
 }

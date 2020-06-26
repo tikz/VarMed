@@ -26,7 +26,7 @@ type Results struct {
 // Pipeline represents a single run of the VarQ pipeline.
 type Pipeline struct {
 	UniProt  *uniprot.UniProt
-	Variants map[int]string
+	SAS      []*uniprot.SAS
 	Results  map[string]*Results // PDB ID to results
 	Duration time.Duration
 
@@ -40,18 +40,13 @@ func (p *Pipeline) msg(m string) {
 }
 
 // NewPipeline constructs a new Pipeline.
-func NewPipeline(unpID string, pdbIDs []string, variants map[int]string, msgChan chan string) (*Pipeline, error) {
-	uniprot, err := loadUniProt(unpID)
-	if err != nil {
-		return nil, err
-	}
-
+func NewPipeline(unp *uniprot.UniProt, pdbIDs []string, sas []*uniprot.SAS, msgChan chan string) (*Pipeline, error) {
 	p := Pipeline{
-		UniProt:  uniprot,
-		Variants: variants,
-		msgChan:  msgChan,
-		pdbIDs:   pdbIDs,
-		Results:  make(map[string]*Results),
+		UniProt: unp,
+		SAS:     sas,
+		msgChan: msgChan,
+		pdbIDs:  pdbIDs,
+		Results: make(map[string]*Results),
 	}
 
 	return &p, nil
@@ -145,7 +140,7 @@ func (p *Pipeline) analysePDB(r *Results) *Results {
 		msgPDB("started exposure analysis")
 	}
 	if cfg.VarQ.Pipeline.EnableSteps.Stability {
-		go stability.Run(p.Variants, r.UniProt, r.PDB, foldxDir, stabilityChan, msgPDB)
+		go stability.Run(p.SAS, r.UniProt, r.PDB, foldxDir, stabilityChan, msgPDB)
 		msgPDB("started stability analysis")
 	}
 
