@@ -87,11 +87,13 @@ func (j *Job) Process(cli bool) {
 	}
 
 	substs, err := loadSAS(unp.Sequence, j.Request.SAS)
-	if len(substs) == 0 {
-		j.fail(errors.New("no aminoacid substitutions entered"))
-	}
 	if err != nil {
 		j.fail(fmt.Errorf("parse SAS list: %v", err))
+		return
+	}
+	if len(substs) == 0 {
+		j.fail(errors.New("no aminoacid substitutions entered"))
+		return
 	}
 
 	msgChan := make(chan string, 100)
