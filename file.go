@@ -9,12 +9,13 @@ import (
 )
 
 const (
-	dataDir  = "data/"
-	unpDir   = dataDir + "uniprot/"
-	pdbDir   = dataDir + "pdb/"
-	jobDir   = dataDir + "jobs/"
-	foldxDir = dataDir + "foldx/"
-	fileExt  = ".varq"
+	dataDir    = "data/"
+	unpDir     = dataDir + "uniprot/"
+	pdbDir     = dataDir + "pdb/"
+	jobDir     = dataDir + "jobs/"
+	foldxDir   = dataDir + "foldx/"
+	clinvarDir = dataDir + "clinvar/"
+	fileExt    = ".varq"
 )
 
 func makeDirs() {
@@ -22,6 +23,7 @@ func makeDirs() {
 	os.MkdirAll(pdbDir, os.ModePerm)
 	os.MkdirAll(jobDir, os.ModePerm)
 	os.MkdirAll(foldxDir, os.ModePerm)
+	os.MkdirAll(clinvarDir, os.ModePerm)
 }
 
 func writeJob(j *Job) error {
