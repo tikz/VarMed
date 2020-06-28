@@ -5,8 +5,10 @@ import (
 	"log"
 	"os"
 	"strings"
+	"varq/clinvar"
 	"varq/config"
 	"varq/http"
+	"varq/uniprot"
 )
 
 var (
@@ -18,10 +20,12 @@ func init() {
 	if err != nil {
 		log.Fatalf("Cannot open and parse config.yaml: %v", err)
 	}
-	cfg = c
-	http.Cfg = c
 
 	makeDirs()
+
+	cfg = c
+	http.Cfg = c
+	uniprot.DbSNP = clinvar.NewDbSNP()
 }
 
 func main() {

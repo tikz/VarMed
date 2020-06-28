@@ -6,8 +6,11 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"varq/clinvar"
 	"varq/http"
 )
+
+var DbSNP *clinvar.DbSNP
 
 // UniProt contains relevant protein data for a single accession.
 type UniProt struct {
@@ -25,11 +28,15 @@ type UniProt struct {
 
 // VariantEntry represents a single variant entry extracted from the TXT.
 type VariantEntry struct {
-	Position int64  `json:"position"`
-	Note     string `json:"note"`
-	Evidence string `json:"evidence"`
-	ID       string `json:"id"`
-	SAS      *SAS   `json:"sas"`
+	Position int64           `json:"position"`
+	FromAa   string          `json:"fromAa"`
+	ToAa     string          `json:"toAa"`
+	Change   string          `json:"change"`
+	Note     string          `json:"note"`
+	Evidence string          `json:"evidence"`
+	ID       string          `json:"id"`
+	DbSNP    string          `json:"dbsnp"`
+	ClinVar  *clinvar.Allele `json:"clinvar"`
 }
 
 // SAS represents a single aminoacid substitution.
@@ -160,10 +167,12 @@ func (u *UniProt) extractVariants() error {
 	matches := r.FindAllStringSubmatch(string(u.Raw), -1)
 
 	for _, variant := range matches {
+		var entry VariantEntry
 		pos, err := strconv.ParseInt(variant[1], 10, 64)
 		if err != nil {
 			return fmt.Errorf("cannot parse variant position int: %s", variant[1])
 		}
+		entry.Position = pos
 
 		data := variant[2]
 		s := regexp.MustCompile("\nFT \\s+")
@@ -171,23 +180,28 @@ func (u *UniProt) extractVariants() error {
 
 		r, _ := regexp.Compile("(?s)/note=\"(.*?)\"")
 		n := r.FindAllStringSubmatch(d, -1)
-		note := n[0][1]
+		entry.Note = n[0][1]
+
+		r, _ = regexp.Compile("(.) -> (.).*dbSNP:(rs[0-9]*)")
+		ne := r.FindAllStringSubmatch(entry.Note, -1)
+		if len(ne) == 0 {
+			continue
+		}
+		entry.FromAa = ne[0][1]
+		entry.ToAa = ne[0][2]
+		entry.Change = entry.FromAa + variant[1] + entry.ToAa
+
+		entry.DbSNP = ne[0][3]
+		entry.ClinVar = DbSNP.GetVariation(entry.DbSNP, entry.Change)
 
 		r, _ = regexp.Compile("(?s)/evidence=\"(.*?)\"")
 		e := r.FindAllStringSubmatch(d, -1)
-		var evidence string
 		if len(e) > 0 {
-			evidence = e[0][1]
+			entry.Evidence = e[0][1]
 		}
 
-		id := variant[3]
-
-		variants = append(variants, &VariantEntry{
-			Position: pos,
-			ID:       id,
-			Note:     note,
-			Evidence: evidence,
-		})
+		entry.ID = variant[3]
+		variants = append(variants, &entry)
 	}
 
 	u.Variants = variants

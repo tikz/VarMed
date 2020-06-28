@@ -51,24 +51,8 @@ func IsAminoacid(letter string) bool {
 	return false
 }
 
-// NewResidue constructs a new residue given a chain, position and aminoacid name.
-// The name is case-insensitive and can be either a full aminoacid name, one or three letter abbreviation.
-func NewResidue(chain string, pos int64, input string) *Residue {
-	name, abbrv3, abbrv1 := matchName(input)
-
-	res := &Residue{
-		Chain:          chain,
-		StructPosition: pos,
-		Name:           name,
-		Name1:          abbrv1,
-		Name3:          abbrv3,
-	}
-
-	return res
-}
-
-// matchName receives a residue name and returns a 3-sized array of all the possible representations as a string.
-func matchName(input string) (string, string, string) {
+// AminoacidNames receives a name and returns a 3-sized array of all the possible representations as a string.
+func AminoacidNames(input string) (string, string, string) {
 	s := strings.Title(strings.ToLower(input))
 	for _, res := range residueNames {
 		for _, n := range res {
@@ -79,6 +63,22 @@ func matchName(input string) (string, string, string) {
 	}
 
 	return input, "Unk", "X"
+}
+
+// NewResidue constructs a new residue given a chain, position and aminoacid name.
+// The name is case-insensitive and can be either a full aminoacid name, one or three letter abbreviation.
+func NewResidue(chain string, pos int64, input string) *Residue {
+	name, abbrv3, abbrv1 := AminoacidNames(input)
+
+	res := &Residue{
+		Chain:          chain,
+		StructPosition: pos,
+		Name:           name,
+		Name1:          abbrv1,
+		Name3:          abbrv3,
+	}
+
+	return res
 }
 
 // ExtractSeqRes parses the raw PDB for SEQRES records containing the primary sequence.
