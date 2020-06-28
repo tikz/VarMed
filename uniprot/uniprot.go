@@ -22,6 +22,7 @@ type UniProt struct {
 	Organism string          `json:"organism"` // organism
 	Sequence string          `json:"sequence"` // canonical sequence
 	PDBIDs   []string        `json:"pdbIds"`   // PDB IDs
+	PTMs     PTMs            `json:"ptms"`
 	Variants []*VariantEntry `json:"variants"` // dbSNP variants
 	Raw      []byte          `json:"-"`        // TXT API raw bytes.
 }
@@ -44,6 +45,23 @@ type SAS struct {
 	Position int64  `json:"position"`
 	FromAa   string `json:"fromAa"`
 	ToAa     string `json:"toAa"`
+}
+
+// PTMs represents post translational modifications from the entry.
+type PTMs struct {
+	DisulfideBonds []Disulfide     `json:"disulfideBonds"`
+	Glycosilations []Glycosilation `json:"glycosilationSites"`
+}
+
+// Disulfide represents a single disulfide bond between positions.
+type Disulfide struct {
+	Positions [2]int64 `json:"positions"`
+}
+
+// Glycosilation represents a glycosilation site.
+type Glycosilation struct {
+	Position int64  `json:"position"`
+	Note     string `json:"note"`
 }
 
 // NewUniProt constructs an instance from an UniProt accession ID and a list of target PDB IDs
@@ -91,6 +109,11 @@ func (u *UniProt) extract() error {
 	err = u.extractVariants()
 	if err != nil {
 		return fmt.Errorf("extracting variants from UniProt TXT: %v", err)
+	}
+
+	err = u.extractPTMs()
+	if err != nil {
+		return fmt.Errorf("extracting PTMs from UniProt TXT: %v", err)
 	}
 
 	return nil
@@ -205,6 +228,34 @@ func (u *UniProt) extractVariants() error {
 	}
 
 	u.Variants = variants
+
+	return nil
+}
+
+// extractPTMs parses for post translational modifications
+func (u *UniProt) extractPTMs() error {
+	u.PTMs = PTMs{}
+
+	// Glycosilation sites
+	r, _ := regexp.Compile("(?ms)^FT[ ]*CARBOHYD[ ]*([0-9]*)$.*?note=\"(.*?)\"")
+	matches := r.FindAllStringSubmatch(string(u.Raw), -1)
+
+	for _, glyco := range matches {
+		pos, _ := strconv.ParseInt(glyco[1], 10, 64)
+		u.PTMs.Glycosilations = append(u.PTMs.Glycosilations,
+			Glycosilation{Position: pos, Note: glyco[2]})
+	}
+
+	// Disulfide bonds
+	r, _ = regexp.Compile("(?ms)^FT[ ]*DISULFID[ ]*([0-9]*)..([0-9]*)")
+	matches = r.FindAllStringSubmatch(string(u.Raw), -1)
+
+	for _, disulf := range matches {
+		pos1, _ := strconv.ParseInt(disulf[1], 10, 64)
+		pos2, _ := strconv.ParseInt(disulf[2], 10, 64)
+		u.PTMs.DisulfideBonds = append(u.PTMs.DisulfideBonds,
+			Disulfide{Positions: [2]int64{pos1, pos2}})
+	}
 
 	return nil
 }
