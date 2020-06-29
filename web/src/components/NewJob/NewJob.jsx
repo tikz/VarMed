@@ -72,8 +72,9 @@ export default class NewJob extends React.Component {
         uniprotId: this.state.unpData.id,
         pdbIds: this.state.pdbs,
         email: email,
-        variationsPos: this.state.variations.map((x) => x.pos),
-        variationsAa: this.state.variations.map((x) => x.aa),
+        sas: ["M1K"],
+        // variationsPos: this.state.variations.map((x) => x.pos),
+        // variationsAa: this.state.variations.map((x) => x.aa),
         clinvar: this.state.clinvar,
       })
       .then(function (response) {
@@ -98,10 +99,7 @@ export default class NewJob extends React.Component {
 
     let unpOk = Object.keys(this.state.unpData).length > 0;
     let structOk = this.state.unpData.pdbs !== null;
-    let dataOk =
-      unpOk &&
-      this.state.pdbs.length > 0 &&
-      (this.state.variations.length > 0 || this.state.clinvar);
+    let dataOk = unpOk && this.state.pdbs.length > 0; // && (this.state.variations.length > 0 || this.state.clinvar);
     return (
       <Box>
         <NavBar />
@@ -130,11 +128,13 @@ export default class NewJob extends React.Component {
                     </Box>
                   </Grow>
                 </Grid>
-                <Grid item>{unpOk && structOk && <ArrowForwardIosIcon />}</Grid>
+                <Grid item>
+                  {false && unpOk && structOk && <ArrowForwardIosIcon />}
+                </Grid>
                 <Grid item xs={4}>
                   <Grow in={unpOk}>
                     <Box>
-                      {unpOk && structOk && (
+                      {false && unpOk && structOk && (
                         <Variations
                           unpID={this.state.unpData.id}
                           sequence={this.state.unpData.sequence}
