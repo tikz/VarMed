@@ -72,7 +72,7 @@ export default class NewJob extends React.Component {
         uniprotId: this.state.unpData.id,
         pdbIds: this.state.pdbs,
         email: email,
-        sas: ["M1K"],
+        sas: [],
         // variationsPos: this.state.variations.map((x) => x.pos),
         // variationsAa: this.state.variations.map((x) => x.aa),
         clinvar: this.state.clinvar,
