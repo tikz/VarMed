@@ -50,14 +50,14 @@ type Job struct {
 }
 
 // generateID returns a SHA256 hash of UniProtID+sorted PDBIDs+sorted SASs.
-func (j *Job) generateID() string {
-	unpID := []byte(j.Request.UniProtID)
+func generateID(r *JobRequest) string {
+	unpID := []byte(r.UniProtID)
 
-	pdbIDs := j.Request.PDBIDs
+	pdbIDs := r.PDBIDs
 	sort.Strings(pdbIDs)
 	pdbBytes := []byte(strings.Join(pdbIDs, ""))
 
-	sas := j.Request.SAS
+	sas := r.SAS
 	sort.Strings(sas)
 	sasBytes := []byte(strings.Join(sas, ""))
 
@@ -68,9 +68,9 @@ func (j *Job) generateID() string {
 }
 
 // NewJob returns a new job instance.
-func NewJob(request *JobRequest) Job {
-	j := Job{Request: request}
-	j.ID = j.generateID()
+func NewJob(request *JobRequest) *Job {
+	j := &Job{Request: request}
+	j.ID = generateID(request)
 
 	return j
 }
