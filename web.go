@@ -85,9 +85,13 @@ func NewJobEndpoint(c *gin.Context) {
 	// TODO: data should be already client side validated, but
 	// do it again server side
 
-	j := NewJob(&req)
-	queue := c.MustGet("queue").(*Queue)
-	queue.Add(&j)
+	// Check if job already exists
+	j, err := loadJob(generateID(&req))
+	if err != nil {
+		j = NewJob(&req)
+		queue := c.MustGet("queue").(*Queue)
+		queue.Add(j)
+	}
 
 	c.JSON(http.StatusOK, gin.H{"id": j.ID, "error": ""})
 }
