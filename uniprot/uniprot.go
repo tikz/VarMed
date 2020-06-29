@@ -10,7 +10,7 @@ import (
 	"varq/http"
 )
 
-var DbSNP *clinvar.DbSNP
+var DbSNP *clinvar.DbSNP // TODO: think about index+file search vs leaving this in RAM as is
 
 // UniProt contains relevant protein data for a single accession.
 type UniProt struct {
