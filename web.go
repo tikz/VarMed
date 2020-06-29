@@ -81,7 +81,7 @@ func NewJobEndpoint(c *gin.Context) {
 	c.BindJSON(&req)
 	req.IP = c.ClientIP()
 	req.Time = time.Now()
-
+	req.SAS = []string{"M1K"}
 	// TODO: data should be already client side validated, but
 	// do it again server side
 
