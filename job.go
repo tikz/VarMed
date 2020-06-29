@@ -91,10 +91,6 @@ func (j *Job) Process(cli bool) {
 		j.fail(fmt.Errorf("parse SAS list: %v", err))
 		return
 	}
-	if len(substs) == 0 {
-		j.fail(errors.New("no aminoacid substitutions entered"))
-		return
-	}
 
 	msgChan := make(chan string, 100)
 	j.Pipeline, _ = NewPipeline(unp, j.Request.PDBIDs, substs, msgChan)
