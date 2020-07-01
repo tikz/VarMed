@@ -19,3 +19,5 @@ varq
 # npm modules and webpack build
 web/node_modules/
 web/output/
+
+.vscode
