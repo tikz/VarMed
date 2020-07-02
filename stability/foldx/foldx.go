@@ -16,9 +16,8 @@ import (
 // SASDiff represents the ddG energy difference between an original
 // and a mutated structure with a single aminoacid substitution.
 type SASDiff struct {
-	SAS         *uniprot.SAS `json:"sas"`
-	InStructure bool         `json:"inStructure"`
-	DdG         float64      `json:"ddG"` // kcal/mol
+	SAS *uniprot.SAS `json:"sas"`
+	DdG float64      `json:"ddG"` // kcal/mol
 }
 
 func fileNotExist(path string) bool {
@@ -33,39 +32,40 @@ func writeFile(path string, contents string) {
 	}
 }
 
-// Repair runs the RepairPDB FoldX command on a PDB file specified by pdb.LocalPath
+// repair runs the RepairPDB FoldX command on a PDB file specified by pdb.LocalPath
 // and stores the resulting file in foldxDir, only if the file doesn't exist already.
-func Repair(p *pdb.PDB, foldxDir string, msg func(string)) error {
-	path := foldxDir + p.ID + "_Repair.pdb"
+// Returns the path where the repaired PDB is located.
+func repair(p *pdb.PDB, msg func(string)) (string, error) {
+	repairDir := "data/foldx/repair/"
+	path := repairDir + p.ID + "_Repair.pdb"
 	if fileNotExist(path) {
 		msg("running FoldX RepairPDB")
 
 		cmd := exec.Command("./foldx",
 			"--command=RepairPDB",
 			"--pdb="+p.ID+".pdb",
-			"--output-dir=../"+foldxDir)
+			"--output-dir=../"+repairDir)
 		cmd.Dir = "bin/"
 
 		out, err := cmd.CombinedOutput()
 		if err != nil {
-			return err
+			return path, err
 		}
 
 		if !strings.Contains(string(out), "run OK") || fileNotExist(path) {
 			fmt.Println(string(out))
-			return errors.New("RepairPDB failed")
+			return path, errors.New("RepairPDB failed")
 		}
 	} else {
-
 		msg("found existing FoldX PDB")
 	}
 
-	return nil
+	return path, nil
 }
 
-// formatMutants receives a given mutation in UniProt position and returns
+// formatMutant receives a given mutation in UniProt position and returns
 // the corresponding PDB positions in FoldX format, i.e.: KA42I,KB42I;
-func formatMutants(unpID string, p *pdb.PDB, pos int64, aa string) (string, error) {
+func formatMutant(unpID string, p *pdb.PDB, pos int64, aa string) (string, error) {
 	var muts []string
 	residues := p.UniProtPositions[unpID][int64(pos)]
 	if len(residues) == 0 {
@@ -79,54 +79,64 @@ func formatMutants(unpID string, p *pdb.PDB, pos int64, aa string) (string, erro
 }
 
 func Run(sasList []*uniprot.SAS, unpID string,
-	p *pdb.PDB, foldxDir string, msg func(string)) ([]*SASDiff, error) {
-	err := Repair(p, foldxDir, msg)
+	p *pdb.PDB, msg func(string)) ([]*SASDiff, error) {
+	pdbPath, err := repair(p, msg)
 	if err != nil {
 		return nil, fmt.Errorf("repair: %v", err)
 	}
 
 	var results []*SASDiff
 	for _, sas := range sasList {
-		diff := &SASDiff{SAS: sas}
-		results = append(results, diff)
-
-		pos := sas.Position
-		aa := sas.ToAa
-		name := p.ID + strconv.FormatInt(pos, 10) + aa
-
-		muts, err := formatMutants(unpID, p, pos, aa)
-		if err != nil {
-			continue
+		mut, err := formatMutant(unpID, p, sas.Position, sas.ToAa)
+		if err == nil {
+			diff, err := buildModel(p.ID, pdbPath, sas, mut)
+			if err != nil {
+				return nil, err
+			}
+			results = append(results, diff)
 		}
-		diff.InStructure = true
+	}
 
+	return results, nil
+}
+
+func buildModel(pdbID string, pdbPath string, sas *uniprot.SAS, mut string) (*SASDiff, error) {
+	diff := &SASDiff{SAS: sas}
+
+	change := sas.FromAa + strconv.FormatInt(sas.Position, 10) + sas.ToAa
+	pdbMutName := pdbID + "_" + change
+	dirPath := "data/foldx/mutations/" + pdbMutName
+	diffPath := dirPath + "/Dif_" + pdbID + "_Repair.fxout"
+
+	if fileNotExist(diffPath) {
 		// Create FoldX job output dir
-		os.MkdirAll("bin/"+name, os.ModePerm)
+		os.MkdirAll(dirPath, os.ModePerm)
 
 		// Create file containing individual list of mutations
-		mutantFile := "individual_list_" + name
-		writeFile("bin/"+mutantFile, muts)
+		mutantFile := "individual_list_" + pdbMutName
+		writeFile("bin/"+mutantFile, mut)
 
 		// Create hardlink
 		// (FoldX seems to only look for PDBs in the same dir)
-		os.Link(foldxDir+p.ID+"_Repair.pdb", "bin/"+p.ID+"_Repair.pdb")
+		os.Link(pdbPath, "bin/"+pdbID+"_Repair.pdb")
 
-		// Remove job files on scope exit
+		// Remove files on scope exit
 		defer func() {
-			os.RemoveAll("bin/" + name)
+			os.RemoveAll("bin/" + pdbPath + "_Repair.pdb") // hardlink
+			os.RemoveAll("bin/" + pdbMutName)
 			os.RemoveAll("bin/" + mutantFile)
-			os.RemoveAll("bin/" + p.ID + "_Repair.pdb")
 		}()
 
 		cmd := exec.Command("./foldx",
 			"--command=BuildModel",
-			"--pdb="+p.ID+"_Repair.pdb",
+			"--pdb="+pdbID+"_Repair.pdb",
 			"--mutant-file="+mutantFile,
-			"--output-dir="+name)
+			"--output-dir=../"+dirPath)
 		cmd.Dir = "bin/"
 
 		out, err := cmd.CombinedOutput()
 		if err != nil {
+			fmt.Println(string(out))
 			return nil, err
 		}
 
@@ -134,16 +144,15 @@ func Run(sasList []*uniprot.SAS, unpID string,
 			fmt.Println(string(out))
 			return nil, errors.New("BuildModel failed")
 		}
-
-		ddG, err := extractddG("bin/" + name + "/Dif_" + p.ID + "_Repair.fxout")
-		if err != nil {
-			return nil, fmt.Errorf("extract results: %v", err)
-		}
-
-		diff.DdG = ddG
 	}
 
-	return results, nil
+	ddG, err := extractddG(diffPath)
+	if err != nil {
+		return nil, fmt.Errorf("extract results: %v", err)
+	}
+	diff.DdG = ddG
+
+	return diff, nil
 }
 
 func extractddG(path string) (ddG float64, err error) {
@@ -152,8 +161,6 @@ func extractddG(path string) (ddG float64, err error) {
 		return ddG, err
 	}
 
-	// First column contains ddG
-	// https://regex101.com/r/BGcps6/1
 	r, _ := regexp.Compile("pdb\t(.*?)\t")
 	ddG, err = strconv.ParseFloat(r.FindAllStringSubmatch(string(data), -1)[0][1], 64)
 	return ddG, err

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -20,29 +21,33 @@ type Pocket struct {
 	Residues  []*pdb.Residue `json:"residues"` // pointers to original residues in the requested structure
 }
 
-// Run creates a temp file of the specified PDB structure, runs Fpocket on it and parses the results
+// Run runs Fpocket on a PDB and parses the results
 func Run(p *pdb.PDB, msg func(string)) (pockets []*Pocket, err error) {
-	outPath := strings.Split(p.LocalPath, ".")[0] + "_out"
+	dirName := p.ID + "_out"
+	dirPath := "data/fpocket/" + dirName
 
-	// Delete Fpocket result files on function exit
-	defer func() {
-		os.RemoveAll(outPath)
-	}()
-
-	// Run Fpocket
-	msg("running Fpocket")
-	out, err := exec.Command("fpocket", "-f", p.LocalPath).CombinedOutput()
-	if err != nil {
-		return nil, err
+	_, err = os.Stat(dirPath)
+	if os.IsNotExist(err) {
+		// Run Fpocket
+		msg("running Fpocket")
+		out, err := exec.Command("fpocket", "-f", p.LocalPath).CombinedOutput()
+		if err != nil {
+			return nil, err
+		}
+		if strings.Contains(string(out), "failed") {
+			fmt.Println(string(out))
+			return nil, errors.New("FPocket failed")
+		}
 	}
-	if strings.Contains(string(out), "failed") {
-		fmt.Println(string(out))
-		return nil, errors.New("FPocket failed")
+
+	err = os.Rename("bin/"+dirName, "data/fpocket/"+dirName)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	msg("retrieving Fpocket results")
 	// Walk created folder containing pocket analysis files
-	dir := outPath + "/pockets"
+	dir := dirPath + "/pockets"
 	pockets, err = walkPocketDir(p, dir, msg)
 	if err != nil {
 		return nil, err
