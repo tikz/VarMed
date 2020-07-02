@@ -16,11 +16,11 @@ type Results struct {
 }
 
 // Run starts the stability analysis step
-func Run(sasList []*uniprot.SAS, unp *uniprot.UniProt, pdb *pdb.PDB, foldxDir string,
+func Run(sasList []*uniprot.SAS, unp *uniprot.UniProt, pdb *pdb.PDB,
 	results chan<- *Results, msg func(string)) {
 	start := time.Now()
 
-	foldxResults, err := foldx.Run(sasList, unp.ID, pdb, foldxDir, msg)
+	foldxResults, err := foldx.Run(sasList, unp.ID, pdb, msg)
 	if err != nil {
 		results <- &Results{Error: fmt.Errorf("FoldX: %v", err)}
 	}

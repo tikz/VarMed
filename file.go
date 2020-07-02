@@ -13,6 +13,7 @@ const (
 	unpDir     = dataDir + "uniprot/"
 	pdbDir     = dataDir + "pdb/"
 	jobDir     = dataDir + "jobs/"
+	fpocketDir = dataDir + "fpocket/"
 	foldxDir   = dataDir + "foldx/"
 	clinvarDir = dataDir + "clinvar/"
 	fileExt    = ".varq"
@@ -22,8 +23,12 @@ func makeDirs() {
 	os.MkdirAll(unpDir, os.ModePerm)
 	os.MkdirAll(pdbDir, os.ModePerm)
 	os.MkdirAll(jobDir, os.ModePerm)
-	os.MkdirAll(foldxDir, os.ModePerm)
+	os.MkdirAll(fpocketDir, os.ModePerm)
 	os.MkdirAll(clinvarDir, os.ModePerm)
+
+	os.MkdirAll(foldxDir, os.ModePerm)
+	os.MkdirAll(foldxDir+"repair", os.ModePerm)
+	os.MkdirAll(foldxDir+"mutations", os.ModePerm)
 }
 
 func writeJob(j *Job) error {

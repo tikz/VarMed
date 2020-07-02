@@ -140,7 +140,7 @@ func (p *Pipeline) analysePDB(r *Results) *Results {
 		msgPDB("started exposure analysis")
 	}
 	if cfg.VarQ.Pipeline.EnableSteps.Stability {
-		go stability.Run(p.SAS, r.UniProt, r.PDB, foldxDir, stabilityChan, msgPDB)
+		go stability.Run(p.SAS, r.UniProt, r.PDB, stabilityChan, msgPDB)
 		msgPDB("started stability analysis")
 	}
 
