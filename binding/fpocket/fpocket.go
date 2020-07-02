@@ -38,11 +38,11 @@ func Run(p *pdb.PDB, msg func(string)) (pockets []*Pocket, err error) {
 			fmt.Println(string(out))
 			return nil, errors.New("FPocket failed")
 		}
-	}
 
-	err = os.Rename("bin/"+dirName, "data/fpocket/"+dirName)
-	if err != nil {
-		log.Fatal(err)
+		err = os.Rename("bin/"+dirName, "data/fpocket/"+dirName)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	msg("retrieving Fpocket results")
