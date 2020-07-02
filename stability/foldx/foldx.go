@@ -104,16 +104,15 @@ func buildModel(pdbID string, pdbPath string, sas *uniprot.SAS, mut string) (*SA
 	diff := &SASDiff{SAS: sas}
 
 	change := sas.FromAa + strconv.FormatInt(sas.Position, 10) + sas.ToAa
-	pdbMutName := pdbID + "_" + change
-	dirPath := "data/foldx/mutations/" + pdbMutName
-	diffPath := dirPath + "/Dif_" + pdbID + "_Repair.fxout"
+	destDirPath := "data/foldx/mutations/" + pdbID + "/" + change
+	diffPath := destDirPath + "/Dif_" + pdbID + "_Repair.fxout"
 
 	if fileNotExist(diffPath) {
 		// Create FoldX job output dir
-		os.MkdirAll(dirPath, os.ModePerm)
+		os.MkdirAll(destDirPath, os.ModePerm)
 
 		// Create file containing individual list of mutations
-		mutantFile := "individual_list_" + pdbMutName
+		mutantFile := "individual_list_" + pdbID + change
 		writeFile("bin/"+mutantFile, mut)
 
 		// Create hardlink
@@ -123,7 +122,7 @@ func buildModel(pdbID string, pdbPath string, sas *uniprot.SAS, mut string) (*SA
 		// Remove files on scope exit
 		defer func() {
 			os.RemoveAll("bin/" + pdbPath + "_Repair.pdb") // hardlink
-			os.RemoveAll("bin/" + pdbMutName)
+			os.RemoveAll("bin/" + pdbID)
 			os.RemoveAll("bin/" + mutantFile)
 		}()
 
@@ -131,7 +130,7 @@ func buildModel(pdbID string, pdbPath string, sas *uniprot.SAS, mut string) (*SA
 			"--command=BuildModel",
 			"--pdb="+pdbID+"_Repair.pdb",
 			"--mutant-file="+mutantFile,
-			"--output-dir=../"+dirPath)
+			"--output-dir=../"+destDirPath)
 		cmd.Dir = "bin/"
 
 		out, err := cmd.CombinedOutput()
