@@ -121,9 +121,15 @@ func buildModel(pdbID string, pdbPath string, sas *uniprot.SAS, mut string) (*SA
 
 		// Remove files on scope exit
 		defer func() {
-			os.RemoveAll("bin/" + pdbPath + "_Repair.pdb") // hardlink
-			os.RemoveAll("bin/" + pdbID)
+			// hardlink
+			os.RemoveAll("bin/" + pdbPath + "_Repair.pdb")
 			os.RemoveAll("bin/" + mutantFile)
+
+			// Duplicate of the original PDB inside mutation folder
+			os.RemoveAll(destDirPath + "/WT_" + pdbID + "_Repair_1.pdb")
+
+			// Mutated PDB
+			os.RemoveAll(destDirPath + "/" + pdbID + "_Repair_1.pdb")
 		}()
 
 		cmd := exec.Command("./foldx",
