@@ -107,23 +107,26 @@ func buildModel(pdbID string, pdbPath string, sas *uniprot.SAS, mut string) (*SA
 	destDirPath := "data/foldx/mutations/" + pdbID + "/" + change
 	diffPath := destDirPath + "/Dif_" + pdbID + "_Repair.fxout"
 
-	if fileNotExist(diffPath) {
+	ddG, err := extractddG(diffPath)
+	if fileNotExist(diffPath) || err != nil {
 		// Create FoldX job output dir
 		os.MkdirAll(destDirPath, os.ModePerm)
 
 		// Create file containing individual list of mutations
 		mutantFile := "individual_list_" + pdbID + change
-		writeFile("bin/"+mutantFile, mut)
+		mutantPath := "bin/" + mutantFile
+		writeFile(mutantPath, mut)
 
 		// Create hardlink
 		// (FoldX seems to only look for PDBs in the same dir)
-		os.Link(pdbPath, "bin/"+pdbID+"_Repair.pdb")
+		linkPath := "bin/" + pdbID + "_Repair.pdb"
+		os.Link(pdbPath, linkPath)
 
 		// Remove files on scope exit
 		defer func() {
 			// hardlink
-			os.RemoveAll("bin/" + pdbPath + "_Repair.pdb")
-			os.RemoveAll("bin/" + mutantFile)
+			os.RemoveAll(linkPath)
+			os.RemoveAll(mutantPath)
 
 			// Duplicate of the original PDB inside mutation folder
 			os.RemoveAll(destDirPath + "/WT_" + pdbID + "_Repair_1.pdb")
@@ -151,10 +154,11 @@ func buildModel(pdbID string, pdbPath string, sas *uniprot.SAS, mut string) (*SA
 		}
 	}
 
-	ddG, err := extractddG(diffPath)
+	ddG, err = extractddG(diffPath)
 	if err != nil {
 		return nil, fmt.Errorf("extract results: %v", err)
 	}
+
 	diff.DdG = ddG
 
 	return diff, nil
@@ -167,6 +171,10 @@ func extractddG(path string) (ddG float64, err error) {
 	}
 
 	r, _ := regexp.Compile("pdb\t(.*?)\t")
-	ddG, err = strconv.ParseFloat(r.FindAllStringSubmatch(string(data), -1)[0][1], 64)
+	m := r.FindAllStringSubmatch(string(data), -1)
+	if len(m) == 0 {
+		return ddG, errors.New("ddG not found")
+	}
+	ddG, err = strconv.ParseFloat(m[0][1], 64)
 	return ddG, err
 }
