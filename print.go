@@ -23,10 +23,6 @@ func printResults(r *Results) {
 		printFpocket(r)
 	}
 
-	if r.Binding != nil && r.Binding.Catalytic != nil {
-		printMCSA(r)
-	}
-
 	if r.Binding != nil && len(r.Binding.Ligands) > 0 {
 		printNearLigands(r)
 	}
@@ -52,10 +48,6 @@ func printFpocket(a *Results) {
 		pocketResidues = append(pocketResidues, pocket.Residues...)
 	}
 	printResultsBlock("Fpocket", a.UniProt, a.PDB, pocketResidues, nil)
-}
-
-func printMCSA(a *Results) {
-	printResultsBlock("M-CSA", a.UniProt, a.PDB, a.Binding.Catalytic.Residues, nil)
 }
 
 func printNearLigands(r *Results) {
