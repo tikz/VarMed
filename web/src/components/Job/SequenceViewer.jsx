@@ -48,17 +48,117 @@ export default class SequenceViewer extends React.Component {
     });
 
     this.fv.onFeatureSelected(function (d) {
-      const chain = d.detail.description.split(" ")[1];
-      structure.selectFocus(
-        chain,
-        d.detail.start + posMap.pdbOffsets[chain],
-        d.detail.end + posMap.pdbOffsets[chain]
-      );
+      if (d.detail.description && d.detail.description.includes("Chain")) {
+        const chain = d.detail.description.split(" ")[1];
+        structure.selectFocus(
+          chain,
+          d.detail.start + posMap.pdbOffsets[chain],
+          d.detail.end + posMap.pdbOffsets[chain]
+        );
+      } else {
+        const chain = posMap.chains[0].id;
+        structure.selectFocus(
+          chain,
+          d.detail.start + posMap.pdbOffsets[chain],
+          d.detail.end + posMap.pdbOffsets[chain]
+        );
+      }
     });
 
     this.setState(() => ({
       zoomPositionElement: document.getElementById("zoomPosition"),
     }));
+
+    var variants = res.uniprot.variants;
+    if (variants) {
+      const vars = [];
+      variants.forEach((v) => {
+        if (v.clinvar) {
+          vars.push({
+            x: v.position,
+            y: v.position,
+            description: v.fromAa + " → " + v.toAa,
+          });
+        }
+      });
+      this.fv.addFeature({
+        data: vars,
+        name: "Variant",
+        color: "#00ffa6",
+        type: "rect",
+        filter: "type2",
+        className: "var",
+      });
+    }
+
+    var glycos = res.uniprot.ptms.glycosilationSites;
+    if (glycos) {
+      this.fv.addFeature({
+        data: glycos.map((g) => {
+          return {
+            x: g.position,
+            y: g.position,
+          };
+        }),
+        name: "Glycosilation",
+        color: "#d1973f",
+        type: "rect",
+        filter: "type2",
+        className: "glyco",
+      });
+    }
+
+    var disulfides = res.uniprot.ptms.disulfideBonds;
+    if (disulfides) {
+      this.fv.addFeature({
+        data: disulfides.map((d) => {
+          return {
+            x: d.positions[0],
+            y: d.positions[1],
+          };
+        }),
+        name: "Disulfide",
+        color: "#B4AF91",
+        type: "path",
+        className: "disulf",
+      });
+    }
+
+    res.conservation.families.forEach((fam) => {
+      this.fv.addFeature({
+        data: [
+          {
+            x: fam.mappings[0].position,
+            y: fam.mappings[fam.mappings.length - 1].position,
+            description: fam.id + " " + fam.hmm.desc,
+          },
+        ],
+        name: "Domain",
+        color: "#1aacdb",
+        type: "rect",
+        className: "fam" + fam.id,
+      });
+    });
+
+    var consData = [];
+    res.conservation.families.forEach((fam) => {
+      fam.mappings.forEach((p) => {
+        consData.push({
+          x: p.position,
+          y: p.bitscore,
+        });
+      });
+    });
+
+    this.fv.addFeature({
+      data: consData,
+      name: "Conservation",
+      color: "#008B8D",
+      type: "line",
+      filter: "type2",
+      height: "5",
+      className: "cons",
+    });
 
     posMap.chains.forEach((chain) => {
       let name = "Chain " + chain.id;
@@ -73,6 +173,7 @@ export default class SequenceViewer extends React.Component {
         name: name,
         color: "#1aacdb",
         type: "rect",
+        className: "chain" + name,
       });
 
       let markResidues = function (that, residues, title) {
@@ -89,6 +190,7 @@ export default class SequenceViewer extends React.Component {
           name: chain.id + " - " + title,
           color: "#1aacdb",
           type: "rect",
+          className: "mark" + chain.id + title,
         });
       };
 
