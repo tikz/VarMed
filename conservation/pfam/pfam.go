@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync"
 	"varq/uniprot"
 )
 
@@ -51,20 +52,22 @@ type Mapping struct {
 }
 
 // LoadFamilies creates a slice of Families from a UniProt.
-func LoadFamilies(unp *uniprot.UniProt) (fams []*Family, err error) {
+func LoadFamilies(unp *uniprot.UniProt, mux *sync.Mutex) (fams []*Family, err error) {
 	for _, id := range unp.Pfam {
 		var fam Family
 		fam.ID = id
 
 		// Get HMM model
-		err := getHMM(id)
+		err := getHMM(id, mux)
 		if err != nil {
 			return nil, fmt.Errorf("retrieve hmm file: %v", err)
 		}
 
 		// Parse HMM
 		hmmPath := "data/pfam/" + id + ".hmm"
+		mux.Lock()
 		hmm, err := loadHMM(hmmPath)
+		mux.Unlock()
 		if err != nil {
 			return nil, fmt.Errorf("parse hmm file: %v", err)
 		}
@@ -208,7 +211,7 @@ func parseFASTA(txt string) (sequence string) {
 }
 
 // getHMM downloads a HMM model from Pfam.
-func getHMM(id string) error {
+func getHMM(id string, mux *sync.Mutex) error {
 	hmmPath := "data/pfam/" + id + ".hmm"
 	_, err := os.Stat(hmmPath)
 	if os.IsNotExist(err) {
@@ -218,6 +221,7 @@ func getHMM(id string) error {
 		}
 		defer resp.Body.Close()
 
+		mux.Lock()
 		out, err := os.Create(hmmPath)
 		if err != nil {
 			return err
@@ -225,6 +229,7 @@ func getHMM(id string) error {
 		defer out.Close()
 
 		_, err = io.Copy(out, resp.Body)
+		mux.Unlock()
 		return err
 	}
 
