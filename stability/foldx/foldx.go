@@ -132,7 +132,7 @@ func buildModel(pdbID string, pdbPath string, sas *uniprot.SAS, mut string) (*SA
 			os.RemoveAll(destDirPath + "/WT_" + pdbID + "_Repair_1.pdb")
 
 			// Mutated PDB
-			os.RemoveAll(destDirPath + "/" + pdbID + "_Repair_1.pdb")
+			// os.RemoveAll(destDirPath + "/" + pdbID + "_Repair_1.pdb")
 		}()
 
 		cmd := exec.Command("./foldx",
