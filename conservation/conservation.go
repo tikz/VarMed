@@ -2,10 +2,13 @@ package conservation
 
 import (
 	"fmt"
+	"sync"
 	"time"
 	"varq/conservation/pfam"
 	"varq/uniprot"
 )
+
+var fileMux sync.Mutex
 
 // Results holds the collected data in the conservation analysis step
 type Results struct {
@@ -18,7 +21,7 @@ type Results struct {
 func Run(unp *uniprot.UniProt, results chan<- *Results, msg func(string)) {
 	start := time.Now()
 
-	fams, err := pfam.LoadFamilies(unp)
+	fams, err := pfam.LoadFamilies(unp, &fileMux)
 	if err != nil {
 		results <- &Results{Error: fmt.Errorf("Pfam: %v", err)}
 	}
