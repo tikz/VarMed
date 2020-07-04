@@ -73,7 +73,7 @@ func formatMutant(unpID string, p *pdb.PDB, pos int64, aa string) (string, error
 	}
 
 	for _, res := range residues {
-		muts = append(muts, res.Name1+res.Chain+strconv.FormatInt(pos, 10)+aa)
+		muts = append(muts, res.Name1+res.Chain+strconv.FormatInt(res.StructPosition, 10)+aa)
 	}
 	return strings.Join(muts, ",") + ";", nil
 }
