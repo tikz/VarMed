@@ -23,10 +23,11 @@ type Config struct {
 		Pipeline   struct {
 			StructureWorkers int `yaml:"structure-workers"`
 			EnableSteps      struct {
-				Binding     bool `yaml:"binding"`
-				Exposure    bool `yaml:"exposure"`
-				Interaction bool `yaml:"interaction"`
-				Stability   bool `yaml:"stability"`
+				Binding      bool `yaml:"binding"`
+				Exposure     bool `yaml:"exposure"`
+				Interaction  bool `yaml:"interaction"`
+				Conservation bool `yaml:"conservation"`
+				Stability    bool `yaml:"stability"`
 			} `yaml:"enable-steps"`
 		} `yaml:"pipeline"`
 	} `yaml:"varq"`

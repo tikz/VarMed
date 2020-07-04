@@ -14,8 +14,9 @@ const (
 	pdbDir     = dataDir + "pdb/"
 	jobDir     = dataDir + "jobs/"
 	fpocketDir = dataDir + "fpocket/"
-	foldxDir   = dataDir + "foldx/"
 	clinvarDir = dataDir + "clinvar/"
+	pfamDir    = dataDir + "pfam/"
+	foldxDir   = dataDir + "foldx/"
 	fileExt    = ".varq"
 )
 
@@ -25,6 +26,7 @@ func makeDirs() {
 	os.MkdirAll(jobDir, os.ModePerm)
 	os.MkdirAll(fpocketDir, os.ModePerm)
 	os.MkdirAll(clinvarDir, os.ModePerm)
+	os.MkdirAll(pfamDir, os.ModePerm)
 
 	os.MkdirAll(foldxDir, os.ModePerm)
 	os.MkdirAll(foldxDir+"repair", os.ModePerm)
