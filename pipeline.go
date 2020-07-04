@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 	"varq/binding"
+	"varq/conservation"
 	"varq/exposure"
 	"varq/interaction"
 	"varq/pdb"
@@ -14,13 +15,14 @@ import (
 
 // Results represents a group of results from each one of the available analysis steps.
 type Results struct {
-	UniProt     *uniprot.UniProt     `json:"uniprot"`
-	PDB         *pdb.PDB             `json:"pdb"`
-	Binding     *binding.Results     `json:"binding"`
-	Interaction *interaction.Results `json:"interaction"`
-	Exposure    *exposure.Results    `json:"exposure"`
-	Stability   *stability.Results   `json:"stability"`
-	Error       error                `json:"-"`
+	UniProt      *uniprot.UniProt      `json:"uniprot"`
+	PDB          *pdb.PDB              `json:"pdb"`
+	Binding      *binding.Results      `json:"binding"`
+	Interaction  *interaction.Results  `json:"interaction"`
+	Conservation *conservation.Results `json:"conservation"`
+	Exposure     *exposure.Results     `json:"exposure"`
+	Stability    *stability.Results    `json:"stability"`
+	Error        error                 `json:"-"`
 }
 
 // Pipeline represents a single run of the VarQ pipeline.
@@ -119,6 +121,7 @@ func (p *Pipeline) analysePDB(r *Results) *Results {
 
 	bindingChan := make(chan *binding.Results)
 	interactionChan := make(chan *interaction.Results)
+	conservationChan := make(chan *conservation.Results)
 	exposureChan := make(chan *exposure.Results)
 	stabilityChan := make(chan *stability.Results)
 
@@ -134,6 +137,10 @@ func (p *Pipeline) analysePDB(r *Results) *Results {
 	if cfg.VarQ.Pipeline.EnableSteps.Interaction {
 		go interaction.Run(r.PDB, interactionChan, msgPDB)
 		msgPDB("started interaction analysis")
+	}
+	if cfg.VarQ.Pipeline.EnableSteps.Conservation {
+		go conservation.Run(r.UniProt, conservationChan, msgPDB)
+		msgPDB("started conservation analysis")
 	}
 	if cfg.VarQ.Pipeline.EnableSteps.Exposure {
 		go exposure.Run(r.PDB, exposureChan, msgPDB)
@@ -163,6 +170,16 @@ func (p *Pipeline) analysePDB(r *Results) *Results {
 		}
 		r.Interaction = interactionRes
 		msgPDB(fmt.Sprintf("interaction analysis done in %.3f secs", interactionRes.Duration.Seconds()))
+	}
+
+	if cfg.VarQ.Pipeline.EnableSteps.Conservation {
+		conservationRes := <-conservationChan
+		if conservationRes.Error != nil {
+			r.Error = fmt.Errorf("conservation analysis: %v", conservationRes.Error)
+			return r
+		}
+		r.Conservation = conservationRes
+		msgPDB(fmt.Sprintf("conservation analysis done in %.3f secs", conservationRes.Duration.Seconds()))
 	}
 
 	if cfg.VarQ.Pipeline.EnableSteps.Exposure {

@@ -23,6 +23,7 @@ type UniProt struct {
 	Sequence string          `json:"sequence"` // canonical sequence
 	PDBIDs   []string        `json:"pdbIds"`   // PDB IDs
 	PTMs     PTMs            `json:"ptms"`
+	Pfam     []string        `json:"pfam"`
 	Variants []*VariantEntry `json:"variants"` // dbSNP variants
 	Raw      []byte          `json:"-"`        // TXT API raw bytes.
 }
@@ -114,6 +115,11 @@ func (u *UniProt) extract() error {
 	err = u.extractPTMs()
 	if err != nil {
 		return fmt.Errorf("extracting PTMs from UniProt TXT: %v", err)
+	}
+
+	err = u.extractFams()
+	if err != nil {
+		return fmt.Errorf("extracting families from UniProt TXT: %v", err)
 	}
 
 	return nil
@@ -255,6 +261,18 @@ func (u *UniProt) extractPTMs() error {
 		pos2, _ := strconv.ParseInt(disulf[2], 10, 64)
 		u.PTMs.DisulfideBonds = append(u.PTMs.DisulfideBonds,
 			Disulfide{Positions: [2]int64{pos1, pos2}})
+	}
+
+	return nil
+}
+
+// extractFams parses for Pfam families.
+func (u *UniProt) extractFams() error {
+	r, _ := regexp.Compile("DR[ ]*Pfam; (.*?);")
+	matches := r.FindAllStringSubmatch(string(u.Raw), -1)
+
+	for _, fam := range matches {
+		u.Pfam = append(u.Pfam, fam[1])
 	}
 
 	return nil
