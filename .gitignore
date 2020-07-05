@@ -21,3 +21,4 @@ web/node_modules/
 web/output/
 
 .vscode
+*.txt
