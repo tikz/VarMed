@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"log"
 	"regexp"
 	"sort"
 	"strconv"
@@ -107,6 +108,7 @@ func (j *Job) Process(cli bool) {
 
 	err = j.Pipeline.Run()
 	if err != nil {
+		log.Fatal(err)
 		j.fail(err)
 		return
 	}
