@@ -13,6 +13,7 @@ varq:
       binding: true
       exposure: true
       interaction: true
+      secondary: true
       conservation: true
       stability: true
 

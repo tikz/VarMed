@@ -9,6 +9,7 @@ import (
 	"varq/exposure"
 	"varq/interaction"
 	"varq/pdb"
+	"varq/secondary"
 	"varq/stability"
 	"varq/uniprot"
 )
@@ -19,6 +20,7 @@ type Results struct {
 	PDB          *pdb.PDB              `json:"pdb"`
 	Binding      *binding.Results      `json:"binding"`
 	Interaction  *interaction.Results  `json:"interaction"`
+	Secondary    *secondary.Results    `json:"secondary"`
 	Conservation *conservation.Results `json:"conservation"`
 	Exposure     *exposure.Results     `json:"exposure"`
 	Stability    *stability.Results    `json:"stability"`
@@ -121,6 +123,7 @@ func (p *Pipeline) analysePDB(r *Results) *Results {
 
 	bindingChan := make(chan *binding.Results)
 	interactionChan := make(chan *interaction.Results)
+	secondaryChan := make(chan *secondary.Results)
 	conservationChan := make(chan *conservation.Results)
 	exposureChan := make(chan *exposure.Results)
 	stabilityChan := make(chan *stability.Results)
@@ -137,6 +140,10 @@ func (p *Pipeline) analysePDB(r *Results) *Results {
 	if cfg.VarQ.Pipeline.EnableSteps.Interaction {
 		go interaction.Run(r.PDB, interactionChan, msgPDB)
 		msgPDB("started interaction analysis")
+	}
+	if cfg.VarQ.Pipeline.EnableSteps.Secondary {
+		go secondary.Run(r.UniProt, r.PDB, secondaryChan, msgPDB)
+		msgPDB("started secondary structure analysis")
 	}
 	if cfg.VarQ.Pipeline.EnableSteps.Conservation {
 		go conservation.Run(r.UniProt, conservationChan, msgPDB)
@@ -170,6 +177,16 @@ func (p *Pipeline) analysePDB(r *Results) *Results {
 		}
 		r.Interaction = interactionRes
 		msgPDB(fmt.Sprintf("interaction analysis done in %.3f secs", interactionRes.Duration.Seconds()))
+	}
+
+	if cfg.VarQ.Pipeline.EnableSteps.Secondary {
+		secondaryRes := <-secondaryChan
+		if secondaryRes.Error != nil {
+			r.Error = fmt.Errorf("secondary structure analysis: %v", secondaryRes.Error)
+			return r
+		}
+		r.Secondary = secondaryRes
+		msgPDB(fmt.Sprintf("secondary structure analysis done in %.3f secs", secondaryRes.Duration.Seconds()))
 	}
 
 	if cfg.VarQ.Pipeline.EnableSteps.Conservation {
