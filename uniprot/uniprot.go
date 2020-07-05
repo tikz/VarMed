@@ -22,8 +22,9 @@ type UniProt struct {
 	Organism string          `json:"organism"` // organism
 	Sequence string          `json:"sequence"` // canonical sequence
 	PDBIDs   []string        `json:"pdbIds"`   // PDB IDs
-	PTMs     PTMs            `json:"ptms"`
-	Pfam     []string        `json:"pfam"`
+	Sites    []*Site         `json:"sites"`    // protein function sites
+	PTMs     PTMs            `json:"ptms"`     // post translational modifications
+	Pfam     []string        `json:"pfam"`     // Pfam families accessions
 	Variants []*VariantEntry `json:"variants"` // dbSNP variants
 	Raw      []byte          `json:"-"`        // TXT API raw bytes.
 }
@@ -61,6 +62,13 @@ type Disulfide struct {
 
 // Glycosilation represents a glycosilation site.
 type Glycosilation struct {
+	Position int64  `json:"position"`
+	Note     string `json:"note"`
+}
+
+// Site represents either a binding, active or metal site entry.
+type Site struct {
+	Type     string `json:"type"`
 	Position int64  `json:"position"`
 	Note     string `json:"note"`
 }
@@ -121,6 +129,8 @@ func (u *UniProt) extract() error {
 	if err != nil {
 		return fmt.Errorf("extracting families from UniProt TXT: %v", err)
 	}
+
+	u.extractSites()
 
 	return nil
 }
@@ -264,6 +274,32 @@ func (u *UniProt) extractPTMs() error {
 	}
 
 	return nil
+}
+
+// extractSites parses for sites
+func (u *UniProt) extractSites() {
+	tags := map[string]string{
+		"ACT_SITE": "active",  // https://www.uniprot.org/help/act_site
+		"METAL":    "metal",   // https://www.uniprot.org/help/metal
+		"BINDING":  "binding", // https://www.uniprot.org/help/binding
+		"SITE":     "site",    // https://www.uniprot.org/help/site
+	}
+
+	for tag, name := range tags {
+		r, _ := regexp.Compile("(?ms)^FT[ ]*" + tag + "[ ]*([0-9]*)$.*?note=\"(.*?)\"")
+		matches := r.FindAllStringSubmatch(string(u.Raw), -1)
+
+		for _, site := range matches {
+			pos, _ := strconv.ParseInt(site[1], 10, 64)
+			u.Sites = append(u.Sites,
+				&Site{
+					Type:     name,
+					Position: pos,
+					Note:     site[2],
+				},
+			)
+		}
+	}
 }
 
 // extractFams parses for Pfam families.
