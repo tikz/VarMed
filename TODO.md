@@ -6,6 +6,10 @@
 - DSSP
 - algoritmo sitio activo
 
+## Features menores QoL
+- Flag de guardar o no archivos resultantes en config.yaml, ahora estoy comentando y recompilando dependiendo si es local o prod
+- Archivo log de solo errores
+
 ## Refactor
 - Estructurar en subpackages de forma diferente
 - Ahora que hay estructuras de datos mas o menos no tan cambiantes, redefinir la forma de manejar channels en pipeline.go
