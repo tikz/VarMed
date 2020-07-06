@@ -1,6 +1,4 @@
 ## Features
-- abSwitch
-- bFactor por residuo y promedio de la estructura
 - deltasasa
 - HELIX y SHEET de pdb
 - DSSP

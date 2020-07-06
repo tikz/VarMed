@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -31,11 +32,11 @@ func Run(name string, seq string) ([]*Residue, error) {
 	cfg := fmt.Sprintf("command=Switch5\nfasta=%s\noFile=%s", fastaFile, outFile)
 	ioutil.WriteFile("bin/"+cfgFile, []byte(cfg), 0644)
 
-	// defer func() {
-	// 	os.RemoveAll("bin/" + fastaFile)
-	// 	os.RemoveAll("bin/" + cfgFile)
-	// 	os.RemoveAll("bin/" + outFile)
-	// }()
+	defer func() {
+		os.RemoveAll("bin/" + fastaFile)
+		os.RemoveAll("bin/" + cfgFile)
+		os.RemoveAll("bin/" + outFile)
+	}()
 
 	// Run
 	cmd := exec.Command("./abSwitch", "-f", cfgFile)

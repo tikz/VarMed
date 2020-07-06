@@ -19,7 +19,7 @@ type Atom struct {
 	Y             float64
 	Z             float64
 	Occupancy     float64
-	TempFactor    float64
+	BFactor       float64
 	Element       string
 	Charge        string
 }
@@ -47,7 +47,7 @@ func (pdb *PDB) extractPDBATMRecords(recordName string) ([]*Atom, error) {
 		atom.Y, _ = strconv.ParseFloat(strings.TrimSpace(match[38:46]), 64)
 		atom.Z, _ = strconv.ParseFloat(strings.TrimSpace(match[46:54]), 64)
 		atom.Occupancy, _ = strconv.ParseFloat(strings.TrimSpace(match[54:60]), 64)
-		atom.TempFactor, _ = strconv.ParseFloat(strings.TrimSpace(match[60:66]), 64)
+		atom.BFactor, _ = strconv.ParseFloat(strings.TrimSpace(match[60:66]), 64)
 		atom.Element = strings.TrimSpace(match[76:78])
 		atom.Charge = strings.TrimSpace(match[78:80])
 
