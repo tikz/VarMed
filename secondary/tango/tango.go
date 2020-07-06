@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-type TangoResidue struct {
+type Residue struct {
 	// http://tango.crg.es/Tango_Handbook.pdf
 	// Those files will have the following columns:
 	Beta             float64 // Percentage of beta-strand conformation
@@ -20,7 +20,7 @@ type TangoResidue struct {
 	HelixAggregation float64 // Percentage of Helical Aggregation
 }
 
-func Run(name string, seq string) ([]*TangoResidue, error) {
+func Run(name string, seq string) ([]*Residue, error) {
 	// http://tango.crg.es/Tango_Handbook.pdf
 	// The format of the sequences to be run is as follows:
 	// Name Cter Nter pH Temp Ionic Sequence
@@ -50,7 +50,7 @@ func Run(name string, seq string) ([]*TangoResidue, error) {
 		return nil, err
 	}
 
-	var results []*TangoResidue
+	var results []*Residue
 
 	for _, line := range strings.Split(string(raw), "\n")[1:] {
 		fields := strings.Fields(line)
@@ -59,7 +59,7 @@ func Run(name string, seq string) ([]*TangoResidue, error) {
 				f, _ := strconv.ParseFloat(str, 64)
 				return f
 			}
-			results = append(results, &TangoResidue{
+			results = append(results, &Residue{
 				Beta:             toFloat(fields[2]),
 				BetaTurn:         toFloat(fields[3]),
 				Helix:            toFloat(fields[4]),
