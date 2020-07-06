@@ -3,6 +3,8 @@ package pdb
 import (
 	"errors"
 	"fmt"
+	"log"
+	"math"
 	"regexp"
 	"strings"
 )
@@ -32,13 +34,15 @@ var residueNames = [...][3]string{
 
 // Residue represents a single residue from the PDB structure.
 type Residue struct {
-	Chain          string  `json:"chain"`
-	StructPosition int64   `json:"structPosition"`
-	Position       int64   `json:"position"`
-	Name           string  `json:"-"`
-	Name1          string  `json:"name1"`
-	Name3          string  `json:"-"`
-	Atoms          []*Atom `json:"-"`
+	Chain           string  `json:"chain"`
+	StructPosition  int64   `json:"structPosition"`
+	Position        int64   `json:"position"`
+	Name            string  `json:"-"`
+	Name1           string  `json:"name1"`
+	Name3           string  `json:"-"`
+	Atoms           []*Atom `json:"-"`
+	MeanBFactor     float64 `json:"mean_bfactor"`
+	NormMeanBFactor float64 `json:"norm_mean_bfactor"`
 }
 
 // IsAminoacid returns true if the given letter is an aminoacid, false otherwise.
@@ -104,7 +108,7 @@ func (pdb *PDB) ExtractSeqRes() error {
 	return nil
 }
 
-// ExtractResidues extracts data from the ATOM and HETATM records and parses them accordingly.
+// ExtractResidues extracts data from the ATOM and HETATM records and parses them.
 func (pdb *PDB) ExtractResidues() error {
 	atoms, err := pdb.extractPDBATMRecords("ATOM")
 	if err != nil {
@@ -124,7 +128,7 @@ func (pdb *PDB) ExtractResidues() error {
 	return nil
 }
 
-// ExtractPDBChains parses the residue chains from raw PDB contents.
+// ExtractPDBChains parses the residue chains.
 func (pdb *PDB) ExtractPDBChains() error {
 	atoms := pdb.Atoms
 	if len(atoms) == 0 {
@@ -144,6 +148,7 @@ func (pdb *PDB) ExtractPDBChains() error {
 		if !posOk {
 			res = NewResidue(atom.Chain, atom.ResidueNumber, atom.Residue)
 			res.Atoms = []*Atom{atom}
+			res.calculateMeanBFactor()
 			chains[atom.Chain][atom.ResidueNumber] = res
 		} else {
 			pos.Atoms = append(pos.Atoms, atom)
@@ -151,10 +156,54 @@ func (pdb *PDB) ExtractPDBChains() error {
 	}
 
 	pdb.Chains = chains
-
 	for _, chain := range pdb.Chains {
 		pdb.TotalLength += int64(len(chain))
 	}
 
+	pdb.calculateNormMeanBFactor()
+
 	return nil
+}
+
+// calculateMeanBFactor calculates the mean B-factor for the residue based on all its atoms.
+func (r *Residue) calculateMeanBFactor() {
+	var sum float64
+	for _, atom := range r.Atoms {
+		sum += atom.BFactor
+	}
+
+	if len(r.Atoms) == 0 {
+		log.Fatal(r.Chain, r.StructPosition)
+	}
+	r.MeanBFactor = sum / float64(len(r.Atoms))
+}
+
+func stddev(vals []float64, mean float64) float64 {
+	var ss float64
+	for _, v := range vals {
+		ss += math.Pow(float64(v)-mean, 2)
+	}
+	return math.Pow(ss/float64(len(vals)), 0.5)
+}
+
+// calculateNormMeanBFactor calculates the z-score for residues mean B-factors.
+func (pdb *PDB) calculateNormMeanBFactor() {
+	var sum float64
+	var n float64
+	var meanBfactors []float64
+	for _, residues := range pdb.Chains {
+		for _, residue := range residues {
+			sum += residue.MeanBFactor
+			meanBfactors = append(meanBfactors, residue.MeanBFactor)
+			n++
+		}
+	}
+	mean := sum / n
+	s := stddev(meanBfactors, mean)
+
+	for _, residues := range pdb.Chains {
+		for _, residue := range residues {
+			residue.NormMeanBFactor = (residue.MeanBFactor - mean) / s
+		}
+	}
 }

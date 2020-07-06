@@ -38,7 +38,6 @@ func cliRun(uniprotID string, pdbFlags arrayFlags, sas []string) {
 	if j.Error != nil {
 		log.Fatal(j.Error)
 	}
-
 	out, _ := json.MarshalIndent(j.Pipeline.Results, "", "\t")
 	ioutil.WriteFile("output.json", out, 0644)
 }
