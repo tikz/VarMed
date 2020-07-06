@@ -1,5 +1,4 @@
 ## Features
-- deltasasa
 - HELIX y SHEET de pdb
 - DSSP
 - algoritmo sitio activo
