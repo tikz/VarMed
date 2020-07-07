@@ -1,6 +1,8 @@
 package secondary
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"sync"
 	"time"
@@ -93,6 +95,11 @@ type MappedAbSwitchResidue struct {
 	Results  *abswitch.Residue `json:"results"`
 }
 
+func generateID(seq string) string {
+	hash := sha256.Sum256([]byte(seq))
+	return hex.EncodeToString(hash[:])
+}
+
 func RunAbSwitch(unp *uniprot.UniProt, pdb *pdb.PDB) ([]*MappedAbSwitchResidue, error) {
 	var seqs []string
 	var results []*MappedAbSwitchResidue
@@ -111,10 +118,10 @@ func RunAbSwitch(unp *uniprot.UniProt, pdb *pdb.PDB) ([]*MappedAbSwitchResidue, 
 	for _, chain := range pdb.SIFTS.UniProt[unp.ID].Mappings {
 		seq := unp.Sequence[chain.UnpStart:chain.UnpEnd]
 		if isUnique(seqs, seq) {
-			name := fmt.Sprintf("%s-%s-%s", unp.ID, pdb.ID, chain.ChainID)
 			fileMux.Lock()
-			abswitchResidues, err := abswitch.Run(name, seq)
+			name := generateID(seq)
 			fileMux.Unlock()
+			abswitchResidues, err := abswitch.Run(name, seq)
 			if err != nil {
 				return nil, err
 			}
