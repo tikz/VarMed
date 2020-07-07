@@ -118,10 +118,10 @@ func RunAbSwitch(unp *uniprot.UniProt, pdb *pdb.PDB) ([]*MappedAbSwitchResidue, 
 	for _, chain := range pdb.SIFTS.UniProt[unp.ID].Mappings {
 		seq := unp.Sequence[chain.UnpStart:chain.UnpEnd]
 		if isUnique(seqs, seq) {
-			fileMux.Lock()
 			name := generateID(seq)
-			fileMux.Unlock()
+			fileMux.Lock()
 			abswitchResidues, err := abswitch.Run(name, seq)
+			fileMux.Unlock()
 			if err != nil {
 				return nil, err
 			}
