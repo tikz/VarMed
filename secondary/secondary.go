@@ -5,6 +5,7 @@ import (
 	"time"
 	"varq/pdb"
 	"varq/secondary/abswitch"
+	"varq/secondary/dssp"
 	"varq/secondary/tango"
 	"varq/uniprot"
 )
@@ -20,6 +21,11 @@ type Results struct {
 // Run starts the secondary structure analysis step
 func Run(unp *uniprot.UniProt, pdb *pdb.PDB, results chan<- *Results, msg func(string)) {
 	start := time.Now()
+
+	err := dssp.RunDSSP(pdb)
+	if err != nil {
+		results <- &Results{Error: fmt.Errorf("DSSP: %v", err)}
+	}
 
 	tangoResidues, err := RunTango(unp, pdb)
 	if err != nil {
