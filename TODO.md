@@ -1,4 +1,7 @@
 ## Features
+- abSwitch aparentemente escribe a la base de datos que trae, lo que hace que no se pueda paralelizar porque se pisan.
+  El mutex genera cuello de botella, mas que es un paso lento. Considerar hacer una copia de abswitch en una carpeta aparte para cada trabajo.
+  Ya probe. Explota la RAM.
 
 ## Features menores QoL
 - Flag de guardar o no archivos resultantes en config.yaml, ahora estoy comentando y recompilando dependiendo si es local o prod
