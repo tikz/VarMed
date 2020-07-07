@@ -2,6 +2,7 @@ package secondary
 
 import (
 	"fmt"
+	"sync"
 	"time"
 	"varq/pdb"
 	"varq/secondary/abswitch"
@@ -9,6 +10,8 @@ import (
 	"varq/secondary/tango"
 	"varq/uniprot"
 )
+
+var fileMux sync.Mutex
 
 // Results holds the collected data in the secondary structure analysis step
 type Results struct {
@@ -109,7 +112,9 @@ func RunAbSwitch(unp *uniprot.UniProt, pdb *pdb.PDB) ([]*MappedAbSwitchResidue, 
 		seq := unp.Sequence[chain.UnpStart:chain.UnpEnd]
 		if isUnique(seqs, seq) {
 			name := fmt.Sprintf("%s-%s-%s", unp.ID, pdb.ID, chain.ChainID)
+			fileMux.Lock()
 			abswitchResidues, err := abswitch.Run(name, seq)
+			fileMux.Unlock()
 			if err != nil {
 				return nil, err
 			}
