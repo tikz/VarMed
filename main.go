@@ -37,19 +37,19 @@ func main() {
 	if len(*uniprotID) > 0 {
 		cliRun(strings.ToUpper(*uniprotID), pdbsFlag, flag.Args())
 	} else {
-		// makeSampleResults()
+		makeSampleResults()
 		httpServe()
 	}
 }
 
 func makeSampleResults() {
-	_, err := os.Stat(jobDir + "236ff01847ea475576e3c7d972c489b673c30d8990ff52248d970fbcc467b605" + fileExt)
+	_, err := os.Stat(jobDir + "15e20e5f18326d264b60eeaa07c9af8d04b0a6c70f037b7f69b6d40d22fb590b" + fileExt)
 	if os.IsNotExist(err) {
 		log.Println("Running pipeline to populate sample results...")
 		j := NewJob(&JobRequest{
-			Name:      "Sample Job - GTPase HRas",
-			UniProtID: "P01112",
-			PDBIDs:    []string{"6D5H"},
+			Name:      "Sample Job - AGAL",
+			UniProtID: "P06280",
+			PDBIDs:    []string{"1R47"},
 		})
 		j.Process(false)
 	}

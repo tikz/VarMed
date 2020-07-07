@@ -173,7 +173,7 @@ export default class SequenceViewer extends React.Component {
         name: name,
         color: "#1aacdb",
         type: "rect",
-        className: "chain" + name,
+        className: "chain" + chain.id,
       });
 
       let markResidues = function (that, residues, title) {
@@ -190,29 +190,30 @@ export default class SequenceViewer extends React.Component {
           name: chain.id + " - " + title,
           color: "#1aacdb",
           type: "rect",
-          className: "mark" + chain.id + title,
+          className: chain.id + title.split(" ").slice(-1)[0],
         });
       };
 
+      if (res.interaction.residues !== null) {
+        markResidues(this, res.interaction.residues, "Interface");
+      }
       if (res.exposure.residues !== null) {
         markResidues(this, res.exposure.residues, "Buried");
       }
-      if (res.binding.catalytic.residues !== null) {
-        markResidues(this, res.binding.catalytic.residues, "Catalytic");
+      if (res.binding.residues !== null) {
+        markResidues(this, res.binding.residues, "Sites");
       }
       if (Object.keys(res.binding.ligands).length != 0) {
         Object.keys(res.binding.ligands).forEach((lig) => {
           markResidues(this, res.binding.ligands[lig], "Near " + lig);
         });
       }
-      if (res.interaction.residues !== null) {
-        markResidues(this, res.interaction.residues, "Interface");
-      }
-      if (res.binding.pockets !== null) {
-        res.binding.pockets.forEach((p) => {
-          markResidues(this, p.residues, "Pocket");
-        });
-      }
+
+      // if (res.binding.pockets !== null) {
+      //   res.binding.pockets.forEach((p) => {
+      //     markResidues(this, p.residues, "Pocket");
+      //   });
+      // }
     });
   }
 

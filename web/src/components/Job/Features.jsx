@@ -58,7 +58,7 @@ export class Features extends React.Component {
 
     const interaction = chip("Interface", res.interaction.residues);
     const buried = chip("Buried", res.exposure.residues);
-    const catalytic = chip("Catalytic", res.binding.catalytic.residues);
+    const binding = chip("Binding", res.binding.residues);
 
     return (
       <Grid container className="features">
@@ -81,11 +81,11 @@ export class Features extends React.Component {
             <Divider orientation="vertical" flexItem />
             {interaction}
             {buried}
-            {catalytic}
-            {res.binding.pockets !== null &&
+            {binding}
+            {/* {res.binding.pockets !== null &&
               res.binding.pockets.map((pocket, index) => {
                 return chip("Pocket " + index, pocket.residues);
-              })}
+              })} */}
             {Object.keys(res.binding.ligands).map((ligand) => {
               return chip("Near " + ligand, res.binding.ligands[ligand]);
             })}
