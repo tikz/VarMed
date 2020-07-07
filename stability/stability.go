@@ -40,6 +40,10 @@ func Run(sasList []*uniprot.SAS, unp *uniprot.UniProt, pdb *pdb.PDB,
 		results <- &Results{Error: fmt.Errorf("repaired SASA: %v", err)}
 	}
 
+	// repairDir := "data/foldx/repair/"
+	// path := repairDir + pdb.ID + "_Repair.pdb"
+	// fpocket.Run(path)
+
 	results <- &Results{
 		FoldX: foldxResults,
 		RepairedStructure: &RepairedStructure{

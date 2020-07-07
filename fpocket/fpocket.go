@@ -1,7 +1,6 @@
 package fpocket
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -16,39 +15,36 @@ import (
 
 //Pocket represents a single pocket found with Fpocket (pocketN_atm.pdb)
 type Pocket struct {
-	Name      string         `json:"name"`
-	DrugScore float64        `json:"drugScore"`
-	Residues  []*pdb.Residue `json:"residues"` // pointers to original residues in the requested structure
+	Name      string  `json:"name"`
+	DrugScore float64 `json:"drugScore"`
+
+	// residues in pocket, chain name to original PDB positions
+	ChainPos map[string][]int64 `json:"chain_pos"`
 }
 
 // Run runs Fpocket on a PDB and parses the results
-func Run(p *pdb.PDB, msg func(string)) (pockets []*Pocket, err error) {
-	dirName := p.ID + "_out"
-	dirPath := "data/fpocket/" + dirName
+func Run(path string) (pockets []*Pocket, err error) {
+	dir, file := filepath.Split(path)
+	outDirName := strings.Split(file, ".")[0] + "_out"
+	dirPath := "data/fpocket/" + outDirName
 
 	_, err = os.Stat(dirPath)
 	if os.IsNotExist(err) {
 		// Run Fpocket
-		msg("running Fpocket")
-		out, err := exec.Command("fpocket", "-f", p.LocalPath).CombinedOutput()
-		if err != nil {
-			return nil, err
-		}
-		if strings.Contains(string(out), "failed") {
-			fmt.Println(string(out))
-			return nil, errors.New("FPocket failed")
+		out, err := exec.Command("fpocket", "-f", path).CombinedOutput()
+		if err != nil || strings.Contains(string(out), "failed") {
+			return nil, fmt.Errorf("fpocket: %v %s", err, string(out))
 		}
 
-		err = os.Rename("bin/"+dirName, "data/fpocket/"+dirName)
+		err = os.Rename(dir+outDirName, dirPath)
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
 
-	msg("retrieving Fpocket results")
 	// Walk created folder containing pocket analysis files
-	dir := dirPath + "/pockets"
-	pockets, err = walkPocketDir(p, dir, msg)
+	pocketsDir := dirPath + "/pockets"
+	pockets, err = walkPocketDir(pocketsDir)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +52,7 @@ func Run(p *pdb.PDB, msg func(string)) (pockets []*Pocket, err error) {
 	return pockets, nil
 }
 
-func walkPocketDir(crystal *pdb.PDB, dir string, msg func(string)) (pockets []*Pocket, err error) {
+func walkPocketDir(dir string) (pockets []*Pocket, err error) {
 	n := 0
 	err = filepath.Walk(dir, func(file string, info os.FileInfo, err error) error {
 		// For each Fpocket result PDB file
@@ -77,17 +73,17 @@ func walkPocketDir(crystal *pdb.PDB, dir string, msg func(string)) (pockets []*P
 				return err
 			}
 
-			var pocketResidues []*pdb.Residue
+			residues := make(map[string][]int64)
 			for chain, chainPos := range pocketPDB.Chains {
 				for pos := range chainPos {
-					pocketResidues = append(pocketResidues, crystal.Chains[chain][pos])
+					residues[chain] = append(residues[chain], pos)
 				}
 			}
 
 			pocket := &Pocket{
 				Name:      file,
 				DrugScore: drugScore,
-				Residues:  pocketResidues,
+				ChainPos:  residues,
 			}
 			pockets = append(pockets, pocket)
 			n++
@@ -95,7 +91,6 @@ func walkPocketDir(crystal *pdb.PDB, dir string, msg func(string)) (pockets []*P
 
 		return nil
 	})
-	msg(fmt.Sprintf("found %d pockets, %d suitable", n, len(pockets)))
 
 	return pockets, err
 }

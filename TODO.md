@@ -1,7 +1,6 @@
 ## Features
 - HELIX y SHEET de pdb
 - DSSP
-- algoritmo sitio activo
 
 ## Features menores QoL
 - Flag de guardar o no archivos resultantes en config.yaml, ahora estoy comentando y recompilando dependiendo si es local o prod

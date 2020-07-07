@@ -19,10 +19,6 @@ func printResults(r *Results) {
 		printBuried(r)
 	}
 
-	if r.Binding != nil && len(r.Binding.Pockets) > 0 {
-		printFpocket(r)
-	}
-
 	if r.Binding != nil && len(r.Binding.Ligands) > 0 {
 		printNearLigands(r)
 	}
@@ -40,14 +36,6 @@ func printInterface(a *Results) {
 
 func printBuried(a *Results) {
 	printResultsBlock("Buried residues", a.UniProt, a.PDB, a.Exposure.Residues, nil)
-}
-
-func printFpocket(a *Results) {
-	var pocketResidues []*pdb.Residue
-	for _, pocket := range a.Binding.Pockets {
-		pocketResidues = append(pocketResidues, pocket.Residues...)
-	}
-	printResultsBlock("Fpocket", a.UniProt, a.PDB, pocketResidues, nil)
 }
 
 func printNearLigands(r *Results) {
