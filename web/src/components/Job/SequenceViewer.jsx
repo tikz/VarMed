@@ -69,17 +69,41 @@ export default class SequenceViewer extends React.Component {
       zoomPositionElement: document.getElementById("zoomPosition"),
     }));
 
-    var variants = res.uniprot.variants;
-    if (variants) {
+    const getClinVar = (change) => {
+      if (res.uniprot.variants) {
+        var clinvar = null;
+        res.uniprot.variants.forEach((v) => {
+          if (v.clinvar && v.clinvar.proteinChange == change) {
+            clinvar = v.clinvar;
+          }
+        });
+        return clinvar;
+      }
+    };
+
+    if (res.stability && res.stability.foldx) {
       const vars = [];
-      variants.forEach((v) => {
-        if (v.clinvar) {
-          vars.push({
-            x: v.position,
-            y: v.position,
-            description: v.fromAa + " → " + v.toAa,
-          });
+      res.stability.foldx.forEach((v) => {
+        var clinvarStr = "";
+        const clinvar = getClinVar(v.sas.fromAa + v.sas.position + v.sas.toAa);
+
+        console.log(clinvar);
+        if (clinvar) {
+          clinvarStr = clinvar.clinSig;
         }
+        vars.push({
+          x: v.sas.position,
+          y: v.sas.position,
+          description:
+            v.sas.fromAa +
+            " → " +
+            v.sas.toAa +
+            "<br>" +
+            "ddG: " +
+            v.ddG.toFixed(2) +
+            ", " +
+            clinvarStr,
+        });
       });
       this.fv.addFeature({
         data: vars,
