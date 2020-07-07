@@ -3,7 +3,6 @@ package fpocket
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -38,7 +37,7 @@ func Run(path string) (pockets []*Pocket, err error) {
 
 		err = os.Rename(dir+outDirName, dirPath)
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 	}
 

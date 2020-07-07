@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -104,6 +105,13 @@ func (p *Pipeline) pdbWorker(pdbIDChan <-chan string, resChan chan<- *Results) {
 		}
 		results.PDB = pdb
 		results.UniProt = p.UniProt
+
+		if _, ok := pdb.SIFTS.UniProt[p.UniProt.ID]; !ok {
+			results.Error = errors.New("UniProt ID not in SIFTS data of PDB " + pdbID)
+			resChan <- &results
+			continue
+		}
+
 		end := time.Since(start)
 		p.msg(fmt.Sprintf("PDB %s loaded in %.3f secs", pdbID, end.Seconds()))
 
