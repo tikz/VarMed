@@ -60,32 +60,42 @@ func Run(name string, seq string) ([]*Residue, error) {
 }
 
 func calculate(name string, seq string) error {
+	// dirName := "bin/abswitch-" + name + "/"
+	// cmd := exec.Command("cp", "-r", "bin/abswitch/", dirName)
+	// err := cmd.Run()
+	// if err != nil {
+	// 	return err
+	// }
+
+	dirName := "bin/abswitch/"
+
 	// Write fasta
 	fastaFile := "abswitch_" + name + ".fasta"
-	ioutil.WriteFile("bin/"+fastaFile, []byte(">"+name+"\n"+seq), 0644)
+	ioutil.WriteFile(dirName+fastaFile, []byte(">"+name+"\n"+seq), 0644)
 
 	// Write cfg
 	cfgFile := "abswitch_" + name + ".cfg"
 	outFile := name + ".s5"
 	cfg := fmt.Sprintf("command=Switch5\nfasta=%s\noFile=%s", fastaFile, outFile)
-	ioutil.WriteFile("bin/"+cfgFile, []byte(cfg), 0644)
+	ioutil.WriteFile(dirName+cfgFile, []byte(cfg), 0644)
 
 	defer func() {
 		os.RemoveAll("bin/" + fastaFile)
 		os.RemoveAll("bin/" + cfgFile)
+		os.RemoveAll("bin/" + outFile)
 	}()
 
 	// Run
 	cmd := exec.Command("./abSwitch", "-f", cfgFile)
-	cmd.Dir = "bin/"
+	cmd.Dir = dirName
 	out, err := cmd.CombinedOutput()
 	strOut := string(out)
 	if err != nil || !strings.Contains(strings.ToLower(strOut), "printed results") {
-		fmt.Println(strOut)
+		fmt.Println(err, strOut)
 		return errors.New(strOut)
 	}
 
-	err = os.Rename("bin/"+outFile, "data/abswitch/"+outFile)
+	err = os.Rename(dirName+outFile, "data/abswitch/"+outFile)
 	if err != nil {
 		return err
 	}
