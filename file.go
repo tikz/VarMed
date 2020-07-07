@@ -9,15 +9,16 @@ import (
 )
 
 const (
-	dataDir    = "data/"
-	unpDir     = dataDir + "uniprot/"
-	pdbDir     = dataDir + "pdb/"
-	jobDir     = dataDir + "jobs/"
-	fpocketDir = dataDir + "fpocket/"
-	clinvarDir = dataDir + "clinvar/"
-	pfamDir    = dataDir + "pfam/"
-	foldxDir   = dataDir + "foldx/"
-	fileExt    = ".varq"
+	dataDir     = "data/"
+	unpDir      = dataDir + "uniprot/"
+	pdbDir      = dataDir + "pdb/"
+	jobDir      = dataDir + "jobs/"
+	fpocketDir  = dataDir + "fpocket/"
+	clinvarDir  = dataDir + "clinvar/"
+	pfamDir     = dataDir + "pfam/"
+	foldxDir    = dataDir + "foldx/"
+	abswitchDir = dataDir + "abswitch/"
+	fileExt     = ".varq"
 )
 
 func makeDirs() {
@@ -27,6 +28,7 @@ func makeDirs() {
 	os.MkdirAll(fpocketDir, os.ModePerm)
 	os.MkdirAll(clinvarDir, os.ModePerm)
 	os.MkdirAll(pfamDir, os.ModePerm)
+	os.MkdirAll(abswitchDir, os.ModePerm)
 
 	os.MkdirAll(foldxDir, os.ModePerm)
 	os.MkdirAll(foldxDir+"repair", os.ModePerm)

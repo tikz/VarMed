@@ -22,33 +22,14 @@ type Residue struct {
 }
 
 func Run(name string, seq string) ([]*Residue, error) {
-	// Write fasta
-	fastaFile := "abswitch_" + name + ".fasta"
-	ioutil.WriteFile("bin/"+fastaFile, []byte(">"+name+"\n"+seq), 0644)
+	path := "data/abswitch/" + name + ".s5"
 
-	// Write cfg
-	cfgFile := "abswitch_" + name + ".cfg"
-	outFile := name + ".s5"
-	cfg := fmt.Sprintf("command=Switch5\nfasta=%s\noFile=%s", fastaFile, outFile)
-	ioutil.WriteFile("bin/"+cfgFile, []byte(cfg), 0644)
-
-	defer func() {
-		os.RemoveAll("bin/" + fastaFile)
-		os.RemoveAll("bin/" + cfgFile)
-		os.RemoveAll("bin/" + outFile)
-	}()
-
-	// Run
-	cmd := exec.Command("./abSwitch", "-f", cfgFile)
-	cmd.Dir = "bin/"
-	out, err := cmd.CombinedOutput()
-	strOut := string(out)
-	if err != nil || !strings.Contains(strings.ToLower(strOut), "printed results") {
-		fmt.Println(strOut)
-		return nil, errors.New(strOut)
+	_, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		calculate(name, seq)
 	}
 
-	raw, err := ioutil.ReadFile("bin/" + outFile)
+	raw, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -76,4 +57,38 @@ func Run(name string, seq string) ([]*Residue, error) {
 	}
 
 	return results, nil
+}
+
+func calculate(name string, seq string) error {
+	// Write fasta
+	fastaFile := "abswitch_" + name + ".fasta"
+	ioutil.WriteFile("bin/"+fastaFile, []byte(">"+name+"\n"+seq), 0644)
+
+	// Write cfg
+	cfgFile := "abswitch_" + name + ".cfg"
+	outFile := name + ".s5"
+	cfg := fmt.Sprintf("command=Switch5\nfasta=%s\noFile=%s", fastaFile, outFile)
+	ioutil.WriteFile("bin/"+cfgFile, []byte(cfg), 0644)
+
+	defer func() {
+		os.RemoveAll("bin/" + fastaFile)
+		os.RemoveAll("bin/" + cfgFile)
+	}()
+
+	// Run
+	cmd := exec.Command("./abSwitch", "-f", cfgFile)
+	cmd.Dir = "bin/"
+	out, err := cmd.CombinedOutput()
+	strOut := string(out)
+	if err != nil || !strings.Contains(strings.ToLower(strOut), "printed results") {
+		fmt.Println(strOut)
+		return errors.New(strOut)
+	}
+
+	err = os.Rename("bin/"+outFile, "data/abswitch/"+outFile)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
