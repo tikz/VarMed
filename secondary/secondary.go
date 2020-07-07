@@ -101,7 +101,8 @@ func RunAbSwitch(unp *uniprot.UniProt, pdb *pdb.PDB) ([]*MappedAbSwitchResidue, 
 	for _, chain := range pdb.SIFTS.UniProt[unp.ID].Mappings {
 		seq := unp.Sequence[chain.UnpStart:chain.UnpEnd]
 		if isUnique(seqs, seq) {
-			abswitchResidues, err := abswitch.Run(unp.ID+chain.ChainID, seq)
+			name := fmt.Sprintf("%s-%s-%s", unp.ID, pdb.ID, chain.ChainID)
+			abswitchResidues, err := abswitch.Run(name, seq)
 			if err != nil {
 				return nil, err
 			}
