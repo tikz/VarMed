@@ -26,7 +26,11 @@ func RunDSSP(p *pdb.PDB) error {
 				if len(posStr) > 0 {
 					chain := string(l[11])
 					pos, _ := strconv.ParseInt(posStr, 10, 64)
-					p.Chains[chain][pos].DSSP = string(l[16])
+					if chain, ok := p.Chains[chain]; ok {
+						if res, ok := chain[pos]; ok {
+							res.DSSP = string(l[16])
+						}
+					}
 				}
 			}
 			if string(l[2]) == "#" {
