@@ -113,9 +113,10 @@ func buildModel(pdbID string, pdbPath string, sas *uniprot.SAS, mut string) (*Mu
 	change := sas.FromAa + strconv.FormatInt(sas.Position, 10) + sas.ToAa
 	destDirPath := "data/foldx/mutations/" + pdbID + "/" + change
 	diffPath := destDirPath + "/Dif_" + pdbID + "_Repair.fxout"
+	mutatedPDBPath := destDirPath + "/" + pdbID + "_Repair_1.pdb"
 
 	ddG, err := extractddG(diffPath)
-	if fileNotExist(diffPath) || err != nil {
+	if fileNotExist(diffPath) || fileNotExist(mutatedPDBPath) || err != nil {
 		// Create FoldX job output dir
 		os.MkdirAll(destDirPath, os.ModePerm)
 
