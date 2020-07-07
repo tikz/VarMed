@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -41,7 +40,7 @@ func Run(p *pdb.PDB, msg func(string)) (pockets []*Pocket, err error) {
 
 		err = os.Rename("bin/"+dirName, "data/fpocket/"+dirName)
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 	}
 
