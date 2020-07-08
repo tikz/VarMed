@@ -21,18 +21,14 @@ func BuriedResidues(p *pdb.PDB) ([]*pdb.Residue, error) {
 		return nil, err
 	}
 
-	for _, line := range strings.Split(string(out), "\n") {
-		f := strings.Fields(line)
-		if len(f) > 0 && f[0] == "RES" {
-			aa := f[1]
-			chain := f[2]
-			pos, _ := strconv.ParseInt(f[3], 10, 64)
-			rsasa, _ := strconv.ParseFloat(f[7], 64)
+	for _, l := range strings.Split(string(out), "\n") {
+		if len(l) > 0 && l[0:3] == "RES" {
+			aa := l[4:7]
+			chain := string(l[8])
+			pos, _ := strconv.ParseInt(strings.TrimSpace(l[9:13]), 10, 64)
+			rsasa, _ := strconv.ParseFloat(strings.TrimSpace(l[35:41]), 64)
 			if aa != "GLY" && rsasa < 50 {
-				res := p.Chains[chain][pos]
-				if res != nil {
-					buried = append(buried, p.Chains[chain][pos])
-				}
+				buried = append(buried, p.Chains[chain][pos])
 			}
 		}
 	}
