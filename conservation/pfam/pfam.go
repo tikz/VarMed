@@ -57,14 +57,21 @@ func LoadFamilies(unp *uniprot.UniProt, mux *sync.Mutex) (fams []*Family, err er
 		var fam Family
 		fam.ID = id
 
+		hmmPath := "data/pfam/" + id + ".hmm"
+
 		// Get HMM model
-		err := getHMM(id, mux)
+		httpCode, err := getHMM(id, mux)
 		if err != nil {
 			return nil, fmt.Errorf("retrieve hmm file: %v", err)
 		}
+		if httpCode != 200 {
+			// The file will contain HTML describing the error instead
+			// of an actual HMMER3 model. This happens with dead families.
+			os.RemoveAll(hmmPath)
+			continue //skip
+		}
 
 		// Parse HMM
-		hmmPath := "data/pfam/" + id + ".hmm"
 		mux.Lock()
 		hmm, err := loadHMM(hmmPath)
 		mux.Unlock()
@@ -211,27 +218,28 @@ func parseFASTA(txt string) (sequence string) {
 }
 
 // getHMM downloads a HMM model from Pfam.
-func getHMM(id string, mux *sync.Mutex) error {
+func getHMM(id string, mux *sync.Mutex) (httpCode int, err error) {
 	hmmPath := "data/pfam/" + id + ".hmm"
-	_, err := os.Stat(hmmPath)
+	_, err = os.Stat(hmmPath)
 	if os.IsNotExist(err) {
 		resp, err := http.Get("http://pfam.xfam.org/family/" + id + "/hmm")
 		if err != nil {
-			return err
+			return 0, err
 		}
 		defer resp.Body.Close()
 
+		httpCode = resp.StatusCode
 		mux.Lock()
 		out, err := os.Create(hmmPath)
 		if err != nil {
-			return err
+			return httpCode, err
 		}
 		defer out.Close()
 
 		_, err = io.Copy(out, resp.Body)
 		mux.Unlock()
-		return err
+		return httpCode, err
 	}
 
-	return nil
+	return httpCode, nil
 }
