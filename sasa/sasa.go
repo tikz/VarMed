@@ -29,7 +29,10 @@ func BuriedResidues(p *pdb.PDB) ([]*pdb.Residue, error) {
 			pos, _ := strconv.ParseInt(f[3], 10, 64)
 			rsasa, _ := strconv.ParseFloat(f[7], 64)
 			if aa != "GLY" && rsasa < 50 {
-				buried = append(buried, p.Chains[chain][pos])
+				res := p.Chains[chain][pos]
+				if res != nil {
+					buried = append(buried, p.Chains[chain][pos])
+				}
 			}
 		}
 	}
