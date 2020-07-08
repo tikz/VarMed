@@ -109,7 +109,10 @@ func write(filePath string, object interface{}) error {
 	file, err := os.Create(filePath)
 	if err == nil {
 		encoder := gob.NewEncoder(file)
-		encoder.Encode(object)
+		err = encoder.Encode(object)
+		if err != nil {
+			return err
+		}
 	}
 	file.Close()
 
@@ -121,6 +124,7 @@ func read(filePath string, object interface{}) error {
 	if err == nil {
 		decoder := gob.NewDecoder(file)
 		err = decoder.Decode(object)
+		fmt.Println(err)
 	}
 	file.Close()
 
