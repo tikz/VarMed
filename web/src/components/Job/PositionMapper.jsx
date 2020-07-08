@@ -22,7 +22,9 @@ export default class PositionMapper {
   }
 
   loadChains() {
+    this.chainsStruct = {};
     this.chains = this.mappings.map((chain) => {
+      this.chainsStruct[chain.chain_id] = chain.struct_asym_id;
       return {
         id: chain.chain_id,
         start:
@@ -37,6 +39,10 @@ export default class PositionMapper {
           1,
       };
     });
+  }
+
+  structChain(chain) {
+    return this.chainsStruct[chain];
   }
 
   pdbToUnp(chain, pos) {
