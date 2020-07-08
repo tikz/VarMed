@@ -124,7 +124,6 @@ func read(filePath string, object interface{}) error {
 	if err == nil {
 		decoder := gob.NewDecoder(file)
 		err = decoder.Decode(object)
-		fmt.Println(err)
 	}
 	file.Close()
 
