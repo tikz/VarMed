@@ -21,7 +21,9 @@ type Results struct {
 func Run(unp *uniprot.UniProt, results chan<- *Results, msg func(string)) {
 	start := time.Now()
 
-	fams, err := pfam.LoadFamilies(unp, &fileMux)
+	fileMux.Lock()
+	fams, err := pfam.LoadFamilies(unp)
+	fileMux.Unlock()
 	if err != nil {
 		results <- &Results{Error: fmt.Errorf("Pfam: %v", err)}
 	}

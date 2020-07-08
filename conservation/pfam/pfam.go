@@ -12,7 +12,6 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
-	"sync"
 	"varq/uniprot"
 )
 
@@ -52,31 +51,20 @@ type Mapping struct {
 }
 
 // LoadFamilies creates a slice of Families from a UniProt.
-func LoadFamilies(unp *uniprot.UniProt, mux *sync.Mutex) (fams []*Family, err error) {
+func LoadFamilies(unp *uniprot.UniProt) (fams []*Family, err error) {
 	for _, id := range unp.Pfam {
 		var fam Family
 		fam.ID = id
 
 		hmmPath := "data/pfam/" + id + ".hmm"
 
-		// Get HMM model
-		httpCode, err := getHMM(id, mux)
-		if err != nil {
-			return nil, fmt.Errorf("retrieve hmm file: %v", err)
-		}
-		if httpCode != 200 {
-			// The file will contain HTML describing the error instead
-			// of an actual HMMER3 model. This happens with dead families.
-			os.RemoveAll(hmmPath)
-			continue //skip
-		}
-
-		// Parse HMM
-		mux.Lock()
-		hmm, err := loadHMM(hmmPath)
-		mux.Unlock()
+		// Get and parse HMM
+		hmm, err := getHMM(id)
 		if err != nil {
 			return nil, fmt.Errorf("parse hmm file: %v", err)
+		}
+		if hmm == nil {
+			continue
 		}
 		fam.HMM = hmm
 
@@ -86,6 +74,7 @@ func LoadFamilies(unp *uniprot.UniProt, mux *sync.Mutex) (fams []*Family, err er
 		if err != nil {
 			return nil, fmt.Errorf("write FASTA: %v", err)
 		}
+
 		defer func() {
 			os.RemoveAll(fastaPath)
 		}()
@@ -218,28 +207,33 @@ func parseFASTA(txt string) (sequence string) {
 }
 
 // getHMM downloads a HMM model from Pfam.
-func getHMM(id string, mux *sync.Mutex) (httpCode int, err error) {
+func getHMM(id string) (*HMM, error) {
 	hmmPath := "data/pfam/" + id + ".hmm"
-	_, err = os.Stat(hmmPath)
-	if os.IsNotExist(err) {
-		resp, err := http.Get("http://pfam.xfam.org/family/" + id + "/hmm")
-		if err != nil {
-			return 0, err
-		}
-		defer resp.Body.Close()
 
-		httpCode = resp.StatusCode
-		mux.Lock()
-		out, err := os.Create(hmmPath)
-		if err != nil {
-			return httpCode, err
-		}
-		defer out.Close()
-
-		_, err = io.Copy(out, resp.Body)
-		mux.Unlock()
-		return httpCode, err
+	hmm, err := loadHMM(hmmPath)
+	if err == nil {
+		return hmm, nil
 	}
 
-	return httpCode, nil
+	resp, err := http.Get("http://pfam.xfam.org/family/" + id + "/hmm")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		// The file will contain HTML describing the error instead
+		// of an actual HMMER3 model. This happens with dead families.
+		return nil, nil
+	}
+
+	out, err := os.Create(hmmPath)
+	if err != nil {
+		return nil, err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, resp.Body)
+
+	return loadHMM(hmmPath)
 }
