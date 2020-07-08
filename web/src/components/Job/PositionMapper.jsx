@@ -1,7 +1,7 @@
 export default class PositionMapper {
   constructor(res) {
     this.seqResOffsets = res.pdb.seqResOffsets;
-    this.chainEnd = res.pdb.chainEndResNumber;
+    this.chainStartResN = res.pdb.chainStartResNumber;
     this.mappings = res.pdb.SIFTS.UniProt[res.uniprot.id].mappings;
     this.loadOffsets();
     this.loadChains();
@@ -31,7 +31,7 @@ export default class PositionMapper {
           chain.start.residue_number +
           1,
         end:
-          this.chainEnd[chain.chain_id] +
+          chain.unp_end +
           this.seqResOffsets[chain.chain_id] -
           chain.start.residue_number +
           1,
