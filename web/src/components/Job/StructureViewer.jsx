@@ -207,7 +207,7 @@ export default class StructureViewer extends React.Component {
     residues.forEach((r) => {
       let query = LiteMol.Core.Structure.Query.sequence(
         null,
-        r.chain,
+        this.context.posMap.structChain(r.chain),
         { seqNumber: r.position },
         {
           seqNumber: r.positionEnd !== undefined ? r.positionEnd : r.position,
