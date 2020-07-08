@@ -44,7 +44,9 @@ func BindingResidues(unp *uniprot.UniProt, p *pdb.PDB, pockets []*fpocket.Pocket
 	// UniProt site positions to residues in structure
 	var siteResidues []*pdb.Residue
 	for _, site := range unp.Sites {
-		siteResidues = append(siteResidues, p.UniProtPositions[unp.ID][site.Position]...)
+		if site.Type == "active" || site.Type == "binding" {
+			siteResidues = append(siteResidues, p.UniProtPositions[unp.ID][site.Position]...)
+		}
 	}
 
 	for _, siteRes := range siteResidues {
