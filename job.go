@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"log"
 	"regexp"
 	"sort"
 	"strconv"
@@ -123,6 +124,7 @@ func (j *Job) Process(cli bool) {
 
 // fail handles the given error message and updates the status.
 func (j *Job) fail(err error) {
+	log.Printf("error %s %s: %v", j.Request.UniProtID, j.Request.PDBIDs, err)
 	j.msgs = append(j.msgs, err.Error())
 	j.Error = err
 	j.Status = statusError
