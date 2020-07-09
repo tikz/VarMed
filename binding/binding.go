@@ -12,7 +12,7 @@ import (
 
 // Results holds the collected data in the binding analysis step
 type Results struct {
-	Pockets  []*fpocket.Pocket         `json:"pockets"`
+	Pockets  []*fpocket.Pocket         `json:"-"`
 	Ligands  map[string][]*pdb.Residue `json:"ligands"` // ligand ID to near residues
 	Residues []*pdb.Residue            `json:"residues"`
 	Duration time.Duration             `json:"duration"`
