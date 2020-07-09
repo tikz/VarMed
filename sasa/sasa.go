@@ -37,14 +37,14 @@ func BuriedResidues(p *pdb.PDB) ([]*pdb.Residue, error) {
 }
 
 // SASA returns total, apolar and polar SASA for the given PDB path.
-func SASA(path string) (totalSASA float64, apolarSASA float64, polarSASA float64, err error) {
+func SASA(path string) (totalSASA float64, apolarSASA float64, polarSASA float64, unknownSASA float64, err error) {
 	cmd := exec.Command("freesasa",
 		"--resolution=100",
 		path)
 
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return 0, 0, 0, err
+		return 0, 0, 0, 0, err
 	}
 
 	for _, line := range strings.Split(string(out), "\n") {
@@ -58,9 +58,11 @@ func SASA(path string) (totalSASA float64, apolarSASA float64, polarSASA float64
 				apolarSASA = val
 			case "Polar":
 				polarSASA = val
+			case "Unknown":
+				unknownSASA = val
 			}
 		}
 	}
 
-	return totalSASA, apolarSASA, polarSASA, err
+	return totalSASA, apolarSASA, polarSASA, unknownSASA, err
 }

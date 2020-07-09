@@ -18,9 +18,10 @@ type Results struct {
 }
 
 type RepairedStructure struct {
-	SASA       float64 `json:"sasa"`
-	SASAApolar float64 `json:"sasa_apolar"`
-	SASAPolar  float64 `json:"sasa_polar"`
+	SASA        float64 `json:"sasa"`
+	SASAApolar  float64 `json:"sasa_apolar"`
+	SASAPolar   float64 `json:"sasa_polar"`
+	SASAUnknown float64 `json:"sasa_unknown"`
 }
 
 // Run starts the stability analysis step
@@ -35,7 +36,7 @@ func Run(sasList []*uniprot.SAS, unp *uniprot.UniProt, pdb *pdb.PDB,
 	}
 
 	// SASA of repaired structure
-	total, apolar, polar, err := sasa.SASA("data/foldx/repair/" + pdb.ID + "_Repair.pdb")
+	total, apolar, polar, unk, err := sasa.SASA("data/foldx/repair/" + pdb.ID + "_Repair.pdb")
 	if err != nil {
 		results <- &Results{Error: fmt.Errorf("repaired SASA: %v", err)}
 	}
@@ -47,9 +48,10 @@ func Run(sasList []*uniprot.SAS, unp *uniprot.UniProt, pdb *pdb.PDB,
 	results <- &Results{
 		FoldX: foldxResults,
 		RepairedStructure: &RepairedStructure{
-			SASA:       total,
-			SASAApolar: apolar,
-			SASAPolar:  polar,
+			SASA:        total,
+			SASAApolar:  apolar,
+			SASAPolar:   polar,
+			SASAUnknown: unk,
 		},
 		Duration: time.Since(start),
 	}
