@@ -178,7 +178,7 @@ func (u *UniProt) extractNames() error {
 	}
 	u.Name = matches[0][1]
 
-	r, _ = regexp.Compile("(?m)^GN.*?=(.*?);")
+	r, _ = regexp.Compile("(?m)^GN.*?=(.*?)[;| ]")
 	matches = r.FindAllStringSubmatch(string(u.Raw), -1)
 
 	if len(matches) == 0 {
