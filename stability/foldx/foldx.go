@@ -71,16 +71,12 @@ func repair(p *pdb.PDB, msg func(string)) (string, error) {
 // formatMutant receives a given mutation in UniProt position and returns
 // the corresponding PDB positions in FoldX format, i.e.: KA42I,KB42I;
 func formatMutant(unpID string, p *pdb.PDB, pos int64, aa string) (string, error) {
-	var muts []string
 	residues := p.UniProtPositions[unpID][int64(pos)]
 	if len(residues) == 0 {
 		return "", errors.New("no coverage")
 	}
-
-	for _, res := range residues {
-		muts = append(muts, res.Name1+res.Chain+strconv.FormatInt(res.StructPosition, 10)+aa)
-	}
-	return strings.Join(muts, ",") + ";", nil
+	res := residues[0]
+	return res.Name1 + res.Chain + strconv.FormatInt(res.StructPosition, 10) + aa + ";", nil
 }
 
 func Run(sasList []*uniprot.SAS, unpID string,
