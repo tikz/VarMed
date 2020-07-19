@@ -3,16 +3,16 @@ package stability
 import (
 	"fmt"
 	"time"
+	"varq/glyco"
 	"varq/pdb"
 	"varq/sasa"
-	"varq/stability/foldx"
 	"varq/uniprot"
 )
 
 // Results holds the collected data in the stability analysis step
 type Results struct {
 	RepairedStructure *RepairedStructure `json:"repaired_structure"`
-	FoldX             []*foldx.Mutation  `json:"foldx"`
+	FoldX             []*Mutation        `json:"foldx"`
 	Duration          time.Duration      `json:"duration"`
 	Error             error              `json:"error"`
 }
@@ -30,9 +30,13 @@ func Run(sasList []*uniprot.SAS, unp *uniprot.UniProt, pdb *pdb.PDB,
 	start := time.Now()
 
 	// Run FoldX Repair + BuildModel
-	foldxResults, err := foldx.Run(sasList, unp.ID, pdb, msg)
+	foldxResults, err := FoldXRun(sasList, unp.ID, pdb, msg)
 	if err != nil {
 		results <- &Results{Error: fmt.Errorf("FoldX: %v", err)}
+	}
+
+	for _, m := range foldxResults {
+		m.GlycoDist = glyco.CalculateMinGlycoDist(m.SAS.Position, unp, pdb)
 	}
 
 	// SASA of repaired structure
