@@ -1,4 +1,4 @@
-package foldx
+package stability
 
 import (
 	"errors"
@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"varq/glyco"
 	"varq/pdb"
 	"varq/sasa"
 	"varq/uniprot"
@@ -17,12 +18,13 @@ import (
 // Mutation represents the parameters between an original
 // and a mutated structure with a single aminoacid substitution.
 type Mutation struct {
-	SAS         *uniprot.SAS `json:"sas"`
-	DdG         float64      `json:"ddG"` // kcal/mol
-	SASA        float64      `json:"sasa"`
-	SASAApolar  float64      `json:"sasa_apolar"`
-	SASAPolar   float64      `json:"sasa_polar"`
-	SASAUnknown float64      `json:"sasa_unknown"`
+	SAS         *uniprot.SAS     `json:"sas"`
+	DdG         float64          `json:"ddG"` // kcal/mol
+	SASA        float64          `json:"sasa"`
+	SASAApolar  float64          `json:"sasa_apolar"`
+	SASAPolar   float64          `json:"sasa_polar"`
+	SASAUnknown float64          `json:"sasa_unknown"`
+	GlycoDist   *glyco.GlycoDist `json:"glyco_dist"`
 }
 
 func fileNotExist(path string) bool {
@@ -79,7 +81,7 @@ func formatMutant(unpID string, p *pdb.PDB, pos int64, aa string) (string, error
 	return res.Name1 + res.Chain + strconv.FormatInt(res.StructPosition, 10) + aa + ";", nil
 }
 
-func Run(sasList []*uniprot.SAS, unpID string,
+func FoldXRun(sasList []*uniprot.SAS, unpID string,
 	p *pdb.PDB, msg func(string)) ([]*Mutation, error) {
 	pdbPath, err := repair(p, msg)
 	if err != nil {

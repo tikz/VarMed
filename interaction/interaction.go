@@ -40,8 +40,8 @@ func Run(p *pdb.PDB, results chan<- *Results, msg func(string)) {
 		Duration: time.Since(start)}
 }
 
-// calculateDistance returns the distance between two atoms
-func calculateDistance(atom1 *pdb.Atom, atom2 *pdb.Atom) float64 {
+// Distance returns the distance between two atoms
+func Distance(atom1 *pdb.Atom, atom2 *pdb.Atom) float64 {
 	return math.Sqrt(math.Pow(atom1.X-atom2.X, 2) + math.Pow(atom1.Y-atom2.Y, 2) + math.Pow(atom1.Z-atom2.Z, 2))
 }
 
@@ -74,7 +74,7 @@ func calculateResiduesInteraction(res1 []*pdb.Residue, a1 []*pdb.Atom,
 	res2 []*pdb.Residue, a2 []*pdb.Atom) (resInteracts []*ResiduesPair) {
 	for i1, atom1 := range a1 {
 		for i2, atom2 := range a2 {
-			if dist := calculateDistance(atom1, atom2); dist < 5 {
+			if dist := Distance(atom1, atom2); dist < 5 {
 				resInteracts = append(resInteracts, &ResiduesPair{
 					Distance: dist,
 					Residue1: res1[i1],
