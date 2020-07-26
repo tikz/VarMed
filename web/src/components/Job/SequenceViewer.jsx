@@ -162,27 +162,45 @@ export default class SequenceViewer extends React.Component {
         type: "rect",
         className: "fam" + fam.id,
       });
-    });
 
-    var consData = [];
-    res.conservation.families.forEach((fam) => {
+      var consData = [];
       fam.mappings.forEach((p) => {
         consData.push({
           x: p.position,
           y: p.bitscore,
         });
       });
+
+      this.fv.addFeature({
+        data: consData,
+        name: "Conservation",
+        color: "#008B8D",
+        type: "line",
+        filter: "type2",
+        height: "5",
+        className: "cons",
+      });
     });
 
-    this.fv.addFeature({
-      data: consData,
-      name: "Conservation",
-      color: "#008B8D",
-      type: "line",
-      filter: "type2",
-      height: "5",
-      className: "cons",
-    });
+    // var consData = [];
+    // res.conservation.families.forEach((fam) => {
+    //   fam.mappings.forEach((p) => {
+    //     consData.push({
+    //       x: p.position,
+    //       y: p.bitscore,
+    //     });
+    //   });
+    // });
+
+    // this.fv.addFeature({
+    //   data: consData,
+    //   name: "Conservation",
+    //   color: "#008B8D",
+    //   type: "line",
+    //   filter: "type2",
+    //   height: "5",
+    //   className: "cons",
+    // });
 
     posMap.chains.forEach((chain) => {
       let name = "Chain " + chain.id;
