@@ -10,10 +10,10 @@ export default function NavBar() {
       <AppBar className="bar">
         <Toolbar className="bar">
           <Link to="/" className="link">
-            <img className="nav-logo" src="/assets/varq.svg" alt="" />
+            <img className="nav-logo" src="/assets/respdb.svg" alt="" />
           </Link>
           <Typography variant="h6" className="nav-title">
-            VarQ
+            RespDB
           </Typography>
           <MyJobs />
           <Link to="/new-job">

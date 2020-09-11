@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"respdb/clinvar"
+	"respdb/http"
 	"strconv"
 	"strings"
-	"varq/clinvar"
-	"varq/http"
 )
 
 var DbSNP *clinvar.DbSNP // TODO: think about index+file search vs leaving this in RAM as is

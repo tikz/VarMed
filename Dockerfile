@@ -39,12 +39,12 @@ RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources
 RUN apt-get update
 RUN apt-get install -y yarn
 
-# VarQ build
-RUN mkdir /varq
-ADD . /varq/
-WORKDIR /varq/
+# RespDB build
+RUN mkdir /respdb
+ADD . /respdb/
+WORKDIR /respdb/
 
 RUN make build
 
 COPY config-example.yaml config.yaml
-CMD ["/varq/varq"]
+CMD ["/respdb/respdb"]

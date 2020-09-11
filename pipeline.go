@@ -4,15 +4,15 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"respdb/binding"
+	"respdb/conservation"
+	"respdb/exposure"
+	"respdb/interaction"
+	"respdb/pdb"
+	"respdb/secondary"
+	"respdb/stability"
+	"respdb/uniprot"
 	"time"
-	"varq/binding"
-	"varq/conservation"
-	"varq/exposure"
-	"varq/interaction"
-	"varq/pdb"
-	"varq/secondary"
-	"varq/stability"
-	"varq/uniprot"
 )
 
 // Results represents a group of results from each one of the available analysis steps.
@@ -28,7 +28,7 @@ type Results struct {
 	Error        error                 `json:"-"`
 }
 
-// Pipeline represents a single run of the VarQ pipeline.
+// Pipeline represents a single run of the RespDB pipeline.
 type Pipeline struct {
 	UniProt  *uniprot.UniProt
 	SAS      []*uniprot.SAS
@@ -65,7 +65,7 @@ func (p *Pipeline) Run() error {
 	pdbIDChan := make(chan string, len(p.pdbIDs))
 	resChan := make(chan *Results, len(p.pdbIDs))
 
-	for w := 1; w <= cfg.VarQ.Pipeline.StructureWorkers; w++ {
+	for w := 1; w <= cfg.RespDB.Pipeline.StructureWorkers; w++ {
 		go p.pdbWorker(pdbIDChan, resChan)
 	}
 
@@ -141,33 +141,33 @@ func (p *Pipeline) analysePDB(r *Results) *Results {
 		p.msg(idStr + msg)
 	}
 
-	if cfg.VarQ.Pipeline.EnableSteps.Binding {
+	if cfg.RespDB.Pipeline.EnableSteps.Binding {
 		go binding.Run(r.UniProt, r.PDB, bindingChan, msgPDB)
 		msgPDB("started binding analysis")
 	}
-	if cfg.VarQ.Pipeline.EnableSteps.Interaction {
+	if cfg.RespDB.Pipeline.EnableSteps.Interaction {
 		go interaction.Run(r.PDB, interactionChan, msgPDB)
 		msgPDB("started interaction analysis")
 	}
-	if cfg.VarQ.Pipeline.EnableSteps.Secondary {
+	if cfg.RespDB.Pipeline.EnableSteps.Secondary {
 		go secondary.Run(r.UniProt, r.PDB, secondaryChan, msgPDB)
 		msgPDB("started secondary structure analysis")
 	}
-	if cfg.VarQ.Pipeline.EnableSteps.Conservation {
+	if cfg.RespDB.Pipeline.EnableSteps.Conservation {
 		go conservation.Run(r.UniProt, conservationChan, msgPDB)
 		msgPDB("started conservation analysis")
 	}
-	if cfg.VarQ.Pipeline.EnableSteps.Exposure {
+	if cfg.RespDB.Pipeline.EnableSteps.Exposure {
 		go exposure.Run(r.PDB, exposureChan, msgPDB)
 		msgPDB("started exposure analysis")
 	}
-	if cfg.VarQ.Pipeline.EnableSteps.Stability {
+	if cfg.RespDB.Pipeline.EnableSteps.Stability {
 		go stability.Run(p.SAS, r.UniProt, r.PDB, stabilityChan, msgPDB)
 		msgPDB("started stability analysis")
 	}
 
 	// TODO: refactor these repeated patterns
-	if cfg.VarQ.Pipeline.EnableSteps.Binding {
+	if cfg.RespDB.Pipeline.EnableSteps.Binding {
 		bindingRes := <-bindingChan
 		if bindingRes.Error != nil {
 			r.Error = fmt.Errorf("binding analysis: %v", bindingRes.Error)
@@ -177,7 +177,7 @@ func (p *Pipeline) analysePDB(r *Results) *Results {
 		msgPDB(fmt.Sprintf("binding analysis done in %.3f secs", bindingRes.Duration.Seconds()))
 	}
 
-	if cfg.VarQ.Pipeline.EnableSteps.Interaction {
+	if cfg.RespDB.Pipeline.EnableSteps.Interaction {
 		interactionRes := <-interactionChan
 		if interactionRes.Error != nil {
 			r.Error = fmt.Errorf("interaction analysis: %v", interactionRes.Error)
@@ -187,7 +187,7 @@ func (p *Pipeline) analysePDB(r *Results) *Results {
 		msgPDB(fmt.Sprintf("interaction analysis done in %.3f secs", interactionRes.Duration.Seconds()))
 	}
 
-	if cfg.VarQ.Pipeline.EnableSteps.Secondary {
+	if cfg.RespDB.Pipeline.EnableSteps.Secondary {
 		secondaryRes := <-secondaryChan
 		if secondaryRes.Error != nil {
 			r.Error = fmt.Errorf("secondary structure analysis: %v", secondaryRes.Error)
@@ -197,7 +197,7 @@ func (p *Pipeline) analysePDB(r *Results) *Results {
 		msgPDB(fmt.Sprintf("secondary structure analysis done in %.3f secs", secondaryRes.Duration.Seconds()))
 	}
 
-	if cfg.VarQ.Pipeline.EnableSteps.Conservation {
+	if cfg.RespDB.Pipeline.EnableSteps.Conservation {
 		conservationRes := <-conservationChan
 		if conservationRes.Error != nil {
 			r.Error = fmt.Errorf("conservation analysis: %v", conservationRes.Error)
@@ -207,7 +207,7 @@ func (p *Pipeline) analysePDB(r *Results) *Results {
 		msgPDB(fmt.Sprintf("conservation analysis done in %.3f secs", conservationRes.Duration.Seconds()))
 	}
 
-	if cfg.VarQ.Pipeline.EnableSteps.Exposure {
+	if cfg.RespDB.Pipeline.EnableSteps.Exposure {
 		exposureRes := <-exposureChan
 		if exposureRes.Error != nil {
 			r.Error = fmt.Errorf("exposure analysis: %v", exposureRes.Error)
@@ -217,7 +217,7 @@ func (p *Pipeline) analysePDB(r *Results) *Results {
 		msgPDB(fmt.Sprintf("exposure analysis done in %.3f secs", exposureRes.Duration.Seconds()))
 	}
 
-	if cfg.VarQ.Pipeline.EnableSteps.Stability {
+	if cfg.RespDB.Pipeline.EnableSteps.Stability {
 		stabilityRes := <-stabilityChan
 		if stabilityRes.Error != nil {
 			r.Error = fmt.Errorf("stability analysis: %v", stabilityRes.Error)

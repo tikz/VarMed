@@ -3,8 +3,8 @@ package pdb
 import (
 	"fmt"
 	"io/ioutil"
+	"respdb/http" // TOOD: decouple this
 	"time"
-	"varq/http" // TOOD: decouple this
 )
 
 // PDB represents a single PDB entry.

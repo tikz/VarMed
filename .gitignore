@@ -4,7 +4,7 @@ config.yaml
 /*.pdb
 /*.db
 
-# VarQ data
+# RespDB data
 /data/
 
 # py
@@ -14,7 +14,7 @@ __pycache__
 # build binaries
 bin/
 dist/
-varq
+respdb
 
 # npm modules and webpack build
 web/node_modules/

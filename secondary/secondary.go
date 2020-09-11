@@ -4,13 +4,13 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"respdb/pdb"
+	"respdb/secondary/abswitch"
+	"respdb/secondary/dssp"
+	"respdb/secondary/tango"
+	"respdb/uniprot"
 	"sync"
 	"time"
-	"varq/pdb"
-	"varq/secondary/abswitch"
-	"varq/secondary/dssp"
-	"varq/secondary/tango"
-	"varq/uniprot"
 )
 
 var fileMux sync.Mutex

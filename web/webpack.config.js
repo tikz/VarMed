@@ -12,14 +12,14 @@ module.exports = {
   entry: path.resolve(__dirname, "src", "index.jsx"),
   output: {
     path: path.resolve(__dirname, "output"),
-    filename: "varq.js",
+    filename: "respdb.js",
   },
   resolve: {
     extensions: [".js", ".jsx"],
   },
   plugins: [
     new CopyPlugin([
-      { from: "src/assets/varq.svg", to: "./assets/varq.svg" },
+      { from: "src/assets/respdb.svg", to: "./assets/respdb.svg" },
       { from: "src/assets/favicons/", to: "./" },
     ]),
     new webpack.DefinePlugin({

@@ -3,7 +3,7 @@ package ligand
 import (
 	"fmt"
 	"math"
-	"varq/pdb"
+	"respdb/pdb"
 )
 
 // calculateDistance returns the distance between two atoms

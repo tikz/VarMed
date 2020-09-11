@@ -2,10 +2,10 @@ package conservation
 
 import (
 	"fmt"
+	"respdb/conservation/pfam"
+	"respdb/uniprot"
 	"sync"
 	"time"
-	"varq/conservation/pfam"
-	"varq/uniprot"
 )
 
 var fileMux sync.Mutex

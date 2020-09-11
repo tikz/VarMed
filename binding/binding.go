@@ -3,11 +3,11 @@ package binding
 import (
 	"fmt"
 	"math"
+	"respdb/binding/fpocket"
+	"respdb/binding/ligand"
+	"respdb/pdb"
+	"respdb/uniprot"
 	"time"
-	"varq/binding/fpocket"
-	"varq/binding/ligand"
-	"varq/pdb"
-	"varq/uniprot"
 )
 
 // Results holds the collected data in the binding analysis step

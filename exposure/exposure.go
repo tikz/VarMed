@@ -2,9 +2,9 @@ package exposure
 
 import (
 	"fmt"
+	"respdb/pdb"
+	"respdb/sasa"
 	"time"
-	"varq/pdb"
-	"varq/sasa"
 )
 
 type Results struct {

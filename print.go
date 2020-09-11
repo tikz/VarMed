@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"respdb/pdb"
+	"respdb/uniprot"
 	"strconv"
 	"strings"
-	"varq/pdb"
-	"varq/uniprot"
 
 	"github.com/logrusorgru/aurora"
 )

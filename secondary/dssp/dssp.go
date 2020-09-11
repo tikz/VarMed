@@ -2,9 +2,9 @@ package dssp
 
 import (
 	"os/exec"
+	"respdb/pdb"
 	"strconv"
 	"strings"
-	"varq/pdb"
 )
 
 // RunDSSP calculates secondary structure for a given PDB.

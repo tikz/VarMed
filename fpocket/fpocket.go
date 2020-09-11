@@ -7,9 +7,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"respdb/pdb"
 	"strconv"
 	"strings"
-	"varq/pdb"
 )
 
 //Pocket represents a single pocket found with Fpocket (pocketN_atm.pdb)

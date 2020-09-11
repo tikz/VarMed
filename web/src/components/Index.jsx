@@ -29,7 +29,7 @@ export default function Index() {
             justify="center"
           >
             <Grid item>
-              <img src="/assets/varq.svg" alt="VarQ" className="logo" />
+              <img src="/assets/respdb.svg" alt="RespDB" className="logo" />
             </Grid>
             <Grid item xs={9} sm={4} lg={3}>
               <Grid
@@ -39,7 +39,7 @@ export default function Index() {
                 justify="center"
               >
                 <Typography variant="h1" align="left" className="name">
-                  VarQ
+                  RespDB
                 </Typography>
                 <Typography variant="h5" align="left" className="desc">
                   A tool for the structural and functional analysis of protein
@@ -99,8 +99,8 @@ export default function Index() {
               >
                 <Grid item>
                   <Typography variant="caption">
-                    VarQ <Link href="#">source code</Link> is released under the{" "}
-                    <Link href="#">MIT license</Link>.
+                    RespDB <Link href="#">source code</Link> is released under
+                    the <Link href="#">MIT license</Link>.
                   </Typography>
                 </Grid>
                 <Grid item>
