@@ -2,9 +2,9 @@ package glyco
 
 import (
 	"errors"
-	"varq/interaction"
-	"varq/pdb"
-	"varq/uniprot"
+	"respdb/interaction"
+	"respdb/pdb"
+	"respdb/uniprot"
 )
 
 type GlycoDist struct {

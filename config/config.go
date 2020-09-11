@@ -18,7 +18,7 @@ type Config struct {
 		Port string `yaml:"port"`
 	} `yaml:"http-server"`
 
-	VarQ struct {
+	RespDB struct {
 		JobWorkers int `yaml:"job-workers"`
 		Pipeline   struct {
 			StructureWorkers int `yaml:"structure-workers"`
@@ -31,7 +31,7 @@ type Config struct {
 				Stability    bool `yaml:"stability"`
 			} `yaml:"enable-steps"`
 		} `yaml:"pipeline"`
-	} `yaml:"varq"`
+	} `yaml:"respdb"`
 
 	DebugPrint struct {
 		Enabled bool `yaml:"enabled"`

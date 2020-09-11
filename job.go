@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"respdb/pdb"
+	"respdb/uniprot"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
-	"varq/pdb"
-	"varq/uniprot"
 )
 
 const (

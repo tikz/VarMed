@@ -3,8 +3,8 @@ package interaction
 import (
 	"fmt"
 	"math"
+	"respdb/pdb"
 	"time"
-	"varq/pdb"
 )
 
 // Results holds the collected data in the interaction analysis step

@@ -10,9 +10,9 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"respdb/uniprot"
 	"strconv"
 	"strings"
-	"varq/uniprot"
 )
 
 // Basado en la estrategia de Target-Pathogen

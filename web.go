@@ -165,7 +165,7 @@ func httpServe() {
 	r.Use(cors.Default()) // TODO: remove in production, unsafe
 
 	// Job queue, pass inside context to Gin methods
-	queue := NewQueue(cfg.VarQ.JobWorkers)
+	queue := NewQueue(cfg.RespDB.JobWorkers)
 	r.Use(func(c *gin.Context) {
 		c.Set("queue", queue)
 		c.Next()
@@ -189,6 +189,6 @@ func httpServe() {
 		c.File("web/output/index.html")
 	})
 
-	log.Printf("Starting VarQ web server: http://127.0.0.1:%s/", cfg.HTTPServer.Port)
+	log.Printf("Starting RespDB web server: http://127.0.0.1:%s/", cfg.HTTPServer.Port)
 	r.Run(":" + cfg.HTTPServer.Port)
 }

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"respdb/config"
 	"time"
-	"varq/config"
 )
 
 var Cfg *config.Config

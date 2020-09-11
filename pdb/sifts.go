@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"respdb/http"
 	"strings"
-	"varq/http"
 )
 
 // Reference: https://www.ebi.ac.uk/pdbe/api/doc/sifts.html

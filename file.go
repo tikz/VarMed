@@ -4,8 +4,8 @@ import (
 	"encoding/gob"
 	"fmt"
 	"os"
-	"varq/pdb"
-	"varq/uniprot"
+	"respdb/pdb"
+	"respdb/uniprot"
 )
 
 const (
@@ -18,7 +18,7 @@ const (
 	pfamDir     = dataDir + "pfam/"
 	foldxDir    = dataDir + "foldx/"
 	abswitchDir = dataDir + "abswitch/"
-	fileExt     = ".varq"
+	fileExt     = ".respdb"
 )
 
 func makeDirs() {

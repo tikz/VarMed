@@ -7,12 +7,12 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"respdb/glyco"
+	"respdb/pdb"
+	"respdb/sasa"
+	"respdb/uniprot"
 	"strconv"
 	"strings"
-	"varq/glyco"
-	"varq/pdb"
-	"varq/sasa"
-	"varq/uniprot"
 )
 
 // Mutation represents the parameters between an original

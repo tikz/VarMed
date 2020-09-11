@@ -2,11 +2,11 @@ package stability
 
 import (
 	"fmt"
+	"respdb/glyco"
+	"respdb/pdb"
+	"respdb/sasa"
+	"respdb/uniprot"
 	"time"
-	"varq/glyco"
-	"varq/pdb"
-	"varq/sasa"
-	"varq/uniprot"
 )
 
 // Results holds the collected data in the stability analysis step

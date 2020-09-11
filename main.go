@@ -4,11 +4,11 @@ import (
 	"flag"
 	"log"
 	"os"
+	"respdb/clinvar"
+	"respdb/config"
+	"respdb/http"
+	"respdb/uniprot"
 	"strings"
-	"varq/clinvar"
-	"varq/config"
-	"varq/http"
-	"varq/uniprot"
 )
 
 var (
