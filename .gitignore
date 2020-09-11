@@ -22,3 +22,5 @@ web/output/
 
 .vscode
 *.txt
+
+*.tar.gz
