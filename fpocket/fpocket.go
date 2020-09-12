@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"respdb/file"
 	"respdb/pdb"
 	"strconv"
 	"strings"
@@ -23,8 +24,8 @@ type Pocket struct {
 
 // Run runs Fpocket on a PDB and parses the results
 func Run(path string) (pockets []*Pocket, err error) {
-	dir, file := filepath.Split(path)
-	outDirName := strings.Split(file, ".")[0] + "_out"
+	dir, fileName := filepath.Split(path)
+	outDirName := strings.Split(fileName, ".")[0] + "_out"
 	dirPath := "data/fpocket/" + outDirName
 
 	_, err = os.Stat(dirPath)
@@ -35,7 +36,7 @@ func Run(path string) (pockets []*Pocket, err error) {
 			return nil, fmt.Errorf("fpocket: %v %s", err, string(out))
 		}
 
-		err = os.Rename(dir+outDirName, dirPath)
+		err = file.Copy(dir+outDirName, dirPath)
 		if err != nil {
 			return nil, err
 		}

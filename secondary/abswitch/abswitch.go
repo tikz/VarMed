@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"respdb/file"
 	"strconv"
 	"strings"
 )
@@ -95,7 +96,7 @@ func calculate(name string, seq string) error {
 		return errors.New(strOut)
 	}
 
-	err = os.Rename(dirName+outFile, "data/abswitch/"+outFile)
+	err = file.Copy(dirName+outFile, "data/abswitch/"+outFile)
 	if err != nil {
 		return err
 	}

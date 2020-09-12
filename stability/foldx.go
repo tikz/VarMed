@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"respdb/file"
 	"respdb/glyco"
 	"respdb/pdb"
 	"respdb/sasa"
@@ -124,15 +125,17 @@ func buildModel(pdbID string, pdbPath string, sas *uniprot.SAS, mut string) (*Mu
 		mutantPath := "bin/" + mutantFile
 		writeFile(mutantPath, mut)
 
-		// Create hardlink
-		// (FoldX seems to only look for PDBs in the same dir)
-		linkPath := "bin/" + pdbID + "_Repair.pdb"
-		os.Link(pdbPath, linkPath)
+		// Copy PDB (FoldX can only open PDBs in the same dir)
+		srcPDBPath := "bin/" + pdbID + "_Repair.pdb"
+		err = file.Copy(pdbPath, srcPDBPath)
+		if err != nil {
+			return nil, err
+		}
 
 		// Remove files on scope exit
 		defer func() {
 			// hardlink
-			os.RemoveAll(linkPath)
+			os.RemoveAll(srcPDBPath)
 			os.RemoveAll(mutantPath)
 
 			// Duplicate of the original repaired PDB copied to mutation folder by FoldX

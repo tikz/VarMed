@@ -41,10 +41,11 @@ export default function Index() {
                 <Typography variant="h1" align="left" className="name">
                   RespDB
                 </Typography>
-                <Typography variant="h5" align="left" className="desc">
-                  A tool for the structural and functional analysis of protein
-                  variants.
-                </Typography>
+                <Typography
+                  variant="h5"
+                  align="left"
+                  className="desc"
+                ></Typography>
               </Grid>
             </Grid>
           </Grid>
@@ -62,9 +63,7 @@ export default function Index() {
           </Typography>
         </Grid>
         <Grid item>
-          <Typography align="center" className="desc">
-            If you find our work useful, please cite us: <br /> -
-          </Typography>
+          <Typography align="center" className="desc"></Typography>
         </Grid>
       </Grid>
       <Grid container className="footer">
