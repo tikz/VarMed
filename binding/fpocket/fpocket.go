@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"respdb/file"
 	"respdb/pdb"
 	"strconv"
 	"strings"
@@ -38,7 +39,7 @@ func Run(p *pdb.PDB, msg func(string)) (pockets []*Pocket, err error) {
 			return nil, errors.New("FPocket failed")
 		}
 
-		err = os.Rename("bin/"+dirName, "data/fpocket/"+dirName)
+		err = file.CopyDir("bin/"+dirName, "data/fpocket/"+dirName)
 		if err != nil {
 			return nil, err
 		}
