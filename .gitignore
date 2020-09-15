@@ -1,5 +1,8 @@
 config.yaml
 
+.env
+docker-compose.yml
+
 /*.json
 /*.pdb
 /*.db
