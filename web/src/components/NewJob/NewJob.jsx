@@ -31,7 +31,6 @@ export default class NewJob extends React.Component {
       unpData: {},
       pdbs: [],
       variations: [],
-      clinvar: false,
       error: false,
       errorMsg: "",
       redirect: "",
@@ -40,7 +39,7 @@ export default class NewJob extends React.Component {
     this.setUnpData = this.setUnpData.bind(this);
     this.setPDBs = this.setPDBs.bind(this);
     this.setVars = this.setVars.bind(this);
-    this.setClinVar = this.setClinVar.bind(this);
+    this.setAnnotated = this.setAnnotated.bind(this);
     this.submit = this.submit.bind(this);
     this.handleErrorClose = this.handleErrorClose.bind(this);
   }
@@ -50,21 +49,42 @@ export default class NewJob extends React.Component {
       unpData: unpData,
       pdbs: [],
       variations: [],
-      clinvar: false,
     });
   }
 
   setPDBs(pdbs) {
     this.setState({ pdbs: pdbs });
   }
+
   setVars(vars) {
+    vars.sort((a, b) => (a.pos + a.aa > b.pos + b.aa ? 1 : -1));
     this.setState({ variations: vars });
   }
-  setClinVar(flag) {
-    this.setState({ clinvar: flag });
+
+  setAnnotated(toggle) {
+    let vars = this.state.variations;
+    let keys = vars.map((v) => v.key);
+    if (toggle) {
+      this.state.unpData.variants.forEach((v) => {
+        if (!keys.includes(v.change)) {
+          vars.push({
+            key: v.change,
+            pos: v.position,
+            aa: v.toAa,
+            label: v.position + " " + v.fromAa + "→" + v.toAa,
+          });
+        }
+      });
+    } else {
+      let annVars = this.state.unpData.variants.map((v) => v.change);
+      vars = vars.filter((v) => !annVars.includes(v.key));
+    }
+    vars.sort((a, b) => (a.pos + a.aa > b.pos + b.aa ? 1 : -1));
+    this.setState({ variations: vars });
   }
 
   submit(email) {
+    console.log(this.state.variations.map((v) => v.key));
     let that = this;
     axios
       .post(API_URL + "/api/new-job", {
@@ -72,10 +92,9 @@ export default class NewJob extends React.Component {
         uniprotId: this.state.unpData.id,
         pdbIds: this.state.pdbs,
         email: email,
-        sas: [],
+        variants: this.state.variations.map((v) => v.key),
         // variationsPos: this.state.variations.map((x) => x.pos),
         // variationsAa: this.state.variations.map((x) => x.aa),
-        clinvar: this.state.clinvar,
       })
       .then(function (response) {
         if (response.data.error != "") {
@@ -99,7 +118,8 @@ export default class NewJob extends React.Component {
 
     let unpOk = Object.keys(this.state.unpData).length > 0;
     let structOk = this.state.unpData.pdbs !== null;
-    let dataOk = unpOk && this.state.pdbs.length > 0; // && (this.state.variations.length > 0 || this.state.clinvar);
+    let dataOk =
+      unpOk && this.state.pdbs.length > 0 && this.state.variations.length > 0;
     return (
       <Box>
         <NavBar />
@@ -121,25 +141,24 @@ export default class NewJob extends React.Component {
                       {unpOk && (
                         <PDBPicker
                           unpID={this.state.unpData.id}
-                          pdbs={this.state.unpData.pdbIds}
+                          pdbs={this.state.unpData.pdbs}
                           setPDBs={this.setPDBs}
                         />
                       )}
                     </Box>
                   </Grow>
                 </Grid>
-                <Grid item>
-                  {false && unpOk && structOk && <ArrowForwardIosIcon />}
-                </Grid>
+                <Grid item>{unpOk && structOk && <ArrowForwardIosIcon />}</Grid>
                 <Grid item xs={4}>
                   <Grow in={unpOk}>
                     <Box>
-                      {false && unpOk && structOk && (
+                      {unpOk && structOk && (
                         <Variations
                           unpID={this.state.unpData.id}
                           sequence={this.state.unpData.sequence}
+                          variants={this.state.variations}
                           setVariations={this.setVars}
-                          setClinVar={this.setClinVar}
+                          setAnnotated={this.setAnnotated}
                         />
                       )}
                     </Box>

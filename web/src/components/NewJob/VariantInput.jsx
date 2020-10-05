@@ -1,13 +1,11 @@
 import { Box, Grid, IconButton, TextField } from "@material-ui/core";
 import { Add } from "@material-ui/icons";
 import React from "react";
-import ChipArray from "./ChipArray";
 
 export default class VariantInput extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      variants: [],
       aaValue: "",
       posError: false,
       posErrorMsg: "",
@@ -21,18 +19,6 @@ export default class VariantInput extends React.Component {
     this.handlePosChange = this.handlePosChange.bind(this);
     this.handleAdd = this.handleAdd.bind(this);
     this.handleKey = this.handleKey.bind(this);
-    this.handleDelete = this.handleDelete.bind(this);
-  }
-
-  handleDelete(chip) {
-    this.setState(
-      {
-        variants: this.state.variants.filter((c) => c.key !== chip.key),
-      },
-      () => {
-        this.props.setVariations(this.state.variants);
-      }
-    );
   }
 
   handleAdd() {
@@ -42,9 +28,12 @@ export default class VariantInput extends React.Component {
       !this.state.posError &&
       !this.state.aaError
     ) {
-      let variants = this.state.variants;
+      let variants = this.props.variants;
       variants.push({
-        key: this.state.variants.length,
+        key:
+          this.props.sequence[this.state.pos - 1] +
+          this.state.pos +
+          this.state.aa,
         pos: this.state.pos,
         aa: this.state.aa,
         label:
@@ -54,7 +43,7 @@ export default class VariantInput extends React.Component {
           "→" +
           this.state.aa,
       });
-      this.setState({ variants: variants, pos: "", aa: "" });
+      this.setState({ pos: "", aa: "" });
       this.props.setVariations(variants);
     }
   }
@@ -82,9 +71,10 @@ export default class VariantInput extends React.Component {
   }
 
   checkFields() {
-    const aminoacids = "ARNDBCEQZGHILKMFPSTWYV";
-    let aa = this.state.aa;
+    const aminoacids = "ARNDCEQGHILKMFPSTWYV";
     let pos = this.state.pos;
+    let aa = this.state.aa;
+    let fromAa = this.props.sequence[pos - 1];
     pos > this.props.sequence.length || pos < 1
       ? this.setState({
           posError: true,
@@ -97,13 +87,15 @@ export default class VariantInput extends React.Component {
     if (this.props.sequence[pos - 1] == aa) {
       this.setState({
         posError: true,
-        posErrorMsg: "Silent mutation",
+        posErrorMsg: "No change",
         aaError: true,
-        aaErrorMsg: "Silent mutation",
+        aaErrorMsg: "No change",
       });
     }
-    if (this.state.variants.filter((v) => v.pos == pos).length > 0) {
-      this.setState({ posError: true, posErrorMsg: "Position already added" });
+
+    let change = fromAa + pos + aa;
+    if (this.props.variants.filter((v) => v.key == change).length > 0) {
+      this.setState({ posError: true, posErrorMsg: "Variant already added" });
     }
   }
 
@@ -143,10 +135,6 @@ export default class VariantInput extends React.Component {
             </IconButton>
           </Grid>
         </Grid>
-        <ChipArray
-          variants={this.state.variants}
-          handleDelete={this.handleDelete}
-        />
       </Box>
     );
   }

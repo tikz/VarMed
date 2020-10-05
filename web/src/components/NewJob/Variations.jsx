@@ -7,15 +7,25 @@ import {
 } from "@material-ui/core";
 import React from "react";
 import VariantInput from "./VariantInput";
+import ChipArray from "./ChipArray";
 
 export class Variations extends React.Component {
   constructor(props) {
     super(props);
     this.handleChange = this.handleChange.bind(this);
+    this.handleDelete = this.handleDelete.bind(this);
   }
+
   handleChange(e) {
-    this.props.setClinVar(e.target.checked);
+    this.props.setAnnotated(e.target.checked);
   }
+
+  handleDelete(chip) {
+    this.props.setVariations(
+      this.props.variants.filter((c) => c.key !== chip.key)
+    );
+  }
+
   render() {
     let unpSeqURL =
       "https://www.uniprot.org/uniprot/" + this.props.unpID + ".fasta";
@@ -33,13 +43,19 @@ export class Variations extends React.Component {
         <Box>
           <FormControlLabel
             control={<Checkbox onChange={this.handleChange} />}
-            label="Include ClinVar variants"
+            label="Include annotated variants"
           />
         </Box>
 
         <VariantInput
+          variants={this.props.variants}
           sequence={this.props.sequence}
           setVariations={this.props.setVariations}
+        />
+
+        <ChipArray
+          variants={this.props.variants}
+          handleDelete={this.handleDelete}
         />
       </Box>
     );

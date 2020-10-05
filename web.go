@@ -9,6 +9,7 @@ import (
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/tikz/bio"
 )
 
 // StatusEndpoint handles GET /api/status
@@ -22,7 +23,7 @@ func StatusEndpoint(c *gin.Context) {
 func UniProtEndpoint(c *gin.Context) {
 	id := c.Param("unpID")
 
-	u, err := loadUniProt(id)
+	u, err := bio.LoadUniProt(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -151,13 +152,19 @@ func wsHandler(w http.ResponseWriter, r *http.Request, j *Job) {
 func CIFEndpoint(c *gin.Context) {
 	id := c.Param("pdbID")
 
-	p, err := readPDB(id)
+	p, err := bio.LoadPDB(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.Data(http.StatusOK, "text/plain", p.RawCIF)
+	cif, err := p.RawCIF()
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Data(http.StatusOK, "text/plain", cif)
 }
 
 func httpServe() {

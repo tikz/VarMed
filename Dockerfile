@@ -56,7 +56,10 @@ RUN make build
 
 COPY config-example.yaml /respdb/config.yaml
 
+RUN mkdir /respdb/bin
 COPY pipeline-bins.tar.gz /
 RUN tar -C /respdb/bin/ -xvf /pipeline-bins.tar.gz
+
+WORKDIR /respdb/
 
 CMD ["/respdb/respdb"]

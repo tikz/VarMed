@@ -47,9 +47,11 @@ function union(a, b) {
 }
 
 export default function PDBPicker(props) {
+  const pdbIds = props.pdbs.map((p) => p.id);
+
   const classes = useStyles();
   const [checked, setChecked] = React.useState([]);
-  const [left, setLeft] = React.useState(props.pdbs);
+  const [left, setLeft] = React.useState(pdbIds);
   const [right, setRight] = React.useState([]);
 
   const leftChecked = intersection(checked, left);

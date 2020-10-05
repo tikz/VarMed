@@ -40,6 +40,21 @@ type Config struct {
 			PDB     bool `yaml:"pdb"`
 		} `yaml:"rulers"`
 	} `yaml:"debug-print"`
+
+	Paths struct {
+		Data           string `yaml:"data"`
+		UniProt        string `yaml:"uniprot"`
+		PDB            string `yaml:"pdb"`
+		Jobs           string `yaml:"jobs"`
+		Fpocket        string `yaml:"fpocket"`
+		ClinVar        string `yaml:"clinvar"`
+		Pfam           string `yaml:"pfam"`
+		FoldXBin       string `yaml:"foldx-bin"`
+		FoldXRepair    string `yaml:"foldx-repair"`
+		FoldXMutations string `yaml:"foldx-mutations"`
+		Abswitch       string `yaml:"abswitch"`
+		FileExt        string `yaml:"file-ext"`
+	} `yaml:"paths"`
 }
 
 // LoadFile opens and parses the YAML config file

@@ -59,4 +59,18 @@ export default class PositionMapper {
     });
     return residues;
   }
+
+  // unpResiduesToPDB(unpResidues) {
+  //   let residues = [];
+  //   unpResidues.forEach((res) => {
+  //     this.mappings.forEach((chain) => {
+  //       residues.push({
+  //         chain: chain.chain_id,
+  //         position: res.position + this.pdbOffsets[chain.chain_id],
+  //       });
+  //     });
+  //   });
+
+  //   return residues;
+  // }
 }

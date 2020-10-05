@@ -22,3 +22,17 @@ debug-print:
   rulers:
     uniprot: true
     pdb: true
+
+paths:
+  data: "data/"
+  uniprot: "data/uniprot/"
+  pdb: "data/pdb/"
+  jobs: "data/jobs/"
+  fpocket: "data/fpocket/"
+  clinvar: "data/clinvar/"
+  pfam: "data/pfam/"
+  foldx-bin: "bin/foldx/foldx"
+  foldx-repair: "data/foldx/repair/"
+  foldx-mutations: "data/foldx/mutations/"
+  abswitch: "data/abswitch/"
+  file-ext: ".data"
