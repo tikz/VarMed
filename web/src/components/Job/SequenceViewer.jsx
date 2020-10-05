@@ -69,40 +69,21 @@ export default class SequenceViewer extends React.Component {
       zoomPositionElement: document.getElementById("zoomPosition"),
     }));
 
-    const getClinVar = (change) => {
-      if (res.uniprot.variants) {
-        var clinvar = null;
-        res.uniprot.variants.forEach((v) => {
-          if (v.clinvar && v.clinvar.proteinChange == change) {
-            clinvar = v.clinvar;
-          }
-        });
-        return clinvar;
-      }
-    };
-
-    if (res.stability && res.stability.foldx) {
+    if (res.variants) {
       const vars = [];
-      res.stability.foldx.forEach((v) => {
-        var clinvarStr = "";
-        const clinvar = getClinVar(v.sas.fromAa + v.sas.position + v.sas.toAa);
-
-        console.log(clinvar);
-        if (clinvar) {
-          clinvarStr = clinvar.clinSig;
-        }
+      res.variants.forEach((v) => {
         vars.push({
-          x: v.sas.position,
-          y: v.sas.position,
+          x: v.position,
+          y: v.position,
           description:
-            v.sas.fromAa +
+            v.fromAa +
             " → " +
-            v.sas.toAa +
+            v.toAa +
             "<br>" +
-            "ddG: " +
-            v.ddG.toFixed(2) +
-            ", " +
-            clinvarStr,
+            "ΔΔG: " +
+            v.ddg.toFixed(2) +
+            " kcal/mol<br>" +
+            v.cvClinSig,
         });
       });
       this.fv.addFeature({
@@ -152,9 +133,9 @@ export default class SequenceViewer extends React.Component {
       this.fv.addFeature({
         data: [
           {
-            x: fam.mappings[0].position,
-            y: fam.mappings[fam.mappings.length - 1].position,
-            description: fam.id + " " + fam.hmm.desc,
+            x: fam.start,
+            y: fam.end,
+            description: fam.id + " " + fam.desc,
           },
         ],
         name: "Domain",
@@ -164,7 +145,7 @@ export default class SequenceViewer extends React.Component {
       });
 
       var consData = [];
-      fam.mappings.forEach((p) => {
+      fam.positions.forEach((p) => {
         consData.push({
           x: p.position,
           y: p.bitscore,
@@ -181,26 +162,6 @@ export default class SequenceViewer extends React.Component {
         className: "cons",
       });
     });
-
-    // var consData = [];
-    // res.conservation.families.forEach((fam) => {
-    //   fam.mappings.forEach((p) => {
-    //     consData.push({
-    //       x: p.position,
-    //       y: p.bitscore,
-    //     });
-    //   });
-    // });
-
-    // this.fv.addFeature({
-    //   data: consData,
-    //   name: "Conservation",
-    //   color: "#008B8D",
-    //   type: "line",
-    //   filter: "type2",
-    //   height: "5",
-    //   className: "cons",
-    // });
 
     posMap.chains.forEach((chain) => {
       let name = "Chain " + chain.id;
@@ -237,25 +198,40 @@ export default class SequenceViewer extends React.Component {
       };
 
       if (res.interaction.residues !== null) {
-        markResidues(this, res.interaction.residues, "Interface");
-      }
-      if (res.exposure.residues !== null) {
-        markResidues(this, res.exposure.residues, "Buried");
-      }
-      if (res.binding.residues !== null) {
-        markResidues(this, res.binding.residues, "Sites");
-      }
-      if (Object.keys(res.binding.ligands).length != 0) {
-        Object.keys(res.binding.ligands).forEach((lig) => {
-          markResidues(this, res.binding.ligands[lig], "Near " + lig);
-        });
+        markResidues(
+          this,
+          res.interaction.residues.map((r) => r.residue),
+          "Interface"
+        );
       }
 
-      // if (res.binding.pockets !== null) {
-      //   res.binding.pockets.forEach((p) => {
-      //     markResidues(this, p.residues, "Pocket");
+      // if (res.exposure.residues !== null) {
+      //   markResidues(
+      //     this,
+      //     res.exposure.residues.map((r) => r.residue),
+      //     "Buried"
+      //   );
+      // }
+
+      // if (res.binding.residues !== null) {
+      //   markResidues(this, res.binding.residues, "Sites");
+      // }
+
+      // if (Object.keys(res.binding.ligands).length != 0) {
+      //   Object.keys(res.binding.ligands).forEach((lig) => {
+      //     markResidues(this, res.binding.ligands[lig], "Near " + lig);
       //   });
       // }
+
+      if (res.fpocket !== null) {
+        res.fpocket.pockets.forEach((p) => {
+          markResidues(
+            this,
+            p.residues.map((r) => r.residue),
+            "Pocket"
+          );
+        });
+      }
     });
   }
 

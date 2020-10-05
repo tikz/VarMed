@@ -4,13 +4,13 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"respdb/pdb"
 	"respdb/secondary/abswitch"
-	"respdb/secondary/dssp"
 	"respdb/secondary/tango"
-	"respdb/uniprot"
 	"sync"
 	"time"
+
+	"github.com/tikz/bio/pdb"
+	"github.com/tikz/bio/uniprot"
 )
 
 var fileMux sync.Mutex
@@ -27,10 +27,10 @@ type Results struct {
 func Run(unp *uniprot.UniProt, pdb *pdb.PDB, results chan<- *Results, msg func(string)) {
 	start := time.Now()
 
-	err := dssp.RunDSSP(pdb)
-	if err != nil {
-		results <- &Results{Error: fmt.Errorf("DSSP: %v", err)}
-	}
+	// err := dssp.RunDSSP(pdb)
+	// if err != nil {
+	// 	results <- &Results{Error: fmt.Errorf("DSSP: %v", err)}
+	// }
 
 	tangoResidues, err := RunTango(unp, pdb)
 	if err != nil {

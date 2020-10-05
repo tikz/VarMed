@@ -56,9 +56,15 @@ export class Features extends React.Component {
 
     const hets = res.pdb.hetGroups;
 
-    const interaction = chip("Interface", res.interaction.residues);
-    const buried = chip("Buried", res.exposure.residues);
-    const binding = chip("Binding", res.binding.residues);
+    const interaction = chip(
+      "Interface",
+      res.interaction.residues.map((r) => r.residue)
+    );
+    const buried = chip(
+      "Buried",
+      res.exposure.residues.map((r) => r.residue)
+    );
+    // const binding = chip("Binding", res.binding.residues);
 
     return (
       <Grid container className="features">
@@ -81,14 +87,17 @@ export class Features extends React.Component {
             <Divider orientation="vertical" flexItem />
             {interaction}
             {buried}
-            {binding}
-            {/* {res.binding.pockets !== null &&
-              res.binding.pockets.map((pocket, index) => {
-                return chip("Pocket " + index, pocket.residues);
-              })} */}
-            {Object.keys(res.binding.ligands).map((ligand) => {
+            {/* {binding} */}
+            {res.fpocket !== null &&
+              res.fpocket.pockets.map((pocket, index) => {
+                return chip(
+                  "Pocket " + index,
+                  pocket.residues.map((r) => r.residue)
+                );
+              })}
+            {/* {Object.keys(res.binding.ligands).map((ligand) => {
               return chip("Near " + ligand, res.binding.ligands[ligand]);
-            })}
+            })} */}
           </Grid>
         </Grid>
         <Grid item xs={1}>

@@ -4,16 +4,25 @@ import (
 	"flag"
 	"log"
 	"os"
-	"respdb/clinvar"
 	"respdb/config"
 	"respdb/http"
-	"respdb/uniprot"
 	"strings"
+
+	"github.com/tikz/bio/clinvar"
+	"github.com/tikz/bio/conservation"
+	"github.com/tikz/bio/foldx"
 )
 
 var (
-	cfg *config.Config
+	cfg       *config.Config
+	instances *Instances
 )
+
+type Instances struct {
+	FoldX   *foldx.FoldX
+	Pfam    *conservation.Pfam
+	ClinVar *clinvar.ClinVar
+}
 
 func init() {
 	c, err := config.LoadFile("config.yaml")
@@ -21,11 +30,25 @@ func init() {
 		log.Fatalf("Cannot open and parse config.yaml: %v", err)
 	}
 
-	makeDirs()
-
 	cfg = c
 	http.Cfg = c
-	uniprot.DbSNP = clinvar.NewDbSNP()
+
+	makeDirs()
+
+	instances = &Instances{}
+	if instances.ClinVar, err = clinvar.NewClinVar(cfg.Paths.ClinVar); err != nil {
+		log.Fatalf("Cannot instance ClinVar dir: %v", err)
+	}
+
+	if instances.Pfam, err = conservation.NewPfam(cfg.Paths.Pfam); err != nil {
+		log.Fatalf("Cannot instance Pfam dir: %v", err)
+	}
+
+	if instances.FoldX, err = foldx.NewFoldX(cfg.Paths.FoldXBin,
+		cfg.Paths.FoldXRepair,
+		cfg.Paths.FoldXMutations); err != nil {
+		log.Fatalf("Cannot instance FoldX: %v", err)
+	}
 }
 
 func main() {
@@ -43,7 +66,7 @@ func main() {
 }
 
 func makeSampleResults() {
-	_, err := os.Stat(jobDir + "15e20e5f18326d264b60eeaa07c9af8d04b0a6c70f037b7f69b6d40d22fb590b" + fileExt)
+	_, err := os.Stat(cfg.Paths.Jobs + "15e20e5f18326d264b60eeaa07c9af8d04b0a6c70f037b7f69b6d40d22fb590b" + cfg.Paths.FileExt)
 	if os.IsNotExist(err) {
 		log.Println("Running pipeline to populate sample results...")
 		j := NewJob(&JobRequest{
