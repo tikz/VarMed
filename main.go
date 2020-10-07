@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"respdb/config"
-	"respdb/http"
 	"strings"
 
 	"github.com/tikz/bio/clinvar"
@@ -31,7 +30,6 @@ func init() {
 	}
 
 	cfg = c
-	http.Cfg = c
 
 	makeDirs()
 
