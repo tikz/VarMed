@@ -7,9 +7,11 @@ import (
 	"respdb/config"
 	"strings"
 
+	"github.com/tikz/bio/abswitch"
 	"github.com/tikz/bio/clinvar"
 	"github.com/tikz/bio/conservation"
 	"github.com/tikz/bio/foldx"
+	"github.com/tikz/bio/tango"
 )
 
 var (
@@ -18,9 +20,11 @@ var (
 )
 
 type Instances struct {
-	FoldX   *foldx.FoldX
-	Pfam    *conservation.Pfam
-	ClinVar *clinvar.ClinVar
+	FoldX    *foldx.FoldX
+	Pfam     *conservation.Pfam
+	ClinVar  *clinvar.ClinVar
+	AbSwitch *abswitch.AbSwitch
+	Tango    *tango.Tango
 }
 
 func init() {
@@ -46,6 +50,14 @@ func init() {
 		cfg.Paths.FoldXRepair,
 		cfg.Paths.FoldXMutations); err != nil {
 		log.Fatalf("Cannot instance FoldX: %v", err)
+	}
+
+	if instances.AbSwitch, err = abswitch.NewAbSwitch(cfg.Paths.AbSwitchBin, cfg.Paths.AbSwitch); err != nil {
+		log.Fatalf("Cannot instance abSwitch: %v", err)
+	}
+
+	if instances.Tango, err = tango.NewTango(cfg.Paths.TangoBin, cfg.Paths.Tango); err != nil {
+		log.Fatalf("Cannot instance Tango: %v", err)
 	}
 }
 
