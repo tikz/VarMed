@@ -14,14 +14,16 @@ import (
 )
 
 type Results struct {
-	UniProt      *uniprot.UniProt `json:"uniprot"`
-	PDB          *pdb.PDB         `json:"pdb"`
-	Variants     []Variant        `json:"variants"`
-	Interaction  Interaction      `json:"interaction"`
-	Exposure     Exposure         `json:"exposure"`
-	Conservation Conservation     `json:"conservation"`
-	Fpocket      Fpocket          `json:"fpocket"`
-	ActiveSite   ActiveSite       `json:"activeSite"`
+	UniProt       *uniprot.UniProt `json:"uniprot"`
+	PDB           *pdb.PDB         `json:"pdb"`
+	Variants      []Variant        `json:"variants"`
+	Interaction   Interaction      `json:"interaction"`
+	Exposure      Exposure         `json:"exposure"`
+	Conservation  Conservation     `json:"conservation"`
+	Fpocket       Fpocket          `json:"fpocket"`
+	ActiveSite    ActiveSite       `json:"activeSite"`
+	Switchability Switchability    `json:"switchability"`
+	Aggregability Aggregability    `json:"aggregability"`
 }
 
 type Residue struct {
@@ -100,6 +102,19 @@ type PositionConservation struct {
 	Bitscore float64 `json:"bitscore"`
 }
 
+type Switchability struct {
+	Positions []PositionValue `json:"positions"`
+}
+
+type Aggregability struct {
+	Positions []PositionValue `json:"positions"`
+}
+
+type PositionValue struct {
+	Position int64   `json:"position"`
+	Value    float64 `json:"value"`
+}
+
 // Pipeline represents a single run of the RespDB pipeline.
 type Pipeline struct {
 	UniProt  *uniprot.UniProt
@@ -132,8 +147,8 @@ func NewPipeline(unp *uniprot.UniProt, pdbIDs []string, variants []SAS, msgChan 
 
 // Run starts the process of analyzing given PDB IDs corresponding to an UniProt ID.
 func (pl *Pipeline) Run() error {
-	// start := time.Now()
-	// p.msg("Job started")
+	start := time.Now()
+	pl.msg("Job started")
 
 	for _, pdbID := range pl.PDBIDs {
 		u := pl.UniProt
@@ -192,14 +207,21 @@ func (pl *Pipeline) Run() error {
 		exposureChan := pl.exposureRunner(p)
 		conservationChan := pl.conservationRunner(pl.UniProt)
 		fpocketChan := pl.fpocketRunner(p)
+		switchabilityChan := pl.switchabilityRunner(u, p)
+		aggregabilityChan := pl.aggregabilityRunner(u, p)
 
 		results.Interaction = <-interactionChan
 		results.Exposure = <-exposureChan
 		results.Conservation = <-conservationChan
 		results.Fpocket = <-fpocketChan
+		results.Switchability = <-switchabilityChan
+		results.Aggregability = <-aggregabilityChan
 
 		pl.Results[pdbID] = &results
 	}
+
+	pl.Duration = time.Now().Sub(start)
+	pl.msg(fmt.Sprintf("Pipeline finished in %s", pl.Duration.String()))
 
 	return pl.Error
 }
@@ -367,6 +389,58 @@ func (pl *Pipeline) fpocketRunner(p *pdb.PDB) chan Fpocket {
 		}
 
 		pl.msg(fmt.Sprintf("%d suitable pockets found, %d total for PDB %s", len(results.Pockets), len(fp.Pockets), p.ID))
+
+		rchan <- results
+	}()
+	return rchan
+}
+
+func (pl *Pipeline) switchabilityRunner(u *uniprot.UniProt, p *pdb.PDB) chan Switchability {
+	rchan := make(chan Switchability)
+	go func() {
+		results := Switchability{}
+		pl.msg(fmt.Sprintf("Running abSwitch for chain seqs in PDB %s", p.ID))
+		res, err := instances.AbSwitch.Switchability(u, p)
+		if err != nil {
+			pl.Error = err
+			rchan <- results
+			return
+		}
+
+		for pos, r := range res {
+			if r.S5s > 5 {
+				results.Positions = append(results.Positions, PositionValue{Position: pos, Value: r.S5s})
+			}
+		}
+
+		pl.msg(fmt.Sprintf("%d high switchability residues found for PDB %s",
+			len(results.Positions), p.ID))
+
+		rchan <- results
+	}()
+	return rchan
+}
+
+func (pl *Pipeline) aggregabilityRunner(u *uniprot.UniProt, p *pdb.PDB) chan Aggregability {
+	rchan := make(chan Aggregability)
+	go func() {
+		results := Aggregability{}
+		pl.msg(fmt.Sprintf("Running Tango for chain seqs in PDB %s", p.ID))
+		res, err := instances.Tango.Aggregability(u, p)
+		if err != nil {
+			pl.Error = err
+			rchan <- results
+			return
+		}
+
+		for pos, r := range res {
+			if r.Aggregation > 5 {
+				results.Positions = append(results.Positions, PositionValue{Position: pos, Value: r.Aggregation})
+			}
+		}
+
+		pl.msg(fmt.Sprintf("%d high aggregability residues found for PDB %s",
+			len(results.Positions), p.ID))
 
 		rchan <- results
 	}()

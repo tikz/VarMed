@@ -12,7 +12,8 @@ func makeDirs() {
 	os.MkdirAll(cfg.Paths.Fpocket, os.ModePerm)
 	os.MkdirAll(cfg.Paths.ClinVar, os.ModePerm)
 	os.MkdirAll(cfg.Paths.Pfam, os.ModePerm)
-	os.MkdirAll(cfg.Paths.Abswitch, os.ModePerm)
+	os.MkdirAll(cfg.Paths.AbSwitch, os.ModePerm)
+	os.MkdirAll(cfg.Paths.Tango, os.ModePerm)
 
 	os.MkdirAll(cfg.Paths.FoldXRepair, os.ModePerm)
 	os.MkdirAll(cfg.Paths.FoldXMutations, os.ModePerm)

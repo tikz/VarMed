@@ -34,5 +34,8 @@ paths:
   foldx-bin: "bin/foldx/foldx"
   foldx-repair: "data/foldx/repair/"
   foldx-mutations: "data/foldx/mutations/"
+  abswitch-bin: "bin/abswitch/abSwitch"
   abswitch: "data/abswitch/"
+  tango-bin: "bin/tango/tango"
+  tango: "data/tango/"
   file-ext: ".data"

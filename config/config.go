@@ -52,7 +52,10 @@ type Config struct {
 		FoldXBin       string `yaml:"foldx-bin"`
 		FoldXRepair    string `yaml:"foldx-repair"`
 		FoldXMutations string `yaml:"foldx-mutations"`
-		Abswitch       string `yaml:"abswitch"`
+		AbSwitchBin    string `yaml:"abswitch-bin"`
+		AbSwitch       string `yaml:"abswitch"`
+		TangoBin       string `yaml:"tango-bin"`
+		Tango          string `yaml:"tango"`
 		FileExt        string `yaml:"file-ext"`
 	} `yaml:"paths"`
 }
