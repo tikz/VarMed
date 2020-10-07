@@ -83,9 +83,6 @@ func NewJobEndpoint(c *gin.Context) {
 	req.IP = c.ClientIP()
 	req.Time = time.Now()
 
-	// TODO: data should be already client side validated, but
-	// do it again server side
-
 	// Check if job already exists
 	j, err := loadJob(generateID(&req))
 	if err != nil {
@@ -129,17 +126,22 @@ func wsHandler(w http.ResponseWriter, r *http.Request, j *Job) {
 	}()
 
 	i := len(j.msgs)
+
+	// Show last 10 messages only when reconnecting
+	if i > 10 {
+		i = i - 10
+	}
+
 	for {
 		select {
 		case <-msgTicker.C:
 			if i < len(j.msgs) {
 				msg := j.msgs[i]
-				ws.WriteMessage(1, []byte(msg))
+				ws.WriteMessage(websocket.TextMessage, []byte(msg))
 				i++
 
 				if j.Status == statusDone ||
-					j.Status == statusSaved ||
-					j.Status == statusError {
+					j.Status == statusSaved {
 					return
 				}
 			}

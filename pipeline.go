@@ -1,11 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"time"
 
 	"github.com/tikz/bio"
-	"github.com/tikz/bio/conservation"
 	"github.com/tikz/bio/fpocket"
 	"github.com/tikz/bio/interaction"
 	"github.com/tikz/bio/pdb"
@@ -22,7 +22,6 @@ type Results struct {
 	Conservation Conservation     `json:"conservation"`
 	Fpocket      Fpocket          `json:"fpocket"`
 	ActiveSite   ActiveSite       `json:"activeSite"`
-	Error        error            `json:"error"`
 }
 
 type Residue struct {
@@ -36,7 +35,6 @@ type ActiveSite struct {
 
 type Fpocket struct {
 	Pockets []Pocket `json:"pockets"`
-	Error   error    `json:"error"`
 }
 
 type Pocket struct {
@@ -47,7 +45,6 @@ type Pocket struct {
 
 type Interaction struct {
 	Residues []Residue `json:"residues"`
-	Error    error     `json:"error"`
 }
 
 type Variant struct {
@@ -73,12 +70,10 @@ type Variant struct {
 	// Calculated
 	DdG     float64 `json:"ddg"`
 	Outcome string  `json:"outcome"`
-	Error   error   `json:"error"`
 }
 
 type Exposure struct {
 	Residues []ResidueExposure `json:"residues"`
-	Error    error             `json:"error"`
 }
 
 type ResidueExposure struct {
@@ -89,7 +84,6 @@ type ResidueExposure struct {
 
 type Conservation struct {
 	Families []Family `json:"families"`
-	Error    error    `json:"error"`
 }
 
 type Family struct {
@@ -114,68 +108,71 @@ type Pipeline struct {
 	Results  map[string]*Results // PDB ID to results
 	Duration time.Duration
 
-	// msgChan chan string // readable text messages about the status
+	Error   error
+	msgChan chan string // readable text messages about the status
 }
 
-// // msg prints and sends a message with added format to the channel.
-// func (p *Pipeline) msg(m string) {
-// 	p.msgChan <- time.Now().Format("15:04:05-0700") + " " + m
-// }
+// msg prints and sends a message with added format to the channel.
+func (pl *Pipeline) msg(m string) {
+	pl.msgChan <- time.Now().Format("15:04:05-0700") + " " + m
+}
 
 // NewPipeline constructs a new Pipeline.
-func NewPipeline(unp *uniprot.UniProt, pdbIDs []string, variants []SAS) (*Pipeline, error) {
+func NewPipeline(unp *uniprot.UniProt, pdbIDs []string, variants []SAS, msgChan chan string) (*Pipeline, error) {
 	p := Pipeline{
 		UniProt:  unp,
 		Variants: variants,
 		PDBIDs:   pdbIDs,
 		Results:  make(map[string]*Results),
+		msgChan:  msgChan,
 	}
 
 	return &p, nil
 }
 
 // Run starts the process of analyzing given PDB IDs corresponding to an UniProt ID.
-func (pipeline *Pipeline) Run() error {
+func (pl *Pipeline) Run() error {
 	// start := time.Now()
 	// p.msg("Job started")
 
-	pfam, err := conservation.NewPfam("data/pfam")
-	if err != nil {
-		return err
-	}
-
-	for _, pdbID := range pipeline.PDBIDs {
-		u := pipeline.UniProt
+	for _, pdbID := range pl.PDBIDs {
+		u := pl.UniProt
 		results := Results{UniProt: u}
+
+		pl.msg(fmt.Sprintf("Loading PDB %s", pdbID))
 		p, err := bio.LoadPDB(pdbID)
 		if err != nil {
-			results.Error = err
+			pl.Error = err
 			continue
 		}
 		results.PDB = p
 
 		// In coverage
 		var coveredVariants []SAS
-		for _, v := range pipeline.Variants {
+		for _, v := range pl.Variants {
 			inStructure := len(p.UniProtPositions[u.ID][v.Position]) > 0
 			if inStructure {
 				coveredVariants = append(coveredVariants, v)
+			} else {
+				pl.msg(fmt.Sprintf("Variant %s position not covered by PDB %s", v.Change, pdbID))
 			}
 		}
 
 		// FoldX
-		if len(pipeline.Variants) > 0 {
+		if len(pl.Variants) > 0 {
+			pl.msg(fmt.Sprintf("Running FoldX RepairPDB %s", pdbID))
 			rp, err := instances.FoldX.Repair(p)
 			if err != nil {
 				return err
 			}
+			pl.msg(fmt.Sprintf("RepairPDB %s done", pdbID))
 
-			n := len(pipeline.Variants)
+			n := len(pl.Variants)
 			varJobs := make(chan SAS, n)
 			varRes := make(chan Variant, n)
 
 			for w := 1; w <= 16; w++ {
-				go variantWorker(rp, u, p, varJobs, varRes)
+				go pl.variantWorker(rp, u, p, varJobs, varRes)
 			}
 
 			for _, v := range coveredVariants {
@@ -184,33 +181,35 @@ func (pipeline *Pipeline) Run() error {
 			close(varJobs)
 
 			for range coveredVariants {
-				results.Variants = append(results.Variants, <-varRes)
+				v := <-varRes
+				results.Variants = append(results.Variants, v)
+				pl.msg(fmt.Sprintf("BuildModel for variant %s with PDB %s done", v.Change, pdbID))
 			}
 		}
 
 		// Start other runners in parallel
-		interactionChan := interactionRunner(p)
-		exposureChan := exposureRunner(p)
-		conservationChan := conservationRunner(pfam, pipeline.UniProt)
-		fpocketChan := fpocketRunner(p)
+		interactionChan := pl.interactionRunner(p)
+		exposureChan := pl.exposureRunner(p)
+		conservationChan := pl.conservationRunner(pl.UniProt)
+		fpocketChan := pl.fpocketRunner(p)
 
 		results.Interaction = <-interactionChan
 		results.Exposure = <-exposureChan
 		results.Conservation = <-conservationChan
 		results.Fpocket = <-fpocketChan
 
-		pipeline.Results[pdbID] = &results
+		pl.Results[pdbID] = &results
 	}
 
-	return nil
+	return pl.Error
 }
 
-func variantWorker(repairPDB string, u *uniprot.UniProt, p *pdb.PDB, sas <-chan SAS, rchan chan<- Variant) {
+func (pl *Pipeline) variantWorker(repairPDB string, u *uniprot.UniProt, p *pdb.PDB, sas <-chan SAS, rchan chan<- Variant) {
 	for v := range sas {
 		results := Variant{}
 		ddg, err := instances.FoldX.BuildModelUniProt(repairPDB, p, u.ID, v.Position, v.ToAa)
 		if err != nil {
-			results.Error = err
+			pl.Error = err
 			rchan <- results
 			continue
 		}
@@ -245,34 +244,38 @@ func variantWorker(repairPDB string, u *uniprot.UniProt, p *pdb.PDB, sas <-chan 
 	}
 }
 
-func interactionRunner(p *pdb.PDB) chan Interaction {
+func (pl *Pipeline) interactionRunner(p *pdb.PDB) chan Interaction {
 	rchan := make(chan Interaction)
 	go func() {
 		results := Interaction{}
 		interacts := interaction.Chains(p, 5)
 
+		pl.msg(fmt.Sprintf("Compute interface by distance with PDB %s", p.ID))
 		for res, interRes := range interacts {
 			if len(interRes) > 0 {
 				results.Residues = append(results.Residues, Residue{res, res.UnpPosition})
 			}
 		}
 
+		pl.msg(fmt.Sprintf("Found %d interface residues in PDB %s", len(interacts), p.ID))
+
 		rchan <- results
 	}()
 	return rchan
 }
 
-func exposureRunner(p *pdb.PDB) chan Exposure {
+func (pl *Pipeline) exposureRunner(p *pdb.PDB) chan Exposure {
 	rchan := make(chan Exposure)
 	go func() {
 		results := Exposure{}
 		sr, err := sasa.SASA(p)
 		if err != nil {
-			results.Error = err
+			pl.Error = err
 			rchan <- results
 			return
 		}
 
+		pl.msg(fmt.Sprintf("Compute solvent accesible surface area for PDB %s", p.ID))
 		for res, sasa := range sr.Residues {
 			if sasa.RelSide < 50 {
 				re := ResidueExposure{
@@ -286,24 +289,28 @@ func exposureRunner(p *pdb.PDB) chan Exposure {
 				results.Residues = append(results.Residues, re)
 			}
 		}
+		pl.msg(fmt.Sprintf("Done SASA for %d residues, %d buried, in PDB %s",
+			len(sr.Residues), len(results.Residues), p.ID))
 
 		rchan <- results
 	}()
 	return rchan
 }
 
-func conservationRunner(pfam *conservation.Pfam, u *uniprot.UniProt) chan Conservation {
+func (pl *Pipeline) conservationRunner(u *uniprot.UniProt) chan Conservation {
 	rchan := make(chan Conservation)
 	go func() {
 		results := Conservation{}
-		fams, err := pfam.Families(u)
+		pl.msg(fmt.Sprintf("Loading Pfam families for %s sequence", u.ID))
+		fams, err := instances.Pfam.Families(u)
 		if err != nil {
-			results.Error = err
+			pl.Error = err
 			rchan <- results
 			return
 		}
 
 		for _, fam := range fams {
+			pl.msg(fmt.Sprintf("Conservation for Pfam family %s %s", fam.ID, fam.HMM.Desc))
 			rf := Family{
 				ID:   fam.ID,
 				Name: fam.HMM.Name,
@@ -317,10 +324,13 @@ func conservationRunner(pfam *conservation.Pfam, u *uniprot.UniProt) chan Conser
 				})
 			}
 
+			pl.msg(fmt.Sprintf("%d aligned residues to HMM model for Pfam family %s", len(fam.Mappings), fam.ID))
+
 			if len(rf.Positions) > 1 {
 				rf.Start = rf.Positions[0].Position
 				rf.End = rf.Positions[len(rf.Positions)-1].Position
 			}
+			pl.msg(fmt.Sprintf("%s %s ranges: %d-%d", fam.ID, fam.HMM.Desc, rf.Start, rf.End))
 
 			results.Families = append(results.Families, rf)
 		}
@@ -330,13 +340,14 @@ func conservationRunner(pfam *conservation.Pfam, u *uniprot.UniProt) chan Conser
 	return rchan
 }
 
-func fpocketRunner(p *pdb.PDB) chan Fpocket {
+func (pl *Pipeline) fpocketRunner(p *pdb.PDB) chan Fpocket {
 	rchan := make(chan Fpocket)
 	go func() {
 		results := Fpocket{}
+		pl.msg(fmt.Sprintf("Searching pockets for PDB %s", p.ID))
 		fp, err := fpocket.Run(cfg.Paths.Fpocket, p)
 		if err != nil {
-			results.Error = err
+			pl.Error = err
 			rchan <- results
 			return
 		}
@@ -354,6 +365,8 @@ func fpocketRunner(p *pdb.PDB) chan Fpocket {
 				results.Pockets = append(results.Pockets, p)
 			}
 		}
+
+		pl.msg(fmt.Sprintf("%d suitable pockets found, %d total for PDB %s", len(results.Pockets), len(fp.Pockets), p.ID))
 
 		rchan <- results
 	}()

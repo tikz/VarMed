@@ -21,7 +21,7 @@ export default class StatusConsole extends React.Component {
     }
     this.ws = new WebSocket(url);
 
-    this.state = { messages: [], connected: false };
+    this.state = { messages: [], connected: false, error: false };
   }
 
   componentDidMount() {
@@ -32,11 +32,8 @@ export default class StatusConsole extends React.Component {
       });
     };
     this.ws.onmessage = (evt) => {
-      if (evt.data == "SUCCESS" || evt.data == "FAILED") {
-        this.ws.close();
-      }
-      if (evt.data == "SUCCESS") {
-        this.props.reload();
+      if (evt.data.startsWith("ERROR")) {
+        this.setState({ error: true });
       }
       this.setState({
         messages: this.state.messages.concat(evt.data),
@@ -76,7 +73,7 @@ export default class StatusConsole extends React.Component {
             </div>
           </div>
         </DialogContent>
-        <LinearProgress variant="query" />
+        {!this.state.error && <LinearProgress variant="query" />}
       </Dialog>
     );
   }

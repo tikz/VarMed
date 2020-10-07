@@ -101,21 +101,22 @@ func (j *Job) Process(cli bool) {
 		return
 	}
 
-	// msgChan := make(chan string, 100)
-	j.Pipeline, _ = NewPipeline(unp, j.Request.PDBIDs, vars)
+	msgChan := make(chan string, 100)
+	j.Pipeline, _ = NewPipeline(unp, j.Request.PDBIDs, vars, msgChan)
 
-	// go func() {
-	// 	for m := range msgChan {
-	// 		if cli {
-	// 			fmt.Println(m)
-	// 		} else {
-	// 			j.msgs = append(j.msgs, m)
-	// 		}
-	// 	}
-	// }()
+	go func() {
+		for m := range msgChan {
+			if cli {
+				fmt.Println(m)
+			} else {
+				j.msgs = append(j.msgs, m)
+			}
+		}
+	}()
 
 	err = j.Pipeline.Run()
 	if err != nil {
+		msgChan <- "ERROR: " + err.Error()
 		j.fail(err)
 		return
 	}
@@ -133,7 +134,6 @@ func (j *Job) Process(cli bool) {
 // fail handles the given error message and updates the status.
 func (j *Job) fail(err error) {
 	log.Printf("error %s %s: %v", j.Request.UniProtID, j.Request.PDBIDs, err)
-	j.msgs = append(j.msgs, err.Error())
 	j.Error = err
 	j.Status = statusError
 }

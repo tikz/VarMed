@@ -40,12 +40,14 @@ export class Variations extends React.Component {
           </Link>{" "}
           length: {this.props.sequence.length}
         </Typography>
-        <Box>
-          <FormControlLabel
-            control={<Checkbox onChange={this.handleChange} />}
-            label="Include annotated variants"
-          />
-        </Box>
+        {this.props.hasAnnotated && (
+          <Box>
+            <FormControlLabel
+              control={<Checkbox onChange={this.handleChange} />}
+              label="Include annotated variants"
+            />
+          </Box>
+        )}
 
         <VariantInput
           variants={this.props.variants}

@@ -5,6 +5,27 @@ export default class PositionMapper {
     this.mappings = res.pdb.SIFTS.UniProt[res.uniprot.id].mappings;
     this.loadOffsets();
     this.loadChains();
+    this.loadChainRanges();
+    this.makeMappings();
+  }
+
+  makeMappings() {
+    this.mapUnpPDB = {};
+    this.mapPDBUnp = {};
+    this.mappings.forEach((chain) => {
+      for (let i = chain.unp_start; i < chain.unp_end; i++) {
+        this.mapUnpPDB[i] = this.mapUnpPDB[i] || [];
+        this.mapUnpPDB[i].push({
+          chain: chain.chain_id,
+          position: i - chain.unp_start + chain.start.residue_number,
+        });
+
+        this.mapPDBUnp[chain.chain_id] = this.mapPDBUnp[chain.chain_id] || {};
+        this.mapPDBUnp[chain.chain_id][
+          i + chain.unp_start - chain.start.residue_number
+        ] = i;
+      }
+    });
   }
 
   loadOffsets() {
@@ -18,6 +39,17 @@ export default class PositionMapper {
     this.mappings.forEach((chain) => {
       this.pdbOffsets[chain.chain_id] =
         -chain.unp_start + chain.start.residue_number;
+    });
+  }
+
+  loadChainRanges() {
+    this.chainRanges = {};
+    this.mappings.forEach((chain) => {
+      this.chainRanges[chain.chain_id] = this.chainRanges[chain.chain_id] || [];
+      this.chainRanges[chain.chain_id].push({
+        start: chain.unp_start,
+        end: chain.unp_end,
+      });
     });
   }
 
@@ -46,10 +78,12 @@ export default class PositionMapper {
   }
 
   pdbToUnp(chain, pos) {
+    return this.mapPDBUnp[chain][pos];
     return pos + this.unpOffsets[chain];
   }
 
   unpToPDB(pos) {
+    return this.mapUnpPDB[pos];
     let residues = [];
     this.mappings.forEach((chain) => {
       residues.push({
@@ -59,18 +93,4 @@ export default class PositionMapper {
     });
     return residues;
   }
-
-  // unpResiduesToPDB(unpResidues) {
-  //   let residues = [];
-  //   unpResidues.forEach((res) => {
-  //     this.mappings.forEach((chain) => {
-  //       residues.push({
-  //         chain: chain.chain_id,
-  //         position: res.position + this.pdbOffsets[chain.chain_id],
-  //       });
-  //     });
-  //   });
-
-  //   return residues;
-  // }
 }

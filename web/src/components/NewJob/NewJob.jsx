@@ -84,7 +84,6 @@ export default class NewJob extends React.Component {
   }
 
   submit(email) {
-    console.log(this.state.variations.map((v) => v.key));
     let that = this;
     axios
       .post(API_URL + "/api/new-job", {
@@ -159,6 +158,7 @@ export default class NewJob extends React.Component {
                           variants={this.state.variations}
                           setVariations={this.setVars}
                           setAnnotated={this.setAnnotated}
+                          hasAnnotated={this.state.unpData.variants !== null}
                         />
                       )}
                     </Box>
