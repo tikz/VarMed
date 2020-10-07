@@ -52,15 +52,17 @@ export default class SequenceViewer extends React.Component {
         const chain = d.detail.description.split(" ")[1];
         structure.selectFocus(
           chain,
-          d.detail.start + posMap.pdbOffsets[chain],
-          d.detail.end + posMap.pdbOffsets[chain]
+          posMap.unpToPDB(d.detail.start).filter((c) => c.chain == chain)[0]
+            .position,
+          posMap.unpToPDB(d.detail.end).filter((c) => c.chain == chain)[0]
+            .position
         );
       } else {
         const chain = posMap.chains[0].id;
         structure.selectFocus(
           chain,
-          d.detail.start + posMap.pdbOffsets[chain],
-          d.detail.end + posMap.pdbOffsets[chain]
+          posMap.unpToPDB(d.detail.start)[0].position, // d.detail.start + posMap.pdbOffsets[chain],
+          posMap.unpToPDB(d.detail.end)[0].position // d.detail.end + posMap.pdbOffsets[chain]
         );
       }
     });
@@ -166,13 +168,9 @@ export default class SequenceViewer extends React.Component {
     posMap.chains.forEach((chain) => {
       let name = "Chain " + chain.id;
       this.fv.addFeature({
-        data: [
-          {
-            x: chain.start,
-            y: chain.end,
-            description: name,
-          },
-        ],
+        data: posMap.chainRanges[chain.id].map(function (r) {
+          return { x: r.start, y: r.end, description: name };
+        }),
         name: name,
         color: "#1aacdb",
         type: "rect",
@@ -180,24 +178,25 @@ export default class SequenceViewer extends React.Component {
       });
 
       let markResidues = function (that, residues, title) {
-        that.fv.addFeature({
-          data: residues
-            .filter((r) => r.chain == chain.id)
-            .map((r) => {
-              return {
-                x: posMap.pdbToUnp(r.chain, r.position),
-                y: posMap.pdbToUnp(r.chain, r.position),
-                description: name,
-              };
-            }),
-          name: chain.id + " - " + title,
-          color: "#1aacdb",
-          type: "rect",
-          className: chain.id + title.split(" ").slice(-1)[0],
-        });
+        residues = residues
+          .filter((r) => r.chain == chain.id)
+          .map((r) => {
+            let pm = posMap.pdbToUnp(r.chain, r.position);
+            return { x: pm, y: pm, description: name };
+          })
+          .filter((r) => r.x);
+        if (residues.length > 0) {
+          that.fv.addFeature({
+            data: residues,
+            name: chain.id + " - " + title,
+            color: "#1aacdb",
+            type: "rect",
+            className: chain.id + title.split(" ").slice(-1)[0],
+          });
+        }
       };
 
-      if (res.interaction.residues !== null) {
+      if (res.interaction.residues) {
         markResidues(
           this,
           res.interaction.residues.map((r) => r.residue),
@@ -223,15 +222,15 @@ export default class SequenceViewer extends React.Component {
       //   });
       // }
 
-      if (res.fpocket !== null) {
-        res.fpocket.pockets.forEach((p) => {
-          markResidues(
-            this,
-            p.residues.map((r) => r.residue),
-            "Pocket"
-          );
-        });
-      }
+      // if (res.fpocket.pockets) {
+      //   res.fpocket.pockets.forEach((p) => {
+      //     markResidues(
+      //       this,
+      //       p.residues.map((r) => r.residue),
+      //       "Pocket"
+      //     );
+      //   });
+      // }
     });
   }
 

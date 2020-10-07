@@ -104,10 +104,12 @@ func write(filePath string, object interface{}) error {
 
 func read(filePath string, object interface{}) error {
 	file, err := os.Open(filePath)
-	if err == nil {
-		decoder := gob.NewDecoder(file)
-		err = decoder.Decode(object)
+	if err != nil {
+		return err
 	}
+
+	decoder := gob.NewDecoder(file)
+	err = decoder.Decode(object)
 	file.Close()
 
 	return err

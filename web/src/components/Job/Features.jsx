@@ -56,14 +56,14 @@ export class Features extends React.Component {
 
     const hets = res.pdb.hetGroups;
 
-    const interaction = chip(
-      "Interface",
-      res.interaction.residues.map((r) => r.residue)
-    );
-    const buried = chip(
-      "Buried",
-      res.exposure.residues.map((r) => r.residue)
-    );
+    // const interaction = chip(
+    //   "Interface",
+    //   res.interaction.residues.map((r) => r.residue)
+    // );
+    // const buried = chip(
+    //   "Buried",
+    //   res.exposure.residues.map((r) => r.residue)
+    // );
     // const binding = chip("Binding", res.binding.residues);
 
     return (
@@ -85,10 +85,18 @@ export class Features extends React.Component {
                 }
               })}
             <Divider orientation="vertical" flexItem />
-            {interaction}
-            {buried}
+            {res.interaction.residues &&
+              chip(
+                "Interface",
+                res.interaction.residues.map((r) => r.residue)
+              )}
+            {res.exposure.residues &&
+              chip(
+                "Buried",
+                res.exposure.residues.map((r) => r.residue)
+              )}
             {/* {binding} */}
-            {res.fpocket !== null &&
+            {res.fpocket.residues &&
               res.fpocket.pockets.map((pocket, index) => {
                 return chip(
                   "Pocket " + index,

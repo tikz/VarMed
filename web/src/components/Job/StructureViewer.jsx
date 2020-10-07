@@ -201,13 +201,17 @@ export default class StructureViewer extends React.Component {
   }
 
   highlightResidues(residues) {
+    if (!residues) {
+      return;
+    }
     this.clearHighlight();
     var plugin = this.state.plugin;
     var model = plugin.context.select("model")[0];
     residues.forEach((r) => {
       let query = LiteMol.Core.Structure.Query.sequence(
         null,
-        this.context.posMap.structChain(r.chain),
+        // this.context.posMap.structChain(r.chain),
+        r.chain,
         { seqNumber: r.position },
         {
           seqNumber: r.positionEnd !== undefined ? r.positionEnd : r.position,
