@@ -60,6 +60,43 @@ export default class Results extends React.Component {
       });
   }
 
+  posFeatures() {
+    const pf = {};
+
+    for (let i = 1; i <= this.state.results.uniprot.sequence.length; i++) {
+      pf[i] = [];
+    }
+
+    const loadFeatures = (residues, name) => {
+      if (residues) {
+        residues.forEach((r) => {
+          pf[r.position].push(name);
+        });
+      }
+    };
+    loadFeatures(this.state.results.exposure.residues, "buried");
+    loadFeatures(this.state.results.interaction.residues, "interface");
+    loadFeatures(
+      this.state.results.aggregability.positions,
+      "high-aggregability"
+    );
+    loadFeatures(
+      this.state.results.switchability.positions,
+      "high-switchability"
+    );
+    this.state.results.conservation.families.forEach((f) => {
+      loadFeatures(
+        f.positions.filter((p) => p.bitscore > 1.6),
+        "high-conservation"
+      );
+    });
+    this.state.results.fpocket.pockets.forEach((p) => {
+      loadFeatures(p.residues, "pocket");
+    });
+
+    return pf;
+  }
+
   render() {
     if (this.state.results.pdb === undefined) {
       return <div />;
@@ -117,7 +154,10 @@ export default class Results extends React.Component {
 
         <div className="right split">
           <Container>
-            <VariantViewer results={this.state.results} />
+            <VariantViewer
+              posFeatures={this.posFeatures()}
+              variants={this.state.results.variants}
+            />
             <SequenceViewer ref={this.sequenceRef} />
           </Container>
         </div>

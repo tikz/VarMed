@@ -5,19 +5,20 @@ import {
   Box,
   TextField,
   Divider,
+  IconButton,
+  Tooltip,
 } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
-import React, { version } from "react";
+import GridOn from "@material-ui/icons/GridOn";
+import React from "react";
 
 import Aminoacid from "./Aminoacid";
 import Evidence from "./Evidence";
 import "../../styles/components/variant.scss";
-import { ResultsContext } from "./ResultsContext";
 
 export default class VariantViewer extends React.Component {
   constructor(props) {
     super(props);
-
     this.loadVariants();
     this.state = {
       selected: this.variants[0],
@@ -25,21 +26,41 @@ export default class VariantViewer extends React.Component {
   }
 
   loadVariants() {
-    this.variants = this.props.results.variants.map((v) => ({
-      variant: v,
-      name: v.position + " " + v.fromAa + "⟶" + v.toAa,
-    }));
+    this.variants = this.props.variants
+      .map((v) => ({
+        variant: v,
+        name: v.position + " " + v.fromAa + "⟶" + v.toAa,
+      }))
+      .sort(function (a, b) {
+        return a.variant.position - b.variant.position;
+      });
   }
 
   setVariant(v) {
     this.setState({ selected: v });
   }
 
+  positionChip(pos, tag, label) {
+    if (this.props.posFeatures[pos].includes(tag)) {
+      return (
+        <Grid item>
+          <Chip
+            variant="outlined"
+            size="small"
+            label={label}
+            className={"propchip " + tag}
+          />
+        </Grid>
+      );
+    }
+    return;
+  }
+
   render() {
     const v = this.state.selected.variant;
     return (
       <Box>
-        <Grid container>
+        <Grid container alignItems="center" spacing={1}>
           <Grid item xs={4}>
             <Autocomplete
               disableClearable
@@ -54,6 +75,13 @@ export default class VariantViewer extends React.Component {
                 this.setVariant(newValue);
               }}
             />
+          </Grid>
+          <Grid item xs={1}>
+            <Tooltip title="Download as CSV" arrow>
+              <IconButton aria-label="collapse">
+                <GridOn />
+              </IconButton>
+            </Tooltip>
           </Grid>
           <Grid item xs container direction="column" alignItems="flex-end">
             <Grid item>
@@ -80,47 +108,23 @@ export default class VariantViewer extends React.Component {
                 <Typography variant="h3">{v.position}</Typography>
               </Grid>
               <Grid item container direction="column">
-                <Grid item>
-                  <Chip
-                    variant="outlined"
-                    size="small"
-                    label="High conservation"
-                    className="propchip high-conservation"
-                  />
-                </Grid>
-                <Grid item>
-                  <Chip
-                    variant="outlined"
-                    size="small"
-                    label="Buried"
-                    className="propchip buried"
-                  />
-                </Grid>
-
-                <Grid item>
-                  <Chip
-                    variant="outlined"
-                    size="small"
-                    label="Interface"
-                    className="propchip interface"
-                  />
-                </Grid>
-                <Grid item>
-                  <Chip
-                    variant="outlined"
-                    size="small"
-                    label="Disulfide"
-                    className="propchip disulfide"
-                  />
-                </Grid>
-                <Grid item>
-                  <Chip
-                    variant="outlined"
-                    size="small"
-                    label="High switchability"
-                    className="propchip high-switchability"
-                  />
-                </Grid>
+                {this.positionChip(
+                  v.position,
+                  "high-conservation",
+                  "Highly conserved"
+                )}
+                {this.positionChip(v.position, "buried", "Buried")}
+                {this.positionChip(v.position, "interface", "Interface")}
+                {this.positionChip(
+                  v.position,
+                  "high-aggregability",
+                  "High aggregability"
+                )}
+                {this.positionChip(
+                  v.position,
+                  "high-switchability",
+                  "High switchability"
+                )}
               </Grid>
             </Grid>
           </Grid>
@@ -137,7 +141,7 @@ export default class VariantViewer extends React.Component {
               </Grid>
               <Grid item>
                 <div className="ddg">
-                  <p>ΔΔG = {v.ddg}</p>
+                  <p>ΔΔG = {v.ddg.toFixed(1)}</p>
                   <p className="unit">kcal/mol</p>
                 </div>
               </Grid>
@@ -157,4 +161,3 @@ export default class VariantViewer extends React.Component {
     );
   }
 }
-VariantViewer.contextType = ResultsContext;
