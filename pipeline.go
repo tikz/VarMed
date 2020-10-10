@@ -204,6 +204,7 @@ func (pl *Pipeline) Run() error {
 
 		// Start other runners in parallel
 		interactionChan := pl.interactionRunner(p)
+		activeSiteChan := pl.activeSiteRunner(u, p)
 		exposureChan := pl.exposureRunner(p)
 		conservationChan := pl.conservationRunner(pl.UniProt)
 		fpocketChan := pl.fpocketRunner(p)
@@ -211,6 +212,7 @@ func (pl *Pipeline) Run() error {
 		aggregabilityChan := pl.aggregabilityRunner(u, p)
 
 		results.Interaction = <-interactionChan
+		results.ActiveSite = <-activeSiteChan
 		results.Exposure = <-exposureChan
 		results.Conservation = <-conservationChan
 		results.Fpocket = <-fpocketChan
@@ -280,6 +282,34 @@ func (pl *Pipeline) interactionRunner(p *pdb.PDB) chan Interaction {
 		}
 
 		pl.msg(fmt.Sprintf("Found %d interface residues in PDB %s", len(interacts), p.ID))
+
+		rchan <- results
+	}()
+	return rchan
+}
+
+func (pl *Pipeline) activeSiteRunner(u *uniprot.UniProt, p *pdb.PDB) chan ActiveSite {
+	rchan := make(chan ActiveSite)
+	go func() {
+		results := ActiveSite{}
+
+		pl.msg(fmt.Sprintf("Compute active site by distance to catalytic residues with PDB %s", p.ID))
+		for _, site := range u.Sites {
+			if site.Type == "active" {
+				if residues, ok := p.UniProtPositions[u.ID][site.Position]; ok {
+					for _, catRes := range residues {
+						for _, res := range pdb.CloseResidues(p, catRes, 5) {
+							results.Residues = append(results.Residues, Residue{
+								Residue:  res,
+								Position: res.UnpPosition,
+							})
+						}
+					}
+				}
+			}
+		}
+
+		pl.msg(fmt.Sprintf("Found %d active site residues in PDB %s", len(results.Residues), p.ID))
 
 		rchan <- results
 	}()
