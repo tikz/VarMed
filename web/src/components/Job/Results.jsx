@@ -117,7 +117,7 @@ export default class Results extends React.Component {
 
         <div className="right split">
           <Container>
-            <VariantViewer />
+            <VariantViewer results={this.state.results} />
             <SequenceViewer ref={this.sequenceRef} />
           </Container>
         </div>
