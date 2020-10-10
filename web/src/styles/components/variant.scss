@@ -1,0 +1,134 @@
+hr {
+  margin: 10px !important;
+}
+
+.red {
+  color: rgb(224, 26, 0);
+}
+
+.orange {
+  color: rgb(255, 123, 0);
+}
+
+.yellow {
+  color: rgb(236, 205, 29);
+}
+
+.green {
+  color: rgb(56, 211, 35);
+}
+
+.ddg {
+  border: solid 1px rgba(255, 255, 255, 0.23);
+  border-radius: 10px;
+  font-size: 0.6vw;
+  padding: 8px;
+  text-align: center;
+}
+
+.ddg p {
+  margin: 0;
+}
+
+.ddg p.unit {
+  color: #888;
+}
+
+.evidence .authors {
+  font-size: 0.6em !important;
+  color: #888;
+}
+
+.evidence .journal {
+  font-size: 0.6em !important;
+  font-weight: 500 !important;
+  color: #999;
+}
+
+.aa {
+  // max-width: 300px;
+}
+
+.aa img {
+  width: 4vw;
+}
+
+@media only screen and (max-width: 1200px) {
+  .aa img {
+    display: none;
+  }
+}
+
+.propchip {
+  font-size: 11px !important;
+  height: 21px !important;
+  border: solid 1px rgb(68, 68, 68) !important;
+}
+
+.propchip span {
+  padding-left: 6px !important;
+  padding-right: 6px !important;
+}
+
+.propchip.exposed,
+.propchip.polar {
+  $color: rgb(0, 195, 255);
+  color: $color !important;
+  //border: solid 1px $color !important;
+}
+
+.propchip.buried,
+.propchip.hydrophobic {
+  $color: rgb(179, 92, 11);
+  color: $color !important;
+  //border: solid 1px $color !important;
+}
+
+.propchip.interface {
+  $color: rgb(253, 159, 18);
+  color: $color !important;
+  //border: solid 1px $color !important;
+}
+
+.propchip.disulfide {
+  $color: #b4af91;
+  color: $color !important;
+  //border: solid 1px $color !important;
+}
+
+.propchip.high-switchability,
+.propchip.high-aggregability {
+  $color: rgb(85, 6, 231);
+  color: $color !important;
+  //border: solid 1px $color !important;
+}
+
+.propchip.high-conservation {
+  $color: rgb(255, 51, 0);
+  color: $color !important;
+  //border: solid 1px $color !important;
+}
+
+.propchip.small {
+  $color: rgb(93, 114, 121);
+  color: $color !important;
+  //border: solid 1px $color !important;
+}
+
+.propchip.charged {
+  $color: rgb(255, 208, 0);
+  color: $color !important;
+  //border: solid 1px $color !important;
+}
+
+.propchip.aromatic {
+  $color: rgb(255, 169, 251);
+  color: $color !important;
+  //border: solid 1px $color !important;
+}
+
+.propchip.aliphatic {
+  $color: rgb(255, 255, 255);
+  color: $color !important;
+  //border: solid 1px $color !important;
+}

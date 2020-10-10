@@ -1,5 +1,4 @@
 import {
-  Box,
   Container,
   Divider,
   FormControl,
@@ -17,6 +16,8 @@ import PositionMapper from "./PositionMapper";
 import { ResultsContext } from "./ResultsContext";
 import SequenceViewer from "./SequenceViewer";
 import StructureViewer from "./StructureViewer";
+import "../../styles/components/results.scss";
+import VariantViewer from "./VariantViewer";
 
 export default class Results extends React.Component {
   constructor(props) {
@@ -61,7 +62,7 @@ export default class Results extends React.Component {
 
   render() {
     if (this.state.results.pdb === undefined) {
-      return <Box />;
+      return <div />;
     }
 
     const ctx = {
@@ -73,50 +74,53 @@ export default class Results extends React.Component {
     return (
       <ResultsContext.Provider value={ctx}>
         <FPSStats left="auto" top="auto" right="0" bottom="0" />
-        <Container>
-          <Box className="over">
-            <Typography variant="h4" className="title">
-              {this.state.results.uniprot.name}
-            </Typography>
-            <Divider />
-            <Grid container spacing={2} alignItems="center">
-              <Grid item>
-                <FormControl variant="outlined">
-                  <InputLabel>PDB</InputLabel>
-                  <Select
-                    label="PDB"
-                    value={this.state.pdb}
-                    onChange={this.handlePDBChange}
-                  >
-                    {this.props.jobResults.request.pdbIds.map(
-                      (pdbId, index) => {
-                        return (
-                          <MenuItem key={index} value={pdbId}>
-                            {pdbId}
-                          </MenuItem>
-                        );
-                      }
-                    )}
-                  </Select>
-                </FormControl>
+        <div className="left split">
+          <Container>
+            <div className="over-title">
+              <Typography variant="h4" className="title">
+                {this.state.results.uniprot.name}
+              </Typography>
+              <Divider />
+              <Grid container spacing={2} alignItems="center">
+                <Grid item>
+                  <FormControl variant="outlined">
+                    <InputLabel>PDB</InputLabel>
+                    <Select
+                      label="PDB"
+                      value={this.state.pdb}
+                      onChange={this.handlePDBChange}
+                    >
+                      {this.props.jobResults.request.pdbIds.map(
+                        (pdbId, index) => {
+                          return (
+                            <MenuItem key={index} value={pdbId}>
+                              {pdbId}
+                            </MenuItem>
+                          );
+                        }
+                      )}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item>
+                  <Typography>{this.state.results.pdb.title}</Typography>
+                </Grid>
               </Grid>
-              <Grid item>
-                <Typography>{this.state.results.pdb.title}</Typography>
-              </Grid>
-            </Grid>
-          </Box>
-        </Container>
+            </div>
+            <div className="over-features">
+              <Features />
+            </div>
+          </Container>
 
-        <StructureViewer ref={this.structureRef} />
+          <StructureViewer ref={this.structureRef} />
+        </div>
 
-        <Container>
-          <Box>
-            <Features />
-          </Box>
-          <Box>
+        <div className="right split">
+          <Container>
+            <VariantViewer />
             <SequenceViewer ref={this.sequenceRef} />
-          </Box>
-        </Container>
+          </Container>
+        </div>
       </ResultsContext.Provider>
     );
   }
