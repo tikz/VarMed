@@ -47,7 +47,7 @@ function union(a, b) {
 }
 
 export default function PDBPicker(props) {
-  const pdbIds = props.pdbs.map((p) => p.id);
+  const pdbIds = props.pdbs ? props.pdbs.map((p) => p.id) : [];
 
   const classes = useStyles();
   const [checked, setChecked] = React.useState([]);
