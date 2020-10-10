@@ -7,7 +7,7 @@ import {
   Divider,
 } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
-import React from "react";
+import React, { version } from "react";
 
 import Aminoacid from "./Aminoacid";
 import Evidence from "./Evidence";
@@ -17,18 +17,42 @@ import { ResultsContext } from "./ResultsContext";
 export default class VariantViewer extends React.Component {
   constructor(props) {
     super(props);
+
+    this.loadVariants();
+    this.state = {
+      selected: this.variants[0],
+    };
+  }
+
+  loadVariants() {
+    this.variants = this.props.results.variants.map((v) => ({
+      variant: v,
+      name: v.position + " " + v.fromAa + "⟶" + v.toAa,
+    }));
+  }
+
+  setVariant(v) {
+    this.setState({ selected: v });
   }
 
   render() {
+    const v = this.state.selected.variant;
     return (
       <Box>
         <Grid container>
           <Grid item xs={4}>
             <Autocomplete
-              options={["89 M⟶K", "129 F⟶W"]}
+              disableClearable
+              value={this.state.selected}
+              options={this.variants}
+              getOptionLabel={(v) => v.name}
+              getOptionSelected={(o, v) => o.name == v.name}
               renderInput={(params) => (
                 <TextField {...params} label="Variant" variant="outlined" />
               )}
+              onChange={(event, newValue) => {
+                this.setVariant(newValue);
+              }}
             />
           </Grid>
           <Grid item xs container direction="column" alignItems="flex-end">
@@ -53,7 +77,7 @@ export default class VariantViewer extends React.Component {
           <Grid item>
             <Grid container direction="column">
               <Grid item>
-                <Typography variant="h3">666</Typography>
+                <Typography variant="h3">{v.position}</Typography>
               </Grid>
               <Grid item container direction="column">
                 <Grid item>
@@ -101,7 +125,7 @@ export default class VariantViewer extends React.Component {
             </Grid>
           </Grid>
           <Grid item xs>
-            <Aminoacid aa="H" />
+            <Aminoacid aa={v.fromAa} />
           </Grid>
 
           <Grid item>
@@ -113,7 +137,7 @@ export default class VariantViewer extends React.Component {
               </Grid>
               <Grid item>
                 <div className="ddg">
-                  <p>ΔΔG = 5.32</p>
+                  <p>ΔΔG = {v.ddg}</p>
                   <p className="unit">kcal/mol</p>
                 </div>
               </Grid>
@@ -121,7 +145,7 @@ export default class VariantViewer extends React.Component {
           </Grid>
 
           <Grid item xs>
-            <Aminoacid aa="E" right />
+            <Aminoacid aa={v.toAa} right />
           </Grid>
         </Grid>
         <Divider />

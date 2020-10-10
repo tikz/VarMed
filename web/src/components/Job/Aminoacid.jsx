@@ -5,11 +5,10 @@ import aminoacids from "./Aminoacids.js";
 export default class Aminoacid extends React.Component {
   constructor(props) {
     super(props);
-    this.aa = aminoacids[this.props.aa];
   }
 
-  aaProperties() {
-    return this.aa.properties.map((p) => {
+  aaProperties(aa) {
+    return aa.properties.map((p) => {
       return (
         <Chip
           variant="outlined"
@@ -23,6 +22,7 @@ export default class Aminoacid extends React.Component {
   }
 
   render() {
+    const aa = aminoacids[this.props.aa];
     if (this.props.right) {
       return (
         <div className="aa">
@@ -36,9 +36,9 @@ export default class Aminoacid extends React.Component {
             <Grid item xs>
               <Grid container direction="column" alignItems="flex-end">
                 <Grid item>
-                  <Typography variant="h4">{this.aa.name}</Typography>
+                  <Typography variant="h4">{aa.name}</Typography>
                 </Grid>
-                <Grid item>{this.aaProperties()}</Grid>
+                <Grid item>{this.aaProperties(aa)}</Grid>
               </Grid>
             </Grid>
             <Grid item>
@@ -64,9 +64,9 @@ export default class Aminoacid extends React.Component {
           <Grid item xs>
             <Grid container direction="column">
               <Grid item>
-                <Typography variant="h4">{this.aa.name}</Typography>
+                <Typography variant="h4">{aa.name}</Typography>
               </Grid>
-              <Grid item>{this.aaProperties()}</Grid>
+              <Grid item>{this.aaProperties(aa)}</Grid>
             </Grid>
           </Grid>
         </Grid>
