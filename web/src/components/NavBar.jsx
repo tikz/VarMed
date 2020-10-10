@@ -13,7 +13,7 @@ export default function NavBar() {
             <img className="nav-logo" src="/assets/respdb.svg" alt="" />
           </Link>
           <Typography variant="h6" className="nav-title">
-            RespDB
+            VarMed
           </Typography>
           <MyJobs />
           <Link to="/new-job">

@@ -69,7 +69,7 @@ export class Features extends React.Component {
     return (
       <Grid container className="features">
         <Grid item xs>
-          <Grid container className="chips" wrap="wrap">
+          <Grid container wrap="wrap">
             {fams}
             <Divider orientation="vertical" flexItem />
             {unpChains.map((unp, index) => {
@@ -108,7 +108,7 @@ export class Features extends React.Component {
             })} */}
           </Grid>
         </Grid>
-        <Grid item xs={1}>
+        <Grid item xs={2}>
           <SurfaceSwitch />
         </Grid>
       </Grid>

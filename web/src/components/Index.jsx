@@ -39,7 +39,7 @@ export default function Index() {
                 justify="center"
               >
                 <Typography variant="h1" align="left" className="name">
-                  RespDB
+                  VarMed
                 </Typography>
                 <Typography
                   variant="h5"
@@ -63,7 +63,18 @@ export default function Index() {
           </Typography>
         </Grid>
         <Grid item>
-          <Typography align="center" className="desc"></Typography>
+          <Typography align="center" className="desc">
+            If you find our work useful, please cite us:
+          </Typography>
+          <Typography align="center" className="desc paper">
+            pending
+          </Typography>
+          <Typography align="center" className="desc authors">
+            Mauro Song, Florencia Niesi, Demian Avendaño
+          </Typography>
+          <Typography align="center" className="desc authors">
+            Marcelo Martí, Pietro Roversi, Carlos Modenutti
+          </Typography>
         </Grid>
       </Grid>
       <Grid container className="footer">
@@ -98,7 +109,7 @@ export default function Index() {
               >
                 <Grid item>
                   <Typography variant="caption">
-                    RespDB <Link href="#">source code</Link> is released under
+                    VarMed <Link href="#">source code</Link> is released under
                     the <Link href="#">MIT license</Link>.
                   </Typography>
                 </Grid>

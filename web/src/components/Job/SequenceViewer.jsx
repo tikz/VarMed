@@ -232,6 +232,36 @@ export default class SequenceViewer extends React.Component {
       //   });
       // }
     });
+
+    if (res.aggregability.positions) {
+      this.fv.addFeature({
+        data: res.aggregability.positions.map((r) => {
+          return {
+            x: r.position,
+            y: r.position,
+          };
+        }),
+        name: "High aggregability",
+        color: "#1aacdb",
+        type: "rect",
+        className: "highAgg",
+      });
+    }
+
+    if (res.switchability.positions) {
+      this.fv.addFeature({
+        data: res.switchability.positions.map((r) => {
+          return {
+            x: r.position,
+            y: r.position,
+          };
+        }),
+        name: "High swichability",
+        color: "#1aacdb",
+        type: "rect",
+        className: "highSwi",
+      });
+    }
   }
 
   render() {
