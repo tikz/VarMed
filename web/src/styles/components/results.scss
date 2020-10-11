@@ -5,9 +5,10 @@
 }
 
 .right.split {
-  margin-top: 32px;
+  padding-top: 32px;
   width: 40%;
   right: 0;
+  overflow-y: scroll;
 }
 
 .split {
