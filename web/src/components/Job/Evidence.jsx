@@ -12,10 +12,22 @@ export default class Evidence extends React.Component {
   render() {
     return (
       <Box>
-        <Grid container direction="column" alignItems="center">
-          <Grid item>
-            <EvidenceItem />
-          </Grid>
+        <Grid container direction="column" alignItems="flex-start">
+          {this.props.pubmeds.map((id) => {
+            const pub = this.props.publications[id];
+            return (
+              <Grid item key={id}>
+                <EvidenceItem
+                  title={pub.title}
+                  authors={pub.authors}
+                  journal={pub.journal}
+                  doi={pub.doi}
+                  pubmed={pub.pubmed}
+                />
+              </Grid>
+            );
+          })}
+
           <Grid item>
             <IconButton aria-label="collapse">
               <ExpandMoreIcon />

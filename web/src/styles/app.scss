@@ -7,6 +7,13 @@ body {
 
 a {
   text-decoration: none;
+  color: inherit;
+}
+
+a:hover {
+  text-decoration: none;
+  color: #f15a29;
+  cursor: pointer;
 }
 
 .title {

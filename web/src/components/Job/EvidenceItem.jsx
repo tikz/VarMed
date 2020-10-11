@@ -7,23 +7,31 @@ export default class EvidenceItem extends React.Component {
   }
 
   render() {
+    let title = "";
+    if (this.props.doi) {
+      title = (
+        <a href={"https://doi.org/" + this.props.doi} target="_blank">
+          <Typography>{this.props.title}</Typography>
+        </a>
+      );
+    } else if (this.props.pubmed) {
+      title = (
+        <a
+          href={"https://pubmed.ncbi.nlm.nih.gov/" + this.props.pubmed}
+          target="_blank"
+        >
+          <Typography>{this.props.title}</Typography>
+        </a>
+      );
+    } else {
+      title = <Typography>{this.props.title}</Typography>;
+    }
     return (
       <Grid container direction="column" className="evidence">
         <Grid item>
-          <Typography>
-            {/* {this.props.title} */}
-            An atypical variant of Fabry's disease in men with left ventricular
-            RT hypertrophy.
-          </Typography>
-          <Typography className="authors">
-            {/* {this.props.authors} */}
-            Nakao S., Takenaka T., Maeda M., Kodama C., Tanaka A., Tahara M., RA
-            Yoshida A., Kuriyama M., Hayashibe H., Sakuraba H., Tanaka H.
-          </Typography>
-          <Typography className="journal">
-            {/* {this.props.journal} */}
-            RL N. Engl. J. Med. 333:288-293(1995)
-          </Typography>
+          {title}
+          <Typography className="authors">{this.props.authors}</Typography>
+          <Typography className="journal">{this.props.journal}</Typography>
         </Grid>
         <Grid item></Grid>
       </Grid>
