@@ -2,6 +2,35 @@
   min-height: 10vw;
 }
 
+.substitution h4 {
+  font-size: 1.4vw !important;
+}
+
+@media only screen and (max-width: 1200px) {
+  .substitution h4 {
+    font-size: 1.3rem !important;
+  }
+}
+
+.substitution h3 {
+  font-size: 2.5vw !important;
+}
+
+@media only screen and (max-width: 1200px) {
+  .substitution h3 {
+    font-size: 1.3rem !important;
+  }
+}
+
+.substitution .propchip {
+  font-size: 0.5vw !important;
+  // padding: 0vw;
+}
+
+.arrow {
+  font-size: 2vw !important;
+}
+
 hr {
   margin: 10px !important;
 }
@@ -58,7 +87,7 @@ hr {
 }
 
 .aa img {
-  width: 4vw;
+  width: 3.8vw;
 }
 
 @media only screen and (max-width: 1200px) {
@@ -71,6 +100,7 @@ hr {
   font-size: 11px !important;
   height: 21px !important;
   border: solid 1px rgb(68, 68, 68) !important;
+  margin: 1px;
 }
 
 .propchip span {
@@ -113,6 +143,12 @@ hr {
 
 .propchip.high-conservation {
   $color: rgb(255, 51, 0);
+  color: $color !important;
+  //border: solid 1px $color !important;
+}
+
+.propchip.active-site {
+  $color: rgb(255, 208, 0);
   color: $color !important;
   //border: solid 1px $color !important;
 }

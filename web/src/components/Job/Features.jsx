@@ -106,6 +106,11 @@ export class Features extends React.Component {
             {/* {Object.keys(res.binding.ligands).map((ligand) => {
               return chip("Near " + ligand, res.binding.ligands[ligand]);
             })} */}
+            {res.activeSite.residues &&
+              chip(
+                "Active site",
+                res.activeSite.residues.map((r) => r.residue)
+              )}
           </Grid>
         </Grid>
         <Grid item xs={2}>

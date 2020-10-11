@@ -94,6 +94,8 @@ export default class Results extends React.Component {
     this.state.results.fpocket.pockets.forEach((p) => {
       loadFeatures(p.residues, "pocket");
     });
+    loadFeatures(this.state.results.interaction.residues, "interface");
+    loadFeatures(this.state.results.activeSite.residues, "active-site");
 
     return pf;
   }
@@ -161,6 +163,7 @@ export default class Results extends React.Component {
               publications={this.state.results.uniprot.publications}
             />
             <SequenceViewer ref={this.sequenceRef} />
+            <Divider />
           </Container>
         </div>
       </ResultsContext.Provider>

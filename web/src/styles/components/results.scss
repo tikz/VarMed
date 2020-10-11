@@ -15,32 +15,3 @@
   position: fixed;
   height: calc(100% - 64px);
 }
-
-.substitution h4 {
-  font-size: 1.4vw !important;
-}
-
-@media only screen and (max-width: 1200px) {
-  .substitution h4 {
-    font-size: 1.3rem !important;
-  }
-}
-
-.substitution h3 {
-  font-size: 2.5vw !important;
-}
-
-@media only screen and (max-width: 1200px) {
-  .substitution h3 {
-    font-size: 1.3rem !important;
-  }
-}
-
-.substitution .propchip {
-  font-size: 0.5vw !important;
-  // padding: 0vw;
-}
-
-.arrow {
-  font-size: 2vw !important;
-}
