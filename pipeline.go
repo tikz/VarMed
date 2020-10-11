@@ -58,10 +58,11 @@ type Variant struct {
 	Change   string       `json:"change"`
 
 	// From UniProt annotations
-	Note     string `json:"note"`
-	Evidence string `json:"evidence"`
-	ID       string `json:"id"`
-	DbSNPID  string `json:"dbSNPId"`
+	Note      string   `json:"note"`
+	Evidence  string   `json:"evidence"`
+	ID        string   `json:"id"`
+	DbSNPID   string   `json:"dbSNPId"`
+	PubMedIDs []string `json:"pubmedIds"`
 
 	// From ClinVar
 	CVName         string `json:"cvName"`
@@ -251,6 +252,7 @@ func (pl *Pipeline) variantWorker(repairPDB string, u *uniprot.UniProt, p *pdb.P
 				results.Evidence = av.Evidence
 				results.ID = av.ID
 				results.DbSNPID = av.DbSNP
+				results.PubMedIDs = av.PubMedIDs
 				if av.DbSNP != "" {
 					allele := instances.ClinVar.GetVariation(av.DbSNP, av.Change)
 					if allele != nil {
