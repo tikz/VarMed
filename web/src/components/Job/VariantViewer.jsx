@@ -12,6 +12,7 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import GridOn from "@material-ui/icons/GridOn";
 import React from "react";
 
+import { ResultsContext } from "./ResultsContext";
 import Aminoacid from "./Aminoacid";
 import Evidence from "./Evidence";
 import "../../styles/components/variant.scss";
@@ -37,11 +38,27 @@ export default class VariantViewer extends React.Component {
   }
 
   setVariant(v) {
+    this.focusPos(v.variant.position);
     this.setState({ selected: v });
   }
 
-  positionChip(pos, tag, label) {
-    if (this.props.posFeatures[pos].includes(tag)) {
+  focusPos(pos) {
+    const structure = this.context.structure.current;
+    const posMap = this.context.posMap;
+    const res = posMap.unpToPDB(pos);
+    if (res.length > 0) {
+      structure.selectFocus(res[0].chain, res[0].position, res[0].position);
+    }
+  }
+
+  positionChip(pos, tag, label, optTag, optLabel) {
+    const included = this.props.posFeatures[pos].includes(tag);
+    if (!included) {
+      tag = optTag;
+      label = optLabel;
+    }
+
+    if (included || optTag) {
       return (
         <Grid item>
           <Chip
@@ -53,11 +70,11 @@ export default class VariantViewer extends React.Component {
         </Grid>
       );
     }
-    return;
   }
 
   render() {
     const v = this.state.selected.variant;
+
     return (
       <Box>
         <Grid container alignItems="center" spacing={1}>
@@ -94,7 +111,6 @@ export default class VariantViewer extends React.Component {
             </Grid>
           </Grid>
         </Grid>
-
         <Divider />
         <Grid
           container
@@ -105,7 +121,13 @@ export default class VariantViewer extends React.Component {
           <Grid item>
             <Grid container direction="column">
               <Grid item>
-                <Typography variant="h3">{v.position}</Typography>
+                <a
+                  onClick={() => {
+                    this.focusPos(v.position);
+                  }}
+                >
+                  <Typography variant="h3">{v.position}</Typography>
+                </a>
               </Grid>
               <Grid item container direction="column">
                 {this.positionChip(
@@ -113,7 +135,13 @@ export default class VariantViewer extends React.Component {
                   "high-conservation",
                   "Highly conserved"
                 )}
-                {this.positionChip(v.position, "buried", "Buried")}
+                {this.positionChip(
+                  v.position,
+                  "buried",
+                  "Buried",
+                  "exposed",
+                  "Exposed"
+                )}
                 {this.positionChip(v.position, "interface", "Interface")}
                 {this.positionChip(
                   v.position,
@@ -153,11 +181,18 @@ export default class VariantViewer extends React.Component {
           </Grid>
         </Grid>
         <Divider />
-        <Typography variant="h6">Evidence</Typography>
-        <Evidence />
-
-        <Divider />
+        {v.pubmedIds && (
+          <Box>
+            <Typography variant="h6">Evidence</Typography>
+            <Evidence
+              publications={this.props.publications}
+              pubmeds={v.pubmedIds}
+            />
+            <Divider />
+          </Box>
+        )}
       </Box>
     );
   }
 }
+VariantViewer.contextType = ResultsContext;

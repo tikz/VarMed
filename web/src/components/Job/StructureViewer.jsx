@@ -280,12 +280,13 @@ export default class StructureViewer extends React.Component {
   }
 
   selectFocus(chain, start, end) {
-    this.focus(chain, start, end);
     this.highlightResidues([
       { chain: chain, position: start, positionEnd: end },
     ]);
-    if (start - end == 0) {
+    if (start == end) {
       this.select(chain, start, end);
+    } else {
+      this.focus(chain, start, end);
     }
   }
 
