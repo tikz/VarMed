@@ -62,11 +62,6 @@ export default class Results extends React.Component {
 
   posFeatures() {
     const pf = {};
-
-    for (let i = 1; i <= this.state.results.uniprot.sequence.length; i++) {
-      pf[i] = [];
-    }
-
     const loadFeatures = (residues, name) => {
       if (residues) {
         residues.forEach((r) => {
@@ -74,6 +69,12 @@ export default class Results extends React.Component {
         });
       }
     };
+
+    const length = this.state.results.uniprot.sequence.length;
+    for (let i = 1; i <= length; i++) {
+      pf[i] = [];
+    }
+
     loadFeatures(this.state.results.exposure.residues, "buried");
     loadFeatures(this.state.results.interaction.residues, "interface");
     loadFeatures(
@@ -157,6 +158,7 @@ export default class Results extends React.Component {
             <VariantViewer
               posFeatures={this.posFeatures()}
               variants={this.state.results.variants}
+              publications={this.state.results.uniprot.publications}
             />
             <SequenceViewer ref={this.sequenceRef} />
           </Container>
