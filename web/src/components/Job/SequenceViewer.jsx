@@ -204,9 +204,13 @@ export default class SequenceViewer extends React.Component {
       //   );
       // }
 
-      // if (res.binding.residues !== null) {
-      //   markResidues(this, res.binding.residues, "Sites");
-      // }
+      if (res.activeSite.residues) {
+        markResidues(
+          this,
+          res.activeSite.residues.map((r) => r.residue),
+          "Active site"
+        );
+      }
 
       // if (Object.keys(res.binding.ligands).length != 0) {
       //   Object.keys(res.binding.ligands).forEach((lig) => {
