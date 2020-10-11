@@ -16,7 +16,7 @@ import (
 type Results struct {
 	UniProt       *uniprot.UniProt `json:"uniprot"`
 	PDB           *pdb.PDB         `json:"pdb"`
-	Variants      []Variant        `json:"variants"`
+	Variants      []*Variant       `json:"variants"`
 	Interaction   Interaction      `json:"interaction"`
 	Exposure      Exposure         `json:"exposure"`
 	Conservation  Conservation     `json:"conservation"`
@@ -198,7 +198,7 @@ func (pl *Pipeline) Run() error {
 
 			for range coveredVariants {
 				v := <-varRes
-				results.Variants = append(results.Variants, v)
+				results.Variants = append(results.Variants, &v)
 				pl.msg(fmt.Sprintf("BuildModel for variant %s with PDB %s done", v.Change, pdbID))
 			}
 		}
@@ -223,6 +223,7 @@ func (pl *Pipeline) Run() error {
 		pl.Results[pdbID] = &results
 	}
 
+	pl.variantsOutcomes()
 	pl.Duration = time.Now().Sub(start)
 	pl.msg(fmt.Sprintf("Pipeline finished in %s", pl.Duration.String()))
 
@@ -477,4 +478,48 @@ func (pl *Pipeline) aggregabilityRunner(u *uniprot.UniProt, p *pdb.PDB) chan Agg
 		rchan <- results
 	}()
 	return rchan
+}
+
+func (pl *Pipeline) variantsOutcomes() {
+	for _, results := range pl.Results {
+		for _, v := range results.Variants {
+			outcome := "no effect"
+
+			for _, p := range results.Switchability.Positions {
+				if p.Position == v.Position {
+					outcome = "disrupts structure"
+				}
+			}
+
+			for _, p := range results.Aggregability.Positions {
+				if p.Position == v.Position {
+					outcome = "disrupts structure"
+				}
+			}
+
+			for _, p := range results.Exposure.Residues {
+				if p.Position == v.Position {
+					outcome = "disrupts folding"
+				}
+			}
+
+			for _, p := range results.Interaction.Residues {
+				if p.Position == v.Position {
+					outcome = "disrupts interface"
+				}
+			}
+
+			for _, p := range results.ActiveSite.Residues {
+				if p.Position == v.Position {
+					outcome = "disrupts function"
+				}
+			}
+
+			if v.DdG < 2 || outcome == "no effect" {
+				outcome = "potentially " + outcome
+			}
+
+			v.Outcome = outcome
+		}
+	}
 }

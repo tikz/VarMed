@@ -106,8 +106,11 @@ export default class VariantViewer extends React.Component {
               <Typography variant="overline">Predicted outcome</Typography>
             </Grid>
             <Grid item>
-              <Typography variant="button" className="orange">
-                Potentially disrupts protein function
+              <Typography
+                variant="button"
+                className={v.outcome.startsWith("potential") ? "yellow" : "red"}
+              >
+                {v.outcome}
               </Typography>
             </Grid>
           </Grid>
@@ -137,6 +140,7 @@ export default class VariantViewer extends React.Component {
                     "high-conservation",
                     "Highly conserved"
                   )}
+                  {this.positionChip(v.position, "active-site", "Active site")}
                   {this.positionChip(
                     v.position,
                     "buried",
