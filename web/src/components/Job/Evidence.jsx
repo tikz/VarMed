@@ -1,4 +1,11 @@
-import { Grid, Typography, Chip, Box, IconButton } from "@material-ui/core";
+import {
+  Grid,
+  Typography,
+  Chip,
+  Box,
+  IconButton,
+  Grow,
+} from "@material-ui/core";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import React from "react";
@@ -16,15 +23,17 @@ export default class Evidence extends React.Component {
           {this.props.pubmeds.map((id) => {
             const pub = this.props.publications[id];
             return (
-              <Grid item key={id}>
-                <EvidenceItem
-                  title={pub.title}
-                  authors={pub.authors}
-                  journal={pub.journal}
-                  doi={pub.doi}
-                  pubmed={pub.pubmed}
-                />
-              </Grid>
+              <Grow in={true} key={id}>
+                <Grid item>
+                  <EvidenceItem
+                    title={pub.title}
+                    authors={pub.authors}
+                    journal={pub.journal}
+                    doi={pub.doi}
+                    pubmed={pub.pubmed}
+                  />
+                </Grid>
+              </Grow>
             );
           })}
 

@@ -7,6 +7,7 @@ import {
   Divider,
   IconButton,
   Tooltip,
+  Grow,
 } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import GridOn from "@material-ui/icons/GridOn";
@@ -119,42 +120,44 @@ export default class VariantViewer extends React.Component {
           spacing={2}
         >
           <Grid item>
-            <Grid container direction="column">
-              <Grid item>
-                <a
-                  onClick={() => {
-                    this.focusPos(v.position);
-                  }}
-                >
-                  <Typography variant="h3">{v.position}</Typography>
-                </a>
+            <Grow in={true} key={v.position}>
+              <Grid container direction="column">
+                <Grid item>
+                  <a
+                    onClick={() => {
+                      this.focusPos(v.position);
+                    }}
+                  >
+                    <Typography variant="h3">{v.position}</Typography>
+                  </a>
+                </Grid>
+                <Grid item container direction="column">
+                  {this.positionChip(
+                    v.position,
+                    "high-conservation",
+                    "Highly conserved"
+                  )}
+                  {this.positionChip(
+                    v.position,
+                    "buried",
+                    "Buried",
+                    "exposed",
+                    "Exposed"
+                  )}
+                  {this.positionChip(v.position, "interface", "Interface")}
+                  {this.positionChip(
+                    v.position,
+                    "high-aggregability",
+                    "High aggregability"
+                  )}
+                  {this.positionChip(
+                    v.position,
+                    "high-switchability",
+                    "High switchability"
+                  )}
+                </Grid>
               </Grid>
-              <Grid item container direction="column">
-                {this.positionChip(
-                  v.position,
-                  "high-conservation",
-                  "Highly conserved"
-                )}
-                {this.positionChip(
-                  v.position,
-                  "buried",
-                  "Buried",
-                  "exposed",
-                  "Exposed"
-                )}
-                {this.positionChip(v.position, "interface", "Interface")}
-                {this.positionChip(
-                  v.position,
-                  "high-aggregability",
-                  "High aggregability"
-                )}
-                {this.positionChip(
-                  v.position,
-                  "high-switchability",
-                  "High switchability"
-                )}
-              </Grid>
-            </Grid>
+            </Grow>
           </Grid>
           <Grid item xs>
             <Aminoacid aa={v.fromAa} />
