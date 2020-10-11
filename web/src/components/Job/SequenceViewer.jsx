@@ -77,15 +77,7 @@ export default class SequenceViewer extends React.Component {
         vars.push({
           x: v.position,
           y: v.position,
-          description:
-            v.fromAa +
-            " → " +
-            v.toAa +
-            "<br>" +
-            "ΔΔG: " +
-            v.ddg.toFixed(2) +
-            " kcal/mol<br>" +
-            v.cvClinSig,
+          description: "Variant <br>" + v.fromAa + " → " + v.toAa,
         });
       });
       this.fv.addFeature({
