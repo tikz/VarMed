@@ -9,7 +9,7 @@ import React from "react";
 import VariantInput from "./VariantInput";
 import ChipArray from "./ChipArray";
 
-export class Variations extends React.Component {
+export class Variants extends React.Component {
   constructor(props) {
     super(props);
     this.handleChange = this.handleChange.bind(this);
@@ -21,7 +21,7 @@ export class Variations extends React.Component {
   }
 
   handleDelete(chip) {
-    this.props.setVariations(
+    this.props.setVariants(
       this.props.variants.filter((c) => c.key !== chip.key)
     );
   }
@@ -32,7 +32,7 @@ export class Variations extends React.Component {
     return (
       <Box>
         <Typography variant="h5" gutterBottom>
-          3. Add variations
+          3. Add variants
         </Typography>
         <Typography variant="overline" gutterBottom>
           <Link href={unpSeqURL} target="_blank" rel="noreferrer">
@@ -52,7 +52,7 @@ export class Variations extends React.Component {
         <VariantInput
           variants={this.props.variants}
           sequence={this.props.sequence}
-          setVariations={this.props.setVariations}
+          setVariants={this.props.setVariants}
         />
 
         <ChipArray
