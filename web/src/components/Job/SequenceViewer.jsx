@@ -218,15 +218,15 @@ export default class SequenceViewer extends React.Component {
       //   });
       // }
 
-      // if (res.fpocket.pockets) {
-      //   res.fpocket.pockets.forEach((p) => {
-      //     markResidues(
-      //       this,
-      //       p.residues.map((r) => r.residue),
-      //       "Pocket"
-      //     );
-      //   });
-      // }
+      if (res.fpocket.pockets) {
+        res.fpocket.pockets.forEach((p) => {
+          markResidues(
+            this,
+            p.residues.map((r) => r.residue),
+            "Pocket"
+          );
+        });
+      }
     });
 
     if (res.aggregability.positions) {
