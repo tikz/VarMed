@@ -102,9 +102,11 @@ export default class VariantViewer extends React.Component {
           </Grid>
           <Grid item xs={1}>
             <Tooltip title="Download as CSV" arrow>
-              <IconButton aria-label="collapse">
-                <GridOn />
-              </IconButton>
+              <a href={this.props.csvUrl}>
+                <IconButton aria-label="collapse">
+                  <GridOn />
+                </IconButton>
+              </a>
             </Tooltip>
           </Grid>
           <Grid item xs container direction="column" alignItems="flex-end">
@@ -182,7 +184,10 @@ export default class VariantViewer extends React.Component {
               </Grid>
               <Grid item>
                 <div className="ddg">
-                  <p>ΔΔG = {v.ddg.toFixed(1)}</p>
+                  <p>
+                    ΔΔG ={" "}
+                    <b className={v.ddg > 2 ? "red" : ""}>{v.ddg.toFixed(1)}</b>
+                  </p>
                   <p className="unit">kcal/mol</p>
                 </div>
               </Grid>
