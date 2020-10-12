@@ -116,7 +116,7 @@ type PositionValue struct {
 	Value    float64 `json:"value"`
 }
 
-// Pipeline represents a single run of the RespDB pipeline.
+// Pipeline represents a single run of the VarMed pipeline.
 type Pipeline struct {
 	UniProt  *uniprot.UniProt
 	PDBIDs   []string

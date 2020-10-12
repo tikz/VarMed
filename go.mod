@@ -1,4 +1,4 @@
-module respdb
+module varmed
 
 go 1.15
 

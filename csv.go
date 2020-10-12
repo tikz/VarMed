@@ -24,7 +24,7 @@ func ResultsCSV(results *Results) string {
 		fromAa := v.FromAa
 		toAa := v.ToAa
 
-		pdbPosition := results.PDB.UniProtPositions[uniprotID][position][0].Position
+		pdbPosition := results.PDB.UniProtPositions[uniprotID][position][0].StructPosition
 
 		// Conservation
 		var consBitscore float64

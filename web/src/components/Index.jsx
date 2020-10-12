@@ -29,7 +29,7 @@ export default function Index() {
             justify="center"
           >
             <Grid item>
-              <img src="/assets/respdb.svg" alt="RespDB" className="logo" />
+              <img src="/assets/varmed.svg" alt="VarMed" className="logo" />
             </Grid>
             <Grid item xs={9} sm={4} lg={3}>
               <Grid

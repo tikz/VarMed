@@ -4,8 +4,8 @@ import (
 	"flag"
 	"log"
 	"os"
-	"respdb/config"
 	"strings"
+	"varmed/config"
 
 	"github.com/tikz/bio/abswitch"
 	"github.com/tikz/bio/clinvar"

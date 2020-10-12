@@ -7,7 +7,7 @@ docker-compose.yml
 /*.pdb
 /*.db
 
-# RespDB data
+# VarMed data
 /data/
 
 # py
@@ -17,7 +17,7 @@ __pycache__
 # build binaries
 bin/
 dist/
-respdb
+varmed
 
 # npm modules and webpack build
 web/node_modules/

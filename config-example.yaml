@@ -1,11 +1,11 @@
 http-client:
-  user-agent: "RespDB - respdb.qb.fcen.uba.ar"
+  user-agent: "VarMed - varmed.qb.fcen.uba.ar"
   timeout: 120
 
 http-server:
   port: 8888
 
-respdb:
+varmed:
   job-workers: 1
   pipeline:
     structure-workers: 4

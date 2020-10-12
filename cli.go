@@ -26,7 +26,7 @@ func cliRun(uniprotID string, pdbFlags arrayFlags, variants []string) {
 		Variants:  variants,
 	})
 
-	fmt.Println("RespDB CLI")
+	fmt.Println("VarMed CLI")
 	fmt.Println()
 	fmt.Printf("UniProt ID: \t %s\n", uniprotID)
 	fmt.Printf("PDB IDs: \t %s\n", pdbFlags)
