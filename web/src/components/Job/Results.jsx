@@ -54,13 +54,17 @@ export default class Results extends React.Component {
     axios
       .get(API_URL + "/api/job/" + jobId + "/" + pdbId)
       .then(function (response) {
-        that.setState({ results: response.data, pdb: pdbId });
+        that.setState({
+          results: response.data,
+          pdb: pdbId,
+          posFeatures: that.posFeatures(response.data),
+        });
         that.structureRef.current.load(response.data);
         that.sequenceRef.current.load();
       });
   }
 
-  posFeatures() {
+  posFeatures(results) {
     const pf = {};
     const loadFeatures = (residues, name) => {
       if (residues) {
@@ -70,32 +74,33 @@ export default class Results extends React.Component {
       }
     };
 
-    const length = this.state.results.uniprot.sequence.length;
+    const length = results.uniprot.sequence.length;
     for (let i = 1; i <= length; i++) {
       pf[i] = [];
     }
 
-    loadFeatures(this.state.results.exposure.residues, "buried");
-    loadFeatures(this.state.results.interaction.residues, "interface");
-    loadFeatures(
-      this.state.results.aggregability.positions,
-      "high-aggregability"
-    );
-    loadFeatures(
-      this.state.results.switchability.positions,
-      "high-switchability"
-    );
-    this.state.results.conservation.families.forEach((f) => {
-      loadFeatures(
-        f.positions.filter((p) => p.bitscore > 1.6),
-        "high-conservation"
-      );
-    });
-    this.state.results.fpocket.pockets.forEach((p) => {
-      loadFeatures(p.residues, "pocket");
-    });
-    loadFeatures(this.state.results.interaction.residues, "interface");
-    loadFeatures(this.state.results.activeSite.residues, "active-site");
+    loadFeatures(results.exposure.residues, "buried");
+    loadFeatures(results.interaction.residues, "interface");
+    loadFeatures(results.aggregability.positions, "high-aggregability");
+    loadFeatures(results.switchability.positions, "high-switchability");
+
+    if (results.conservation.families) {
+      results.conservation.families.forEach((f) => {
+        loadFeatures(
+          f.positions.filter((p) => p.bitscore > 1.6),
+          "high-conservation"
+        );
+      });
+    }
+
+    if (results.fpocket.pockets) {
+      results.fpocket.pockets.forEach((p) => {
+        loadFeatures(p.residues, "pocket");
+      });
+    }
+
+    loadFeatures(results.interaction.residues, "interface");
+    loadFeatures(results.activeSite.residues, "active-site");
 
     return pf;
   }
@@ -158,7 +163,7 @@ export default class Results extends React.Component {
         <div className="right split">
           <Container>
             <VariantViewer
-              posFeatures={this.posFeatures()}
+              posFeatures={this.state.posFeatures}
               variants={this.state.results.variants}
               publications={this.state.results.uniprot.publications}
             />

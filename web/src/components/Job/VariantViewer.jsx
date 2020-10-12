@@ -21,14 +21,20 @@ import "../../styles/components/variant.scss";
 export default class VariantViewer extends React.Component {
   constructor(props) {
     super(props);
-    this.loadVariants();
+
+    this.loadVariants(this.props);
     this.state = {
       selected: this.variants[0],
     };
   }
 
-  loadVariants() {
-    this.variants = this.props.variants
+  componentWillReceiveProps(nextProps) {
+    this.loadVariants(nextProps);
+    this.setState({ selected: this.variants[0] });
+  }
+
+  loadVariants(props) {
+    this.variants = props.variants
       .map((v) => ({
         variant: v,
         name: v.position + " " + v.fromAa + "⟶" + v.toAa,
