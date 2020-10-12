@@ -100,7 +100,7 @@ export default class Results extends React.Component {
     }
 
     loadFeatures(results.interaction.residues, "interface");
-    loadFeatures(results.activeSite.residues, "active-site");
+    loadFeatures(results.bindingSite.residues, "binding-site");
 
     return pf;
   }

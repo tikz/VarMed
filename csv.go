@@ -13,7 +13,7 @@ func ResultsCSV(results *Results) string {
 	buf := new(bytes.Buffer)
 	writer := csv.NewWriter(buf)
 	writer.Write([]string{"UniProt ID", "PDB ID", "PDB Position", "Position", "From Aa", "To Aa",
-		"Family", "Conservation Bitscore", "Active Site", "Interface", "Buried", "High Aggregability",
+		"Family", "Conservation Bitscore", "Binding Site", "Interface", "Buried", "High Aggregability",
 		"High Switchability", "DDG", "Outcome", "PubMed IDs", "dbSNP ID", "ClinVar Sig",
 		"ClinVar Phenotypes"})
 
@@ -65,8 +65,8 @@ func ResultsCSV(results *Results) string {
 			return false
 		}
 
-		// Active site
-		activeSite := posExistsResidues(position, results.ActiveSite.Residues)
+		// binding site
+		bindingSite := posExistsResidues(position, results.BindingSite.Residues)
 		interaction := posExistsResidues(position, results.Interaction.Residues)
 		buried := posExistsResExp(position, results.Exposure.Residues)
 		highSwi := posExistsPosVal(position, results.Switchability.Positions)
@@ -87,7 +87,7 @@ func ResultsCSV(results *Results) string {
 			toAa,
 			family,
 			fmt.Sprintf("%f", consBitscore),
-			strconv.FormatBool(activeSite),
+			strconv.FormatBool(bindingSite),
 			strconv.FormatBool(interaction),
 			strconv.FormatBool(buried),
 			strconv.FormatBool(highAgg),
