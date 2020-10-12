@@ -21,7 +21,7 @@ type Results struct {
 	Exposure      Exposure         `json:"exposure"`
 	Conservation  Conservation     `json:"conservation"`
 	Fpocket       Fpocket          `json:"fpocket"`
-	ActiveSite    ActiveSite       `json:"activeSite"`
+	BindingSite   BindingSite      `json:"bindingSite"`
 	Switchability Switchability    `json:"switchability"`
 	Aggregability Aggregability    `json:"aggregability"`
 }
@@ -31,7 +31,7 @@ type Residue struct {
 	Position int64        `json:"position"`
 }
 
-type ActiveSite struct {
+type BindingSite struct {
 	Residues []Residue `json:"residues"`
 }
 
@@ -205,7 +205,7 @@ func (pl *Pipeline) Run() error {
 
 		// Start other runners in parallel
 		interactionChan := pl.interactionRunner(p)
-		activeSiteChan := pl.activeSiteRunner(u, p)
+		bindingSiteChan := pl.bindingSiteRunner(u, p)
 		exposureChan := pl.exposureRunner(p)
 		conservationChan := pl.conservationRunner(pl.UniProt)
 		fpocketChan := pl.fpocketRunner(p)
@@ -213,7 +213,7 @@ func (pl *Pipeline) Run() error {
 		aggregabilityChan := pl.aggregabilityRunner(u, p)
 
 		results.Interaction = <-interactionChan
-		results.ActiveSite = <-activeSiteChan
+		results.BindingSite = <-bindingSiteChan
 		results.Exposure = <-exposureChan
 		results.Conservation = <-conservationChan
 		results.Fpocket = <-fpocketChan
@@ -291,14 +291,14 @@ func (pl *Pipeline) interactionRunner(p *pdb.PDB) chan Interaction {
 	return rchan
 }
 
-func (pl *Pipeline) activeSiteRunner(u *uniprot.UniProt, p *pdb.PDB) chan ActiveSite {
-	rchan := make(chan ActiveSite)
+func (pl *Pipeline) bindingSiteRunner(u *uniprot.UniProt, p *pdb.PDB) chan BindingSite {
+	rchan := make(chan BindingSite)
 	go func() {
-		results := ActiveSite{}
+		results := BindingSite{}
 
-		pl.msg(fmt.Sprintf("Compute active site by distance to catalytic residues with PDB %s", p.ID))
+		pl.msg(fmt.Sprintf("Compute binding site by distance to catalytic residues with PDB %s", p.ID))
 		for _, site := range u.Sites {
-			if site.Type == "active" {
+			if site.Type == "active" || site.Type == "nucleotide" {
 				if residues, ok := p.UniProtPositions[u.ID][site.Position]; ok {
 					for _, catRes := range residues {
 						for _, res := range pdb.CloseResidues(p, catRes, 5) {
@@ -312,7 +312,7 @@ func (pl *Pipeline) activeSiteRunner(u *uniprot.UniProt, p *pdb.PDB) chan Active
 			}
 		}
 
-		pl.msg(fmt.Sprintf("Found %d active site residues in PDB %s", len(results.Residues), p.ID))
+		pl.msg(fmt.Sprintf("Found %d binding site residues in PDB %s", len(results.Residues), p.ID))
 
 		rchan <- results
 	}()
@@ -509,7 +509,7 @@ func (pl *Pipeline) variantsOutcomes() {
 				}
 			}
 
-			for _, p := range results.ActiveSite.Residues {
+			for _, p := range results.BindingSite.Residues {
 				if p.Position == v.Position {
 					outcome = "disrupts function"
 				}

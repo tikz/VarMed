@@ -148,7 +148,11 @@ export default class VariantViewer extends React.Component {
                     "high-conservation",
                     "Highly conserved"
                   )}
-                  {this.positionChip(v.position, "active-site", "Active site")}
+                  {this.positionChip(
+                    v.position,
+                    "binding-site",
+                    "Binding site"
+                  )}
                   {this.positionChip(
                     v.position,
                     "buried",

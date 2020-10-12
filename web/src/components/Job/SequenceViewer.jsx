@@ -204,11 +204,11 @@ export default class SequenceViewer extends React.Component {
       //   );
       // }
 
-      if (res.activeSite.residues) {
+      if (res.bindingSite.residues) {
         markResidues(
           this,
-          res.activeSite.residues.map((r) => r.residue),
-          "Active site"
+          res.bindingSite.residues.map((r) => r.residue),
+          "Binding site"
         );
       }
 
