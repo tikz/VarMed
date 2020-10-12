@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -73,6 +74,29 @@ func JobPDBEndpoint(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, job.Pipeline.Results[pdbID])
+}
+
+// JobPDBCSVEndpoint handles GET /api/job/:jobID/:pdbID/csv
+// Returns a CSV file of variants in a job.
+func JobPDBCSVEndpoint(c *gin.Context) {
+	jobID := c.Param("jobID")
+	pdbID := c.Param("pdbID")
+
+	job, err := loadJob(jobID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	if _, ok := job.Pipeline.Results[pdbID]; !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+		return
+	}
+	results := job.Pipeline.Results[pdbID]
+
+	filename := fmt.Sprintf("%s_%s_%s.csv", results.UniProt.ID, results.PDB.ID, jobID[:5])
+	c.Writer.Header().Set("content-disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
+	c.String(http.StatusOK, ResultsCSV(job.Pipeline.Results[pdbID]))
 }
 
 // NewJobEndpoint handles POST /api/new-job
@@ -188,6 +212,7 @@ func httpServe() {
 	r.GET("/api/uniprot/:unpID", UniProtEndpoint)
 	r.GET("/api/job/:jobID", JobEndpoint)
 	r.GET("/api/job/:jobID/:pdbID", JobPDBEndpoint)
+	r.GET("/api/job/:jobID/:pdbID/csv", JobPDBCSVEndpoint)
 	r.GET("/api/structure/cif/:pdbID", CIFEndpoint)
 	r.GET("/ws/:jobID", WSProcessEndpoint)
 
