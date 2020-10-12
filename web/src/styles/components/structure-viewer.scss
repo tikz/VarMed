@@ -35,6 +35,12 @@
   margin-top: 100px !important;
 }
 
+.lm-layout-left,
+.lm-layout-right,
+.lm-layout-bottom {
+  z-index: 999;
+}
+
 #litemol {
   position: absolute;
   width: 100%;
