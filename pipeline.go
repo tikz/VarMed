@@ -296,20 +296,25 @@ func (pl *Pipeline) bindingSiteRunner(u *uniprot.UniProt, p *pdb.PDB) chan Bindi
 	go func() {
 		results := BindingSite{}
 
+		bindingResidues := make(map[Residue]struct{})
 		pl.msg(fmt.Sprintf("Compute binding site by distance to catalytic residues with PDB %s", p.ID))
 		for _, site := range u.Sites {
 			if site.Type == "active" || site.Type == "nucleotide" {
 				if residues, ok := p.UniProtPositions[u.ID][site.Position]; ok {
 					for _, catRes := range residues {
 						for _, res := range pdb.CloseResidues(p, catRes, 5) {
-							results.Residues = append(results.Residues, Residue{
+							bindingResidues[Residue{
 								Residue:  res,
 								Position: res.UnpPosition,
-							})
+							}] = struct{}{}
 						}
 					}
 				}
 			}
+		}
+
+		for bRes := range bindingResidues {
+			results.Residues = append(results.Residues, bRes)
 		}
 
 		pl.msg(fmt.Sprintf("Found %d binding site residues in PDB %s", len(results.Residues), p.ID))
