@@ -116,7 +116,7 @@ export default class StructureViewer extends React.Component {
 
     this.state.plugin.command(LiteMol.Bootstrap.Command.Layout.SetState, {
       collapsedControlsLayout:
-        LiteMol.Bootstrap.Components.CollapsedControlsLayout.Landscape,
+        LiteMol.Bootstrap.Components.CollapsedControlsLayout.Portrait,
       hideControls: true,
     });
   }
