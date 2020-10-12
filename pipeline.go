@@ -255,7 +255,7 @@ func (pl *Pipeline) variantWorker(repairPDB string, u *uniprot.UniProt, p *pdb.P
 				results.DbSNPID = av.DbSNP
 				results.PubMedIDs = av.PubMedIDs
 				if av.DbSNP != "" {
-					allele := instances.ClinVar.GetVariation(av.DbSNP, av.Change)
+					allele := instances.ClinVar.GetVariant(av.DbSNP, av.Change)
 					if allele != nil {
 						results.CVName = allele.Name
 						results.CVReviewStatus = allele.ReviewStatus

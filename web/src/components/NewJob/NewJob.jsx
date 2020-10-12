@@ -16,7 +16,7 @@ import { Redirect } from "react-router-dom";
 import PDBPicker from "./PDBPicker";
 import SendBar from "./SendBar";
 import { UniProtInput } from "./UniProtInput";
-import { Variations } from "./Variations";
+import { Variants } from "./Variants";
 import NavBar from "../NavBar";
 
 function Alert(props) {
@@ -30,7 +30,7 @@ export default class NewJob extends React.Component {
     this.state = {
       unpData: {},
       pdbs: [],
-      variations: [],
+      variants: [],
       error: false,
       errorMsg: "",
       redirect: "",
@@ -48,7 +48,7 @@ export default class NewJob extends React.Component {
     this.setState({
       unpData: unpData,
       pdbs: [],
-      variations: [],
+      variants: [],
     });
   }
 
@@ -58,11 +58,11 @@ export default class NewJob extends React.Component {
 
   setVars(vars) {
     vars.sort((a, b) => (a.pos + a.aa > b.pos + b.aa ? 1 : -1));
-    this.setState({ variations: vars });
+    this.setState({ variants: vars });
   }
 
   setAnnotated(toggle) {
-    let vars = this.state.variations;
+    let vars = this.state.variants;
     let keys = vars.map((v) => v.key);
     if (toggle) {
       this.state.unpData.variants.forEach((v) => {
@@ -80,7 +80,7 @@ export default class NewJob extends React.Component {
       vars = vars.filter((v) => !annVars.includes(v.key));
     }
     vars.sort((a, b) => (a.pos + a.aa > b.pos + b.aa ? 1 : -1));
-    this.setState({ variations: vars });
+    this.setState({ variants: vars });
   }
 
   submit(email) {
@@ -91,9 +91,9 @@ export default class NewJob extends React.Component {
         uniprotId: this.state.unpData.id,
         pdbIds: this.state.pdbs,
         email: email,
-        variants: this.state.variations.map((v) => v.key),
-        // variationsPos: this.state.variations.map((x) => x.pos),
-        // variationsAa: this.state.variations.map((x) => x.aa),
+        variants: this.state.variants.map((v) => v.key),
+        // variantsPos: this.state.variants.map((x) => x.pos),
+        // variantsAa: this.state.variants.map((x) => x.aa),
       })
       .then(function (response) {
         if (response.data.error != "") {
@@ -118,7 +118,7 @@ export default class NewJob extends React.Component {
     let unpOk = Object.keys(this.state.unpData).length > 0;
     let structOk = this.state.unpData.pdbs !== null;
     let dataOk =
-      unpOk && this.state.pdbs.length > 0 && this.state.variations.length > 0;
+      unpOk && this.state.pdbs.length > 0 && this.state.variants.length > 0;
     return (
       <Box>
         <NavBar />
@@ -152,11 +152,11 @@ export default class NewJob extends React.Component {
                   <Grow in={unpOk}>
                     <Box>
                       {unpOk && structOk && (
-                        <Variations
+                        <Variants
                           unpID={this.state.unpData.id}
                           sequence={this.state.unpData.sequence}
-                          variants={this.state.variations}
-                          setVariations={this.setVars}
+                          variants={this.state.variants}
+                          setVariants={this.setVars}
                           setAnnotated={this.setAnnotated}
                           hasAnnotated={this.state.unpData.variants !== null}
                         />
