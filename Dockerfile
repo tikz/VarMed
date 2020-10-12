@@ -47,19 +47,19 @@ RUN apt-get install -y dssp
 # HMMER
 RUN apt-get install -y hmmer
 
-# RespDB build
-RUN mkdir /respdb
-ADD . /respdb/
-WORKDIR /respdb/
+# VarMed build
+RUN mkdir /varmed
+ADD . /varmed/
+WORKDIR /varmed/
 
 RUN make build
 
-COPY config-example.yaml /respdb/config.yaml
+COPY config-example.yaml /varmed/config.yaml
 
-RUN mkdir /respdb/bin
+RUN mkdir /varmed/bin
 COPY pipeline-bins.tar.gz /
-RUN tar -C /respdb/bin/ -xvf /pipeline-bins.tar.gz
+RUN tar -C /varmed/bin/ -xvf /pipeline-bins.tar.gz
 
-WORKDIR /respdb/
+WORKDIR /varmed/
 
-CMD ["/respdb/respdb"]
+CMD ["/varmed/varmed"]

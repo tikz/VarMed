@@ -10,7 +10,7 @@ export default function NavBar() {
       <AppBar className="bar">
         <Toolbar className="bar">
           <Link to="/" className="link">
-            <img className="nav-logo" src="/assets/respdb.svg" alt="" />
+            <img className="nav-logo" src="/assets/varmed.svg" alt="" />
           </Link>
           <Typography variant="h6" className="nav-title">
             VarMed
