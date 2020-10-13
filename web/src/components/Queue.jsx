@@ -1,4 +1,5 @@
 import React from "react";
+import { Link as LinkRouter } from "react-router-dom";
 import {
   Grid,
   Typography,
@@ -145,11 +146,11 @@ export default class Queue extends React.Component {
                       </Grid>
                       <Grid item xs={4}>
                         {isMyJob(j.shortId) && (
-                          <a href={"job/" + myJobId(j.shortId)}>
+                          <LinkRouter to={"job/" + myJobId(j.shortId)}>
                             <Typography variant="overline">
                               {j.shortId} (my job)
                             </Typography>
-                          </a>
+                          </LinkRouter>
                         )}
 
                         {!isMyJob(j.shortId) && (
@@ -212,11 +213,11 @@ export default class Queue extends React.Component {
                         <Typography variant="h6">#{j.position}</Typography>
                       </Grid>
                       <Grid item xs={4}>
-                        <a href={"job/" + j.id}>
+                        <LinkRouter to={"job/" + myJobId(j.id)}>
                           <Typography variant="overline">
                             {j.shortId} (my job)
                           </Typography>
-                        </a>
+                        </LinkRouter>
                         <br />
                         <Typography variant="caption">
                           {j.pdbs} PDBs, {j.variants} variants
