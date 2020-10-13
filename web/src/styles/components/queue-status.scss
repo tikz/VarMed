@@ -1,0 +1,22 @@
+.queue-icon {
+  margin-right: 10px !important;
+}
+
+.queue-status {
+  width: 480px;
+  overflow: hidden;
+  height: auto;
+  padding: 1em;
+}
+
+.queue-job {
+  padding: 10px;
+}
+
+.queue-job:last-child {
+  padding-bottom: 0;
+}
+
+.queue-status .progress {
+  margin-top: 18px;
+}

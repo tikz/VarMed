@@ -4,6 +4,7 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
+  Divider,
   Grid,
   IconButton,
   List,
@@ -71,19 +72,22 @@ function MyJobsDialog(props) {
           key={job.id}
         >
           <ListItemIcon>
-            <Grid container direction="column">
+            <Grid container direction="column" alignItems="center">
               <Grid item>
-                <ListItemAvatar>
-                  <Avatar>
-                    <NotesIcon />
-                  </Avatar>
-                </ListItemAvatar>
+                <center>
+                  <ListItemAvatar>
+                    <Avatar>
+                      <NotesIcon />
+                    </Avatar>
+                  </ListItemAvatar>
+                </center>
               </Grid>
               <Grid item>
-                <Typography variant="caption">{job.id.slice(0, 6)}</Typography>
+                <Typography variant="overline">{job.id.slice(0, 6)}</Typography>
               </Grid>
             </Grid>
           </ListItemIcon>
+          <Divider orientation="vertical" />
           <Grid container>
             <Grid item></Grid>
             <Grid item>

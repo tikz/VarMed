@@ -122,7 +122,10 @@ type Pipeline struct {
 	PDBIDs   []string
 	Variants []SAS
 	Results  map[string]*Results // PDB ID to results
-	Duration time.Duration
+
+	Progress    float64
+	ProgressPDB float64
+	Duration    time.Duration
 
 	Error   error
 	msgChan chan string // readable text messages about the status
@@ -152,6 +155,7 @@ func (pl *Pipeline) Run() error {
 	pl.msg("Job started")
 
 	for _, pdbID := range pl.PDBIDs {
+		pl.ProgressPDB += 1 / float64(len(pl.PDBIDs))
 		u := pl.UniProt
 		results := Results{UniProt: u}
 
@@ -187,7 +191,7 @@ func (pl *Pipeline) Run() error {
 			varJobs := make(chan SAS, n)
 			varRes := make(chan Variant, n)
 
-			for w := 1; w <= 16; w++ {
+			for w := 1; w <= 2; w++ {
 				go pl.variantWorker(rp, u, p, varJobs, varRes)
 			}
 
@@ -200,6 +204,8 @@ func (pl *Pipeline) Run() error {
 				v := <-varRes
 				results.Variants = append(results.Variants, &v)
 				pl.msg(fmt.Sprintf("BuildModel for variant %s with PDB %s done", v.Change, pdbID))
+
+				pl.Progress += (1 / float64(len(pl.PDBIDs))) * (1 / float64(len(coveredVariants)))
 			}
 		}
 

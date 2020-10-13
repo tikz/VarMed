@@ -8,6 +8,9 @@ import NewJob from "./NewJob/NewJob";
 const theme = createMuiTheme({
   palette: {
     type: "dark",
+    background: {
+      paper: "#282c30",
+    },
     primary: {
       main: "#1aacdb",
       contrastText: "#fff",
