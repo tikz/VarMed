@@ -15,9 +15,9 @@ export default class StatusConsole extends React.Component {
     var url;
     if (API_URL == "") {
       let protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-      url = protocol + window.location.host + "/ws/" + this.props.jobId;
+      url = protocol + window.location.host + "/ws/job/" + this.props.jobId;
     } else {
-      url = API_URL.replace("http", "ws") + "/ws/" + this.props.jobId;
+      url = API_URL.replace("http", "ws") + "/ws/job/" + this.props.jobId;
     }
     this.ws = new WebSocket(url);
 

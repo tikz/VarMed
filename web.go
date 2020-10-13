@@ -9,7 +9,6 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
 	"github.com/tikz/bio"
 )
 
@@ -118,62 +117,6 @@ func NewJobEndpoint(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"id": j.ID, "error": ""})
 }
 
-// WSProcessEndpoint handles WebSocket /ws/:jobID
-func WSProcessEndpoint(c *gin.Context) {
-	id := c.Param("jobID")
-	queue := c.MustGet("queue").(*Queue)
-	job, err := queue.GetJob(id)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-	wsHandler(c.Writer, c.Request, job)
-}
-
-func wsHandler(w http.ResponseWriter, r *http.Request, j *Job) {
-	upg := websocket.Upgrader{ReadBufferSize: 1024, WriteBufferSize: 1024}
-
-	upg.CheckOrigin = func(r *http.Request) bool { return true } // TODO: remove in production, unsafe
-
-	ws, err := upg.Upgrade(w, r, nil)
-	if err != nil {
-		log.Printf("websocket upgrade fail: %+v", err)
-		return
-	}
-
-	msgTicker := time.NewTicker(100 * time.Millisecond)
-	defer func() {
-		msgTicker.Stop()
-		ws.Close()
-	}()
-
-	i := len(j.msgs)
-
-	// Show last 10 messages only when reconnecting
-	if i > 10 {
-		i = i - 10
-	}
-
-	for {
-		select {
-		case <-msgTicker.C:
-			if i < len(j.msgs) {
-				msg := j.msgs[i]
-				ws.WriteMessage(websocket.TextMessage, []byte(msg))
-				i++
-
-				if j.Status == statusDone ||
-					j.Status == statusSaved {
-					return
-				}
-			}
-		}
-
-	}
-}
-
 // CIFEndpoint handles GET /api/structure/cif/:pdbID
 func CIFEndpoint(c *gin.Context) {
 	id := c.Param("pdbID")
@@ -214,7 +157,8 @@ func httpServe() {
 	r.GET("/api/job/:jobID/:pdbID", JobPDBEndpoint)
 	r.GET("/api/job/:jobID/:pdbID/csv", JobPDBCSVEndpoint)
 	r.GET("/api/structure/cif/:pdbID", CIFEndpoint)
-	r.GET("/ws/:jobID", WSProcessEndpoint)
+	r.GET("/ws/job/:jobID", WSJobEndpoint)
+	r.GET("/ws/queue", WSQueueEndpoint)
 
 	r.POST("/api/new-job", NewJobEndpoint)
 

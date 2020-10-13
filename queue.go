@@ -84,7 +84,7 @@ func (q *Queue) posMsg() {
 		pos := q.GetJobPosition(j) - q.nWorkers + 1
 		if pos > 0 {
 			t := time.Now().Format("15:04:05-0700")
-			m := fmt.Sprintf(t+" "+"Awaiting in queue. Position #%d", pos)
+			m := fmt.Sprintf(t+" "+"Waiting in queue at position #%d", pos)
 			j.msgs = append(j.msgs, m)
 		}
 	}
