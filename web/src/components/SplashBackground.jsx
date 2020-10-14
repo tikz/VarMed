@@ -7,7 +7,7 @@ const Transformer = LiteMol.Bootstrap.Entity.Transformer;
 const Transform = LiteMol.Bootstrap.Tree.Transform;
 
 function mousemoveListener(e) {
-  if (e.isTrusted || (e.screenX != 99 && e.screenY != 99)) {
+  if (e.isTrusted || (e.screenX != 1 && e.screenY != 1)) {
     e.stopPropagation();
   }
 }
@@ -119,12 +119,12 @@ export default class SplashBackground extends React.Component {
     const canvas = document.querySelector("#splash canvas");
     this.moveInterval = setInterval(function () {
       simulate(canvas, "mousedown", {
-        pointerX: 100,
-        pointerY: 100,
+        pointerX: 1,
+        pointerY: 1,
       });
       simulate(canvas, "mousemove", {
-        pointerX: 99,
-        pointerY: 99,
+        pointerX: 0,
+        pointerY: 0,
       });
       simulate(canvas, "mouseup");
     }, 50);
