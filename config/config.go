@@ -22,14 +22,6 @@ type Config struct {
 		JobWorkers int `yaml:"job-workers"`
 		Pipeline   struct {
 			StructureWorkers int `yaml:"structure-workers"`
-			EnableSteps      struct {
-				Binding      bool `yaml:"binding"`
-				Exposure     bool `yaml:"exposure"`
-				Interaction  bool `yaml:"interaction"`
-				Secondary    bool `yaml:"secondary"`
-				Conservation bool `yaml:"conservation"`
-				Stability    bool `yaml:"stability"`
-			} `yaml:"enable-steps"`
 		} `yaml:"pipeline"`
 	} `yaml:"varmed"`
 
