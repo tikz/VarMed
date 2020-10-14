@@ -62,7 +62,7 @@ export default function Index() {
                   <Button className="glowButton">New Job</Button>
                 </LinkRouter>{" "}
                 or view{" "}
-                <LinkRouter to="/job/f44f3c3880d25872ce61cfa3612e2d683fec7c8296924337a24a28da26ee4d8d">
+                <LinkRouter to="/job/ba2388afd68a4b467fc2c1b6e81a301a8341f98bb5ea564d2d0b483d165f9c4c">
                   <Button variant="outlined">Sample Results</Button>
                 </LinkRouter>
               </Typography>
