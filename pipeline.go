@@ -154,7 +154,33 @@ func (pl *Pipeline) Run() error {
 	start := time.Now()
 	pl.msg("Job started")
 
+	n := len(pl.PDBIDs)
+	structJobs := make(chan string, n)
+	structRes := make(chan Results, n)
+
+	for w := 1; w <= cfg.VarMed.Pipeline.StructureWorkers; w++ {
+		go pl.structureWorker(structJobs, structRes)
+	}
+
 	for _, pdbID := range pl.PDBIDs {
+		structJobs <- pdbID
+	}
+
+	for range pl.PDBIDs {
+		r := <-structRes
+		pl.Results[r.PDB.ID] = &r
+	}
+	close(structJobs)
+
+	pl.variantsOutcomes()
+	pl.Duration = time.Now().Sub(start)
+	pl.msg(fmt.Sprintf("Pipeline finished in %s", pl.Duration.String()))
+
+	return pl.Error
+}
+
+func (pl *Pipeline) structureWorker(pdbIDs <-chan string, rchan chan<- Results) {
+	for pdbID := range pdbIDs {
 		pl.ProgressPDB += 1 / float64(len(pl.PDBIDs))
 		u := pl.UniProt
 		results := Results{UniProt: u}
@@ -163,6 +189,7 @@ func (pl *Pipeline) Run() error {
 		p, err := bio.LoadPDB(pdbID)
 		if err != nil {
 			pl.Error = err
+			rchan <- results
 			continue
 		}
 		results.PDB = p
@@ -183,7 +210,9 @@ func (pl *Pipeline) Run() error {
 			pl.msg(fmt.Sprintf("Running FoldX RepairPDB %s", pdbID))
 			rp, err := instances.FoldX.Repair(p)
 			if err != nil {
-				return err
+				pl.Error = err
+				rchan <- results
+				continue
 			}
 			pl.msg(fmt.Sprintf("RepairPDB %s done", pdbID))
 
@@ -191,7 +220,7 @@ func (pl *Pipeline) Run() error {
 			varJobs := make(chan SAS, n)
 			varRes := make(chan Variant, n)
 
-			for w := 1; w <= 16; w++ {
+			for w := 1; w <= cfg.VarMed.Pipeline.StructureWorkers; w++ {
 				go pl.variantWorker(rp, u, p, varJobs, varRes)
 			}
 
@@ -226,14 +255,8 @@ func (pl *Pipeline) Run() error {
 		results.Switchability = <-switchabilityChan
 		results.Aggregability = <-aggregabilityChan
 
-		pl.Results[pdbID] = &results
+		rchan <- results
 	}
-
-	pl.variantsOutcomes()
-	pl.Duration = time.Now().Sub(start)
-	pl.msg(fmt.Sprintf("Pipeline finished in %s", pl.Duration.String()))
-
-	return pl.Error
 }
 
 func (pl *Pipeline) variantWorker(repairPDB string, u *uniprot.UniProt, p *pdb.PDB, sas <-chan SAS, rchan chan<- Variant) {
