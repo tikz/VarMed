@@ -187,7 +187,7 @@ export default class Queue extends React.Component {
                   );
                 })}
 
-              {status.myJobs && (
+              {status.myJobs && status.totalJobs > status.myJobs.length && (
                 <Grid item>
                   <center>
                     <MoreVert />
@@ -263,7 +263,7 @@ export default class Queue extends React.Component {
               {status.totalJobs == 0 && (
                 <Grid item>
                   <center>
-                    <Typography variant="h6">No jobs in queue!</Typography>
+                    <Typography variant="h6">No jobs in queue.</Typography>
                   </center>
                 </Grid>
               )}

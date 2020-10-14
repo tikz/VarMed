@@ -102,8 +102,8 @@ export default class VariantInput extends React.Component {
   render() {
     return (
       <Box>
-        <Grid container spacing={1} alignItems="center">
-          <Grid item xs={7}>
+        <Grid container spacing={1} alignItems="flex-start">
+          <Grid item xs>
             <TextField
               label="Position"
               onChange={this.handlePosChange}
@@ -114,25 +114,29 @@ export default class VariantInput extends React.Component {
               onKeyPress={this.handleKey}
             />
           </Grid>
-          <Grid item xs={3}>
-            <TextField
-              onChange={this.handleAaChange}
-              label="1-letter Aa"
-              error={this.state.aaError}
-              helperText={this.state.aaErrorMsg}
-              value={this.state.aa}
-              onKeyPress={this.handleKey}
-            />
-          </Grid>
-          <Grid item xs={2}>
-            <IconButton
-              color="primary"
-              aria-label="add variant"
-              onClick={this.handleAdd}
-              style={{ marginTop: 20 }}
-            >
-              <Add />
-            </IconButton>
+          <Grid item>
+            <Grid container alignItems="flex-start">
+              <Grid item>
+                <TextField
+                  onChange={this.handleAaChange}
+                  label="1-letter Aa"
+                  error={this.state.aaError}
+                  helperText={this.state.aaErrorMsg}
+                  value={this.state.aa}
+                  onKeyPress={this.handleKey}
+                />
+              </Grid>
+              <Grid item>
+                <IconButton
+                  color="primary"
+                  aria-label="add variant"
+                  onClick={this.handleAdd}
+                  style={{ marginTop: 20 }}
+                >
+                  <Add />
+                </IconButton>
+              </Grid>
+            </Grid>
           </Grid>
         </Grid>
       </Box>

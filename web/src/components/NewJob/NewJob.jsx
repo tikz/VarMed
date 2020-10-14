@@ -92,8 +92,6 @@ export default class NewJob extends React.Component {
         pdbIds: this.state.pdbs,
         email: email,
         variants: this.state.variants.map((v) => v.key),
-        // variantsPos: this.state.variants.map((x) => x.pos),
-        // variantsAa: this.state.variants.map((x) => x.aa),
       })
       .then(function (response) {
         if (response.data.error != "") {
@@ -130,39 +128,63 @@ export default class NewJob extends React.Component {
           <Grid container spacing={4} direction="column">
             <Grid item>
               <Grid container spacing={2} alignItems="center">
-                <Grid item xs={2}>
+                <Grid item xs={12} lg={2}>
                   <UniProtInput setUnpData={this.setUnpData} />
                 </Grid>
-                <Grid item>{unpOk && <ArrowForwardIosIcon />}</Grid>
+
                 <Grid item>
-                  <Grow in={unpOk}>
-                    <Box>
-                      {unpOk && (
-                        <PDBPicker
-                          unpID={this.state.unpData.id}
-                          pdbs={this.state.unpData.pdbs}
-                          setPDBs={this.setPDBs}
-                        />
-                      )}
-                    </Box>
-                  </Grow>
+                  <Grid
+                    container
+                    alignItems="center"
+                    justify="flex-start"
+                    spacing={2}
+                  >
+                    <Grid item>{unpOk && <ArrowForwardIosIcon />}</Grid>
+                    <Grid item xs>
+                      <Grow in={unpOk}>
+                        <Box>
+                          {unpOk && (
+                            <PDBPicker
+                              unpID={this.state.unpData.id}
+                              pdbs={this.state.unpData.pdbs}
+                              setPDBs={this.setPDBs}
+                            />
+                          )}
+                        </Box>
+                      </Grow>
+                    </Grid>
+                  </Grid>
                 </Grid>
-                <Grid item>{unpOk && structOk && <ArrowForwardIosIcon />}</Grid>
-                <Grid item xs={4}>
-                  <Grow in={unpOk}>
-                    <Box>
-                      {unpOk && structOk && (
-                        <Variants
-                          unpID={this.state.unpData.id}
-                          sequence={this.state.unpData.sequence}
-                          variants={this.state.variants}
-                          setVariants={this.setVars}
-                          setAnnotated={this.setAnnotated}
-                          hasAnnotated={this.state.unpData.variants !== null}
-                        />
-                      )}
-                    </Box>
-                  </Grow>
+
+                <Grid item xs={12} lg={4}>
+                  <Grid
+                    container
+                    alignItems="center"
+                    justify="flex-start"
+                    spacing={2}
+                  >
+                    <Grid item>
+                      {unpOk && structOk && <ArrowForwardIosIcon />}
+                    </Grid>
+                    <Grid item xs>
+                      <Grow in={unpOk}>
+                        <Box>
+                          {unpOk && structOk && (
+                            <Variants
+                              unpID={this.state.unpData.id}
+                              sequence={this.state.unpData.sequence}
+                              variants={this.state.variants}
+                              setVariants={this.setVars}
+                              setAnnotated={this.setAnnotated}
+                              hasAnnotated={
+                                this.state.unpData.variants !== null
+                              }
+                            />
+                          )}
+                        </Box>
+                      </Grow>
+                    </Grid>
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>

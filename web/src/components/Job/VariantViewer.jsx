@@ -15,8 +15,8 @@ import React from "react";
 
 import { ResultsContext } from "./ResultsContext";
 import Aminoacid from "./Aminoacid";
-import Evidence from "./Evidence";
-import "../../styles/components/variant.scss";
+import Publications from "./Publications";
+import "../../styles/components/variant-viewer.scss";
 
 export default class VariantViewer extends React.Component {
   constructor(props) {
@@ -83,7 +83,7 @@ export default class VariantViewer extends React.Component {
     const v = this.state.selected.variant;
 
     return (
-      <Box>
+      <Box className="variants">
         <Grid container alignItems="center" spacing={1}>
           <Grid item xs={4}>
             <Autocomplete
@@ -202,11 +202,97 @@ export default class VariantViewer extends React.Component {
             <Aminoacid aa={v.toAa} right />
           </Grid>
         </Grid>
+
         <Divider />
+        {v.dbSNPId && (
+          <Box>
+            <Grow in={true} key={v.dbSNPId}>
+              <Grid container justify="space-between" alignItems="center">
+                <Grid item>
+                  <Typography variant="h6">ClinVar</Typography>
+                </Grid>
+                <Grid item>
+                  <a
+                    href={"https://www.ncbi.nlm.nih.gov/snp/" + v.dbSNPId}
+                    target="_blank"
+                  >
+                    <Chip
+                      label={v.dbSNPId}
+                      size="small"
+                      variant="outlined"
+                      className="chip"
+                    />
+                  </a>
+                </Grid>
+              </Grid>
+            </Grow>
+
+            {v.cvClinSig && (
+              <Grow in={true} key={"cs" + v.dbSNPId}>
+                <Grid
+                  container
+                  direction="column"
+                  alignItems="center"
+                  className="clin-sig"
+                >
+                  <Grid item>
+                    <Typography variant="overline">
+                      Clinical significance
+                    </Typography>
+                  </Grid>
+                  <Grid item>
+                    <Typography variant="caption">{v.cvClinSig}</Typography>
+                  </Grid>
+                </Grid>
+              </Grow>
+            )}
+
+            {v.cvPhenotypes && (
+              <Grow in={true} key={"p" + v.dbSNPId}>
+                <Grid container direction="column" alignItems="center">
+                  <Grid item>
+                    <Typography variant="overline">Phenotypes</Typography>
+                  </Grid>
+                  <Grid item>
+                    <Typography variant="caption">
+                      {v.cvPhenotypes.split("|").join(", ")}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Grow>
+            )}
+
+            <Divider />
+          </Box>
+        )}
         {v.pubmedIds && (
           <Box>
-            <Typography variant="h6">Evidence</Typography>
-            <Evidence
+            <Grow in={true} key={v.id}>
+              <Grid container justify="space-between" alignItems="center">
+                <Grid item>
+                  <Typography variant="h6">Publications</Typography>
+                </Grid>
+                <Grid item>
+                  {v.id && (
+                    <a
+                      href={
+                        "https://web.expasy.org/variant_pages/" + v.id + ".html"
+                      }
+                      target="_blank"
+                    >
+                      <Chip
+                        label={v.id}
+                        size="small"
+                        variant="outlined"
+                        className="chip"
+                      />
+                    </a>
+                  )}
+                </Grid>
+              </Grid>
+            </Grow>
+
+            <Publications
               publications={this.props.publications}
               pubmeds={v.pubmedIds}
             />

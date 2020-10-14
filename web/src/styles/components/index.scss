@@ -1,7 +1,6 @@
 .presentation {
-  width: 100% !important;
   min-height: 600px;
-  background: radial-gradient(circle, #1f2b2f 0%, #1c1e20 25%);
+  // background: radial-gradient(circle, #1f2b2f 0%, #1c1e20 25%);
 }
 
 .hero {
@@ -17,9 +16,10 @@
 
 .footer {
   color: #758694;
-  padding-top: 30px;
-  padding-bottom: 30px;
+  padding-top: 15px;
+  padding-bottom: 15px;
   background-color: #20232a;
+  opacity: 0.85;
 }
 
 .paper {
@@ -31,4 +31,30 @@
   color: #888;
   font-size: 0.75rem !important;
   letter-spacing: 0.03333em !important;
+}
+
+#splash {
+  z-index: 0;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  filter: blur(55px);
+  opacity: 0;
+  transition: all 2s ease-in-out;
+}
+
+#splash.started {
+  filter: blur(5px);
+  opacity: 1;
+}
+
+#splash .lm-viewport-controls,
+#splash .lm-task-state,
+#splash .lm-logo {
+  display: none;
+}
+
+.index {
+  z-index: 999;
+  position: relative;
 }

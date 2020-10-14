@@ -1,3 +1,20 @@
+.variants hr {
+  margin: 10px 0;
+}
+
+.variants a .chip {
+  cursor: pointer;
+  margin-left: 5px;
+}
+
+.variants a .chip:hover {
+  color: #f15a29;
+}
+
+.variants .clin-sig {
+  margin-bottom: 10px;
+}
+
 .substitution {
   min-height: 10vw;
 }
@@ -6,20 +23,8 @@
   font-size: 1.4vw !important;
 }
 
-@media only screen and (max-width: 1200px) {
-  .substitution h4 {
-    font-size: 1.3rem !important;
-  }
-}
-
 .substitution h3 {
   font-size: 2.5vw !important;
-}
-
-@media only screen and (max-width: 1200px) {
-  .substitution h3 {
-    font-size: 1.3rem !important;
-  }
 }
 
 .arrow {
@@ -76,12 +81,6 @@
 
 .aa img {
   width: 3.8vw;
-}
-
-@media only screen and (max-width: 1200px) {
-  .aa img {
-    display: none;
-  }
 }
 
 .propchip {
@@ -164,4 +163,42 @@
   $color: rgb(255, 255, 255);
   color: $color !important;
   //border: solid 1px $color !important;
+}
+
+@media only screen and (max-width: 1180px) {
+  .substitution {
+    min-height: 10vw;
+  }
+
+  .substitution h4 {
+    font-size: 4vw !important;
+  }
+
+  .substitution h3 {
+    font-size: 3vw !important;
+  }
+
+  .aa img {
+    width: 10vw;
+  }
+
+  .ddg {
+    border: solid 1px rgba(255, 255, 255, 0.23);
+    border-radius: 10px;
+    font-size: 2vw;
+    padding: 8px;
+    text-align: center;
+  }
+
+  .ddg p.unit {
+    color: #888;
+    font-size: 1.4vw;
+  }
+
+  .propchip {
+    font-size: 1.1vw !important;
+    height: 21px !important;
+    border: solid 1px rgb(68, 68, 68) !important;
+    margin: 1px;
+  }
 }

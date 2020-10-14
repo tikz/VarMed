@@ -1,7 +1,7 @@
 import { Grid, Typography, Chip } from "@material-ui/core";
 import React from "react";
 
-export default class EvidenceItem extends React.Component {
+export default class PublicationItem extends React.Component {
   constructor(props) {
     super(props);
   }
