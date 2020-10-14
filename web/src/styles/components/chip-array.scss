@@ -3,6 +3,8 @@
   justify-content: center;
   flex-wrap: wrap;
   margin-top: 10px;
+  max-height: 170px;
+  overflow-y: scroll;
 }
 
 .chip-array > * {

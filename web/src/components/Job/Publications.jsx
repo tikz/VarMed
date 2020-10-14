@@ -9,7 +9,7 @@ import {
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import React from "react";
-import EvidenceItem from "./EvidenceItem";
+import PublicationItem from "./PublicationItem";
 
 export default class Evidence extends React.Component {
   constructor(props) {
@@ -25,7 +25,7 @@ export default class Evidence extends React.Component {
             return (
               <Grow in={true} key={id}>
                 <Grid item>
-                  <EvidenceItem
+                  <PublicationItem
                     title={pub.title}
                     authors={pub.authors}
                     journal={pub.journal}
@@ -37,11 +37,11 @@ export default class Evidence extends React.Component {
             );
           })}
 
-          <Grid item>
+          {/* <Grid item>
             <IconButton aria-label="collapse">
               <ExpandMoreIcon />
             </IconButton>
-          </Grid>
+          </Grid> */}
         </Grid>
       </Box>
     );

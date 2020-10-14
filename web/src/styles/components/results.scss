@@ -15,3 +15,23 @@
   position: fixed;
   height: calc(100% - 64px);
 }
+
+@media only screen and (max-width: 1180px) {
+  .split {
+    position: relative;
+    height: 400px;
+  }
+
+  .left.split {
+    margin-top: 0;
+    width: 100%;
+    top: 0;
+  }
+
+  .right.split {
+    padding-top: 32px;
+    width: 100%;
+    right: 0;
+    height: auto;
+  }
+}

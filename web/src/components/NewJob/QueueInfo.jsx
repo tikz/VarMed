@@ -9,13 +9,13 @@ export class QueueInfo extends React.Component {
           <Grid item xs={8}>
             Jobs in queue:
           </Grid>
-          <Grid item>0</Grid>
+          <Grid item>-</Grid>
         </Grid>
         <Grid container item>
           <Grid item xs={8}>
             Estimated time:
           </Grid>
-          <Grid item>{"<"}1 minute</Grid>
+          <Grid item>-</Grid>
         </Grid>
       </Grid>
     );

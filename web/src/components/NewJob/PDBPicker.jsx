@@ -168,7 +168,7 @@ export default function PDBPicker(props) {
         <Grid
           container
           spacing={2}
-          justify="center"
+          justify="flex-start"
           alignItems="center"
           className={classes.root}
         >

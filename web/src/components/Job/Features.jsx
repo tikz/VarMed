@@ -67,7 +67,7 @@ export class Features extends React.Component {
     // const binding = chip("Binding", res.binding.residues);
 
     return (
-      <Grid container className="features">
+      <Grid container className="features" alignItems="center">
         <Grid item xs>
           <Grid container wrap="wrap">
             {fams}
@@ -77,7 +77,7 @@ export class Features extends React.Component {
                 <Divider key={index} orientation="vertical" flexItem />
               );
             })}
-            <Divider orientation="vertical" flexItem />
+            {/* <Divider orientation="vertical" flexItem /> */}
             {hets &&
               hets.map((hetId) => {
                 if (hetId != "HOH") {
@@ -113,7 +113,7 @@ export class Features extends React.Component {
               )}
           </Grid>
         </Grid>
-        <Grid item xs={2}>
+        <Grid item>
           <SurfaceSwitch />
         </Grid>
       </Grid>

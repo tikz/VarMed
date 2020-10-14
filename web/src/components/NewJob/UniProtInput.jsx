@@ -83,7 +83,7 @@ export class UniProtInput extends React.Component {
             autoFocus
             autoComplete="off"
             fullWidth
-            label="UniProt Accession ID"
+            label="UniProt ID"
             onChange={this.handleChange}
             value={this.state.unpID}
             error={this.state.error}
