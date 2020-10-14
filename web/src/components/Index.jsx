@@ -67,7 +67,7 @@ export default function Index() {
                 </LinkRouter>
               </Typography>
             </Grid>
-            <Grid item>
+            <Grid item className="cite-us">
               <Typography align="center" className="desc">
                 If you find our work useful, please cite us:
               </Typography>
@@ -115,7 +115,7 @@ export default function Index() {
                   alignItems="flex-end"
                   spacing={1}
                 >
-                  <Grid item>
+                  {/* <Grid item>
                     <Typography variant="caption">
                       VarMed <Link href="#">source code</Link> is released under
                       the <Link href="#">MIT license</Link>.
@@ -125,7 +125,7 @@ export default function Index() {
                     <Typography variant="caption">
                       External tools and libraries may have different licenses.
                     </Typography>
-                  </Grid>
+                  </Grid> */}
                 </Grid>
               </Grid>
             </Grid>

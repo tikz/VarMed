@@ -7,7 +7,7 @@ const Transformer = LiteMol.Bootstrap.Entity.Transformer;
 const Transform = LiteMol.Bootstrap.Tree.Transform;
 
 function mousemoveListener(e) {
-  if (e.isTrusted) {
+  if (e.isTrusted || (e.screenX != 99 && e.screenY != 99)) {
     e.stopPropagation();
   }
 }
@@ -107,19 +107,18 @@ export default class SplashBackground extends React.Component {
     });
 
     this.load();
+
+    const canvas = document.querySelector("#splash canvas");
     setInterval(function () {
-      simulate(document.querySelector("#splash canvas"), "mousedown", {
+      simulate(canvas, "mousedown", {
         pointerX: 100,
         pointerY: 100,
       });
-      simulate(document.querySelector("#splash canvas"), "mousemove", {
+      simulate(canvas, "mousemove", {
         pointerX: 99,
         pointerY: 99,
       });
-      simulate(document.querySelector("#splash canvas"), "mouseup", {
-        pointerX: 100,
-        pointerY: 100,
-      });
+      simulate(canvas, "mouseup");
     }, 50);
 
     const that = this;
@@ -127,7 +126,7 @@ export default class SplashBackground extends React.Component {
 
     setInterval(function () {
       let h = setInterval(function () {
-        that.highlight(i, 5);
+        that.highlight(i, 3);
         i = i < 1456 ? i + 1 : 1;
         if (i < 1456) {
           i++;
@@ -135,8 +134,8 @@ export default class SplashBackground extends React.Component {
           i = 1;
           clearInterval(h);
         }
-      }, 10);
-    }, 60000);
+      }, 100);
+    }, 40000);
   }
 
   load() {
@@ -222,7 +221,8 @@ export default class SplashBackground extends React.Component {
       this.applyTheme("surface-het", this.createTheme(0.4, 0x00fffb));
 
       document.getElementById("splash").classList.add("started");
-      this.focus("A", 350, 400);
+      const start = Math.round(Math.random() * 1400);
+      this.focus("A", start, start + 50);
     });
 
     this.plugin.command(LiteMol.Bootstrap.Command.Layout.SetState, {
