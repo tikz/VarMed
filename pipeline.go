@@ -191,7 +191,7 @@ func (pl *Pipeline) Run() error {
 			varJobs := make(chan SAS, n)
 			varRes := make(chan Variant, n)
 
-			for w := 1; w <= 2; w++ {
+			for w := 1; w <= 16; w++ {
 				go pl.variantWorker(rp, u, p, varJobs, varRes)
 			}
 
