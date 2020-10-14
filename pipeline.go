@@ -446,7 +446,9 @@ func (pl *Pipeline) switchabilityRunner(u *uniprot.UniProt, p *pdb.PDB) chan Swi
 		pl.msg(fmt.Sprintf("Running abSwitch for chain seqs in PDB %s", p.ID))
 		res, err := instances.AbSwitch.Switchability(u, p)
 		if err != nil {
-			pl.Error = err
+			// pl.Error = err
+			// Ignore error, abswitch can be unstable crap with long seqs.
+			// "terminated by signal SIGSEGV (Address boundary error)"
 			rchan <- results
 			return
 		}
