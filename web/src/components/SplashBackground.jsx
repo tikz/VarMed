@@ -92,6 +92,12 @@ export default class SplashBackground extends React.Component {
     this.state = { plugin: {}, collapsed: false };
   }
 
+  componentWillUnmount() {
+    document.removeEventListener("mousemove", mousemoveListener);
+    clearInterval(this.moveInterval);
+    clearInterval(this.highlightInterval);
+  }
+
   componentDidMount() {
     this.plugin = LiteMol.Plugin.create({
       target: "#splash",
@@ -102,14 +108,16 @@ export default class SplashBackground extends React.Component {
       },
     });
 
-    document.addEventListener("mousemove", mousemoveListener, {
-      capture: true,
-    });
+    // document.addEventListener("mousemove", mousemoveListener, {
+    //   capture: true,
+    // });
 
     this.load();
+  }
 
+  startAnimation() {
     const canvas = document.querySelector("#splash canvas");
-    setInterval(function () {
+    this.moveInterval = setInterval(function () {
       simulate(canvas, "mousedown", {
         pointerX: 100,
         pointerY: 100,
@@ -124,7 +132,7 @@ export default class SplashBackground extends React.Component {
     const that = this;
     let i = 1;
 
-    setInterval(function () {
+    this.highlightInterval = setInterval(function () {
       let h = setInterval(function () {
         that.highlight(i, 3);
         i = i < 1456 ? i + 1 : 1;
@@ -223,6 +231,8 @@ export default class SplashBackground extends React.Component {
       document.getElementById("splash").classList.add("started");
       const start = Math.round(Math.random() * 1400);
       this.focus("A", start, start + 50);
+
+      this.startAnimation();
     });
 
     this.plugin.command(LiteMol.Bootstrap.Command.Layout.SetState, {
