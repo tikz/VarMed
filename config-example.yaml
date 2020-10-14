@@ -6,16 +6,9 @@ http-server:
   port: 8888
 
 varmed:
-  job-workers: 1
+  job-workers: 4
   pipeline:
     structure-workers: 4
-    enable-steps:
-      binding: true
-      exposure: true
-      interaction: true
-      secondary: true
-      conservation: true
-      stability: true
 
 debug-print:
   enabled: true
