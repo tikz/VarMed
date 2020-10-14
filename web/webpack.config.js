@@ -20,6 +20,7 @@ module.exports = {
   plugins: [
     new CopyPlugin([
       { from: "src/assets/varmed.svg", to: "./assets/varmed.svg" },
+      { from: "src/assets/aa/", to: "./assets/aa/" },
       { from: "src/assets/favicons/", to: "./" },
     ]),
     new webpack.DefinePlugin({
