@@ -28,6 +28,11 @@ a:hover {
   color: white;
 }
 
+.MuiPopover-root,
+.my-jobs {
+  z-index: 1500 !important;
+}
+
 ::-webkit-scrollbar {
   width: 10px;
 }

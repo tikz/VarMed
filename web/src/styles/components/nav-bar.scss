@@ -25,6 +25,8 @@
 .nav {
   flex-grow: 1;
   margin: 0 !important;
+  position: relative;
+  z-index: 1400;
 }
 
 .myJobs {

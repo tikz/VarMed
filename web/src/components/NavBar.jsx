@@ -3,7 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import "../styles/components/nav-bar.scss";
 import MyJobs from "./MyJobs";
-import Queue from "./Queue";
+import QueueIcon from "./QueueIcon";
 
 export default function NavBar() {
   return (
@@ -16,7 +16,7 @@ export default function NavBar() {
           <Typography variant="h6" className="nav-title">
             VarMed
           </Typography>
-          <Queue />
+          <QueueIcon />
           <MyJobs />
           <Link to="/new-job">
             <Button className="glowButton">New Job</Button>

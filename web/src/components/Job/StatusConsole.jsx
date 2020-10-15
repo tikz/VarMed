@@ -73,7 +73,7 @@ export default class StatusConsole extends React.Component {
             </div>
           </div>
         </DialogContent>
-        {!this.state.error && <LinearProgress variant="query" />}
+        {!this.state.error && <LinearProgress />}
       </Dialog>
     );
   }
