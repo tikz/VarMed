@@ -120,7 +120,13 @@ function MyJobsDialog(props) {
   }
 
   return (
-    <Dialog onClose={handleClose} open={open} maxWidth="xs" fullWidth={true}>
+    <Dialog
+      onClose={handleClose}
+      open={open}
+      maxWidth="xs"
+      fullWidth={true}
+      className="my-jobs"
+    >
       <DialogTitle>My jobs</DialogTitle>
       <List>{jobsList}</List>
     </Dialog>

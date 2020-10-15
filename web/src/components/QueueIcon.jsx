@@ -24,7 +24,7 @@ const StyledBadge = withStyles((theme) => ({
   },
 }))(Badge);
 
-export default class Queue extends React.Component {
+export default class QueueIcon extends React.Component {
   constructor(props) {
     super(props);
 

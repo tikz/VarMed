@@ -1,11 +1,4 @@
-import {
-  Box,
-  Button,
-  Container,
-  Grid,
-  Link,
-  Typography,
-} from "@material-ui/core";
+import { Box, Button, Container, Grid, Typography } from "@material-ui/core";
 import React from "react";
 import { Link as LinkRouter } from "react-router-dom";
 import "../styles/components/index.scss";
