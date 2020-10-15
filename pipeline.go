@@ -208,12 +208,21 @@ func (pl *Pipeline) structureWorker(pdbIDs <-chan string, rchan chan<- Results) 
 		// FoldX
 		if len(pl.Variants) > 0 {
 			pl.msg(fmt.Sprintf("Running FoldX RepairPDB %s", pdbID))
+			msgRepair := time.NewTicker(30 * time.Second)
+			go func() {
+				for range msgRepair.C {
+					pl.msg(fmt.Sprintf("RepairPDB %s still in progress...", pdbID))
+				}
+			}()
+
 			rp, err := instances.FoldX.Repair(p)
 			if err != nil {
+				msgRepair.Stop()
 				pl.Error = err
 				rchan <- results
 				continue
 			}
+			msgRepair.Stop()
 			pl.msg(fmt.Sprintf("RepairPDB %s done", pdbID))
 
 			n := len(pl.Variants)
