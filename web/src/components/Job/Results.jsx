@@ -69,6 +69,7 @@ export default class Results extends React.Component {
     const loadFeatures = (residues, name) => {
       if (residues) {
         residues.forEach((r) => {
+          pf[r.position] = pf[r.position] || [];
           pf[r.position].push(name);
         });
       }
