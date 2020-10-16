@@ -2,7 +2,7 @@ module varmed
 
 go 1.15
 
-replace github.com/tikz/bio => /home/tik/go/src/github.com/tikz/bio
+// replace github.com/tikz/bio => /home/tik/go/src/github.com/tikz/bio
 
 require (
 	github.com/gin-contrib/cors v1.3.1
