@@ -90,11 +90,13 @@ export default class QueueIcon extends React.Component {
 
     const myJobId = function (shortId) {
       var id;
-      status.myJobs.forEach((j) => {
-        if (j.shortId == shortId) {
-          id = j.id;
-        }
-      });
+      if (status.myJobs) {
+        status.myJobs.forEach((j) => {
+          if (j.shortId == shortId) {
+            id = j.id;
+          }
+        });
+      }
       return id;
     };
 
