@@ -58,7 +58,7 @@ COPY config-example.yaml /varmed/config.yaml
 
 RUN mkdir /varmed/bin
 COPY pipeline-bins.tar.gz /
-RUN tar -C /varmed/bin/ -xvf /pipeline-bins.tar.gz
+RUN tar -C /varmed/ -xvf /pipeline-bins.tar.gz
 
 WORKDIR /varmed/
 
