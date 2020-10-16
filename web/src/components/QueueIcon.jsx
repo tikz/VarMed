@@ -77,11 +77,15 @@ export default class QueueIcon extends React.Component {
     const status = this.state.status;
 
     const isProcessing = function (pos) {
-      return status.jobs.filter((j) => j.position == pos).length != 0;
+      return status.myJobs
+        ? status.jobs.filter((j) => j.position == pos).length != 0
+        : [];
     };
 
     const isMyJob = function (shortId) {
-      return status.myJobs.filter((j) => j.shortId == shortId).length != 0;
+      return status.myJobs
+        ? status.myJobs.filter((j) => j.shortId == shortId).length != 0
+        : [];
     };
 
     const myJobId = function (shortId) {
