@@ -228,11 +228,14 @@ export default class SplashBackground extends React.Component {
       this.applyTheme("surface", this.createTheme(0.2, 0x0d6273));
       this.applyTheme("surface-het", this.createTheme(0.4, 0x00fffb));
 
-      document.getElementById("splash").classList.add("started");
-      const start = Math.round(Math.random() * 1400);
-      this.focus("A", start, start + 50);
+      const splash = document.getElementById("splash");
+      if (splash) {
+        splash.classList.add("started");
+        const start = Math.round(Math.random() * 1400);
+        this.focus("A", start, start + 50);
 
-      this.startAnimation();
+        this.startAnimation();
+      }
     });
 
     this.plugin.command(LiteMol.Bootstrap.Command.Layout.SetState, {
