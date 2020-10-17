@@ -11,6 +11,6 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/tikz/bio v0.0.0-20201012164242-c78252bbf3aa
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
-	golang.org/x/tools v0.0.0-20201015182029-a5d9e455e9c4 // indirect
+	golang.org/x/tools v0.0.0-20201017001424-6003fad69a88 // indirect
 	gopkg.in/yaml.v2 v2.3.0
 )

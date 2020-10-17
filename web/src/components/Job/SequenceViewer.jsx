@@ -50,12 +50,16 @@ export default class SequenceViewer extends React.Component {
     this.fv.onFeatureSelected(function (d) {
       if (d.detail.description && d.detail.description.includes("Chain")) {
         const chain = d.detail.description.split(" ")[1];
+        console.log(posMap.unpToPDB(d.detail.start), chain);
+        const start = posMap
+          .unpToPDB(d.detail.start)
+          .filter((c) => c.chain == chain)[0];
+        const end = start.position + (d.detail.end - d.detail.start);
         structure.selectFocus(
           chain,
           posMap.unpToPDB(d.detail.start).filter((c) => c.chain == chain)[0]
             .position,
-          posMap.unpToPDB(d.detail.end).filter((c) => c.chain == chain)[0]
-            .position
+          end
         );
       } else {
         const chain = posMap.chains[0].id;
