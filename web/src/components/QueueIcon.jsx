@@ -65,6 +65,10 @@ export default class QueueIcon extends React.Component {
     this.connectWS();
   }
 
+  componentWillUnmount() {
+    this.ws.close();
+  }
+
   handleClick(e) {
     this.setState({ anchorEl: e.currentTarget });
   }
