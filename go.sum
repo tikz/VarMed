@@ -49,6 +49,8 @@ github.com/tikz/bio v0.0.0-20201004002649-dcb6751d9c5c h1:54IhiicWy7SFrvm1i32U/r
 github.com/tikz/bio v0.0.0-20201004002649-dcb6751d9c5c/go.mod h1:LALoj04+Dux7CHVQ2gpcP2IwNXA04olVykT6Ok7Dnbk=
 github.com/tikz/bio v0.0.0-20201012164242-c78252bbf3aa h1:+XDnxnuwaYNONyY7zkZ+ifX4WcKpOjIXG89lJDoLGag=
 github.com/tikz/bio v0.0.0-20201012164242-c78252bbf3aa/go.mod h1:LALoj04+Dux7CHVQ2gpcP2IwNXA04olVykT6Ok7Dnbk=
+github.com/tikz/bio v0.0.0-20201017193336-fa0dc35880cc h1:EOaF8Dh6NID1vhyIMP35Iyqn2B+TQT1tBwQBi4KlMpY=
+github.com/tikz/bio v0.0.0-20201017193336-fa0dc35880cc/go.mod h1:LALoj04+Dux7CHVQ2gpcP2IwNXA04olVykT6Ok7Dnbk=
 github.com/ugorji/go v1.1.7 h1:/68gy2h+1mWMrwZFeD1kQialdSzAb432dtpeJ42ovdo=
 github.com/ugorji/go v1.1.7/go.mod h1:kZn38zHttfInRq0xu/PH0az30d+z6vm202qpg1oXVMw=
 github.com/ugorji/go/codec v1.1.7 h1:2SvQaVZ1ouYrrKKwoSk2pzd4A9evlKJb9oTL+OaLUSs=
