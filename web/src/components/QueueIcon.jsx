@@ -50,9 +50,10 @@ export default class QueueIcon extends React.Component {
       this.setState({ status: status });
     };
 
+    const that = this;
     this.ws.onclose = () => {
       setTimeout(function () {
-        connectWS();
+        that.connectWS();
       }, 1000);
     };
 
