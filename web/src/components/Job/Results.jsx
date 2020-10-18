@@ -163,19 +163,21 @@ export default class Results extends React.Component {
 
         <div className="right split">
           <Container>
-            <VariantViewer
-              csvUrl={
-                API_URL +
-                "/api/job/" +
-                this.props.jobId +
-                "/" +
-                this.state.results.pdb.id +
-                "/csv"
-              }
-              posFeatures={this.state.posFeatures}
-              variants={this.state.results.variants}
-              publications={this.state.results.uniprot.publications}
-            />
+            {this.state.results.variants && (
+              <VariantViewer
+                csvUrl={
+                  API_URL +
+                  "/api/job/" +
+                  this.props.jobId +
+                  "/" +
+                  this.state.results.pdb.id +
+                  "/csv"
+                }
+                posFeatures={this.state.posFeatures}
+                variants={this.state.results.variants}
+                publications={this.state.results.uniprot.publications}
+              />
+            )}
             <SequenceViewer ref={this.sequenceRef} />
             <Divider />
           </Container>
