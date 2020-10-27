@@ -51,11 +51,12 @@ type Interaction struct {
 
 type Variant struct {
 	// From request
-	Residue  *pdb.Residue `json:"-"`
-	FromAa   string       `json:"fromAa"`
-	ToAa     string       `json:"toAa"`
-	Position int64        `json:"position"`
-	Change   string       `json:"change"`
+	Residue   *pdb.Residue `json:"-"`
+	FromAa    string       `json:"fromAa"`
+	ToAa      string       `json:"toAa"`
+	Position  int64        `json:"position"`
+	Change    string       `json:"change"`
+	ChangeDir string       `json:"changeDir"`
 
 	// From UniProt annotations
 	Note      string   `json:"note"`
@@ -271,7 +272,7 @@ func (pl *Pipeline) structureWorker(pdbIDs <-chan string, rchan chan<- Results) 
 func (pl *Pipeline) variantWorker(repairPDB string, u *uniprot.UniProt, p *pdb.PDB, sas <-chan SAS, rchan chan<- Variant) {
 	for v := range sas {
 		results := Variant{}
-		ddg, err := instances.FoldX.BuildModelUniProt(repairPDB, p, u.ID, v.Position, v.ToAa)
+		mutant, ddg, err := instances.FoldX.BuildModelUniProt(repairPDB, p, u.ID, v.Position, v.ToAa)
 		if err != nil {
 			pl.Error = err
 			rchan <- results
@@ -284,6 +285,7 @@ func (pl *Pipeline) variantWorker(repairPDB string, u *uniprot.UniProt, p *pdb.P
 		results.ToAa = v.ToAa
 		results.Position = v.Position
 		results.Change = v.Change
+		results.ChangeDir = mutant
 
 		for _, av := range u.Variants {
 			if av.Change == v.Change {

@@ -47,6 +47,11 @@ export default class VariantViewer extends React.Component {
   setVariant(v) {
     this.focusPos(v.variant.position);
     this.setState({ selected: v });
+
+    this.context.structure.current.loadMutated(
+      this.props.pdb,
+      v.variant.changeDir
+    );
   }
 
   focusPos(pos) {
