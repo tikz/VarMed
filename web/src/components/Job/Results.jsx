@@ -61,6 +61,11 @@ export default class Results extends React.Component {
         });
         that.structureRef.current.load(response.data);
         that.sequenceRef.current.load();
+        that.structureRef.current.loadMutated(
+          pdbId,
+          response.data.variants[0].changeDir,
+          true
+        );
       });
   }
 
@@ -173,6 +178,7 @@ export default class Results extends React.Component {
                   this.state.results.pdb.id +
                   "/csv"
                 }
+                pdb={this.state.pdb}
                 posFeatures={this.state.posFeatures}
                 variants={this.state.results.variants}
                 publications={this.state.results.uniprot.publications}

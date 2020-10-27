@@ -11,7 +11,7 @@ export default class StructureViewer extends React.Component {
   constructor(props) {
     super(props);
     this.litemolRef = React.createRef();
-    this.state = { plugin: {}, collapsed: false };
+    this.state = { plugin: {}, mutated: false };
   }
 
   componentDidMount() {
@@ -117,6 +117,48 @@ export default class StructureViewer extends React.Component {
     });
   }
 
+  loadMutated(pdbId, mutation, hide) {
+    let name = "mutated";
+    let model = this.state.plugin.context.select(name)[0];
+    if (model) {
+      console.log(model);
+      console.log(model);
+      LiteMol.Bootstrap.Command.Tree.RemoveNode.dispatch(
+        this.state.plugin.context,
+        model
+      );
+    }
+
+    let action = Transform.build()
+      .add(this.state.plugin.context.tree.root, Transformer.Data.Download, {
+        url: API_URL + `/api/mutated/` + pdbId + `/` + mutation,
+        type: "String",
+        name,
+      })
+      .then(
+        Transformer.Molecule.CreateFromData,
+        {
+          format: LiteMol.Core.Formats.Molecule.SupportedFormats.PDB,
+          customId: "Mutated",
+        },
+        { isBinding: true }
+      )
+      .then(
+        Transformer.Molecule.CreateModel,
+        { modelIndex: 0 },
+        { isBinding: true, ref: name }
+      )
+      .then(Transformer.Molecule.CreateMacromoleculeVisual, {
+        polymer: true,
+        het: false,
+        water: false,
+      });
+
+    this.state.plugin.applyTransform(action).then(() => {
+      this.setVisibility("mutated", this.state.mutated);
+    });
+  }
+
   applyTheme(ref, theme) {
     var plugin = this.state.plugin;
 
@@ -173,6 +215,10 @@ export default class StructureViewer extends React.Component {
       isSticky: true,
     });
     return theme;
+  }
+
+  showMutated(visible) {
+    this.setVisibility("mutated", visible);
   }
 
   showSurface(visible) {

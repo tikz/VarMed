@@ -4,6 +4,7 @@ import "../../styles/components/features.scss";
 import { ChipRes, ChipHet } from "./FeatureChips";
 import { SurfaceSwitch } from "./SurfaceSwitch";
 import { ResultsContext } from "./ResultsContext";
+import { MutantSwitch } from "./MutantSwitch";
 
 export class Features extends React.Component {
   constructor(props) {
@@ -112,6 +113,7 @@ export class Features extends React.Component {
         </Grid>
         <Grid item>
           <SurfaceSwitch />
+          <MutantSwitch />
         </Grid>
       </Grid>
     );

@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -136,6 +138,28 @@ func CIFEndpoint(c *gin.Context) {
 	c.Data(http.StatusOK, "text/plain", cif)
 }
 
+// MutatedPDBEndpoint handles GET /api/mutated/:pdbID/:mutation
+func MutatedPDBEndpoint(c *gin.Context) {
+	pdbID := c.Param("pdbID")
+	mutation := c.Param("mutation")
+
+	pdbPath := fmt.Sprintf("%s/%s/%s/%s_Repair_1.pdb",
+		cfg.Paths.FoldXMutations, pdbID, mutation, pdbID)
+
+	if _, err := os.Stat(pdbPath); os.IsNotExist(err) {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	pdb, err := ioutil.ReadFile(pdbPath)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Data(http.StatusOK, "text/plain", pdb)
+}
+
 func httpServe() {
 	r := gin.Default()
 	r.Use(cors.Default()) // TODO: remove in production, unsafe
@@ -157,6 +181,7 @@ func httpServe() {
 	r.GET("/api/job/:jobID/:pdbID", JobPDBEndpoint)
 	r.GET("/api/job/:jobID/:pdbID/csv", JobPDBCSVEndpoint)
 	r.GET("/api/structure/cif/:pdbID", CIFEndpoint)
+	r.GET("/api/mutated/:pdbID/:mutation", MutatedPDBEndpoint)
 	r.GET("/ws/job/:jobID", WSJobEndpoint)
 	r.GET("/ws/queue", WSQueueEndpoint)
 
