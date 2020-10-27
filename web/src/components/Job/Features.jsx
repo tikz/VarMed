@@ -56,15 +56,7 @@ export class Features extends React.Component {
 
     const hets = res.pdb.hetGroups;
 
-    // const interaction = chip(
-    //   "Interface",
-    //   res.interaction.residues.map((r) => r.residue)
-    // );
-    // const buried = chip(
-    //   "Buried",
-    //   res.exposure.residues.map((r) => r.residue)
-    // );
-    // const binding = chip("Binding", res.binding.residues);
+    const posMap = this.context.posMap;
 
     return (
       <Grid container className="features" alignItems="center">
@@ -95,7 +87,6 @@ export class Features extends React.Component {
                 "Buried",
                 res.exposure.residues.map((r) => r.residue)
               )}
-            {/* {binding} */}
             {res.fpocket.residues &&
               res.fpocket.pockets.map((pocket, index) => {
                 return chip(
@@ -110,6 +101,12 @@ export class Features extends React.Component {
               chip(
                 "Binding site",
                 res.bindingSite.residues.map((r) => r.residue)
+              )}
+
+            {res.variants &&
+              chip(
+                "Variants",
+                res.variants.map((r) => posMap.unpToPDB(r.position)).flat()
               )}
           </Grid>
         </Grid>
