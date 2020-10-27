@@ -1,25 +1,27 @@
 .left.split {
-  margin-top: 64px;
+  margin-top: 63px;
   width: 60%;
   top: 0;
+  height: calc(100% - 64px);
 }
 
 .right.split {
-  padding-top: 32px;
+  padding-top: 84px;
   width: 40%;
   right: 0;
   overflow-y: scroll;
+  height: calc(100% - 84px);
+  margin-top: -64px;
 }
 
 .split {
-  position: fixed;
-  height: calc(100% - 64px);
+  position: absolute;
 }
 
 @media only screen and (max-width: 1180px) {
   .split {
     position: relative;
-    height: 400px;
+    height: 400px !important;
   }
 
   .left.split {
@@ -29,7 +31,6 @@
   }
 
   .right.split {
-    padding-top: 32px;
     width: 100%;
     right: 0;
     height: auto;
