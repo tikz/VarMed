@@ -60,6 +60,8 @@
 }
 
 .index {
-  z-index: 999;
-  position: relative;
+  width: 100%;
+  min-height: 100%;
+  z-index: 1000;
+  position: absolute;
 }
