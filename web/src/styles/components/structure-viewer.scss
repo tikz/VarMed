@@ -2,7 +2,7 @@
   pointer-events: none;
   text-shadow: 2px 2px 10px #1c1e20, 2px 2px 10px #1c1e20;
   position: absolute;
-  z-index: 999;
+  z-index: 1000;
 }
 
 .over-title hr {
@@ -21,7 +21,7 @@
 
 .over-features {
   position: absolute;
-  z-index: 999;
+  z-index: 1000;
   left: 0;
   bottom: 0;
   width: calc(100% - 48px);
@@ -36,7 +36,7 @@
 
 .lm-overlay {
   background: #1c1e20 !important;
-  z-index: 99 !important;
+  z-index: 100 !important;
 }
 
 .lm-task-state {
@@ -46,7 +46,7 @@
 .lm-layout-left,
 .lm-layout-right,
 .lm-layout-bottom {
-  z-index: 999;
+  z-index: 1000;
 }
 
 #litemol {
