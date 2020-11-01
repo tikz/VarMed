@@ -81,7 +81,6 @@ export class UniProtInput extends React.Component {
             id="filled-basic"
             variant="filled"
             autoFocus
-            autoComplete="off"
             fullWidth
             label="UniProt ID"
             onChange={this.handleChange}
