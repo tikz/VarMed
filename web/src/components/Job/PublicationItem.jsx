@@ -8,18 +8,18 @@ export default class PublicationItem extends React.Component {
 
   render() {
     let title = "";
-    if (this.props.doi) {
-      title = (
-        <a href={"https://doi.org/" + this.props.doi} target="_blank">
-          <Typography>{this.props.title}</Typography>
-        </a>
-      );
-    } else if (this.props.pubmed) {
+    if (this.props.pubmed) {
       title = (
         <a
           href={"https://pubmed.ncbi.nlm.nih.gov/" + this.props.pubmed}
           target="_blank"
         >
+          <Typography>{this.props.title}</Typography>
+        </a>
+      );
+    } else if (this.props.doi) {
+      title = (
+        <a href={"https://doi.org/" + this.props.doi} target="_blank">
           <Typography>{this.props.title}</Typography>
         </a>
       );
