@@ -108,6 +108,7 @@ export default class StructureViewer extends React.Component {
       this.applyTheme("polymer-visual", this.createTheme());
       this.applyTheme("surface", this.createTheme(0.2, 0x0d6273));
       this.applyTheme("surface-het", this.createTheme(0.4, 0x00fffb));
+      this.setVisibility("model", true);
     });
 
     this.state.plugin.command(LiteMol.Bootstrap.Command.Layout.SetState, {
@@ -121,8 +122,6 @@ export default class StructureViewer extends React.Component {
     let name = "mutated";
     let model = this.state.plugin.context.select(name)[0];
     if (model) {
-      console.log(model);
-      console.log(model);
       LiteMol.Bootstrap.Command.Tree.RemoveNode.dispatch(
         this.state.plugin.context,
         model
@@ -228,7 +227,6 @@ export default class StructureViewer extends React.Component {
 
   setVisibility(ref, visible) {
     let entity = this.state.plugin.context.select(ref)[0];
-
     LiteMol.Bootstrap.Command.Entity.SetVisibility.dispatch(
       this.state.plugin.context,
       { entity, visible: visible }
