@@ -1,29 +1,16 @@
-name: NodeJS with Webpack
-
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+name: Webpack
+on: [push]
 
 jobs:
   build:
+    name: Install and build
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [12.x, 14.x, 16.x]
-    
     steps:
-    - uses: actions/checkout@v2
-
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-
-    - name: Build
-      run: |
-        cd web/
-        npm install
-        npx webpack
+      - uses: actions/checkout@v2
+      - uses: borales/actions-yarn@v2.3.0
+        with:
+          cmd: --cwd web/ install
+      - uses: borales/actions-yarn@v2.3.0
+        with:
+          cmd: --cwd web/ build
