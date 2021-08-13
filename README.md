@@ -1,5 +1,7 @@
 # VarMed [![Go](https://github.com/tikz/VarMed/actions/workflows/go.yml/badge.svg)](https://github.com/tikz/VarMed/actions/workflows/go.yml) [![Webpack](https://github.com/tikz/VarMed/actions/workflows/webpack.yml/badge.svg)](https://github.com/tikz/VarMed/actions/workflows/webpack.yml) [![Docker](https://github.com/tikz/VarMed/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/tikz/VarMed/actions/workflows/docker-publish.yml)
 
+[![Logo](http://varmed.qb.fcen.uba.ar/assets/varmed.svg)](http://varmed.qb.fcen.uba.ar)
+
 http://varmed.qb.fcen.uba.ar
 
 ## Build
