@@ -455,7 +455,7 @@ func (pl *Pipeline) fpocketRunner(p *pdb.PDB) chan Fpocket {
 		for i, pocket := range fp.Pockets {
 			if pocket.DrugScore > 0.5 {
 				p := Pocket{
-					Name:      string(i),
+					Name:      fmt.Sprint(i),
 					DrugScore: pocket.DrugScore,
 				}
 
