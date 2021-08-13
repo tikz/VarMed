@@ -68,10 +68,8 @@ export default function Index() {
                 Pending
               </Typography>
               <Typography align="center" className="desc authors">
-                Mauro Song, Florencia Niesi, Demian Avendaño
               </Typography>
               <Typography align="center" className="desc authors">
-                Marcelo Martí, Pietro Roversi, Carlos Modenutti
               </Typography>
             </Grid>
           </Grid>
