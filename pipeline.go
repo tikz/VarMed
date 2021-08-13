@@ -368,7 +368,7 @@ func (pl *Pipeline) exposureRunner(p *pdb.PDB) chan Exposure {
 	rchan := make(chan Exposure)
 	go func() {
 		results := Exposure{}
-		sr, err := sasa.SASA(p)
+		sr, err := sasa.SASA(p, 100)
 		if err != nil {
 			pl.Error = err
 			rchan <- results
