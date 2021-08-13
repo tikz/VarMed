@@ -1,7 +1,8 @@
-FROM ubuntu:19.10
+FROM ubuntu:20.04
 
 RUN apt-get update
-RUN apt-get install -y curl build-essential git
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata
+RUN apt-get install -y curl build-essential git python2
 
 # Golang
 RUN rm -rf /var/lib/apt/lists/*
@@ -9,7 +10,7 @@ RUN rm -rf /var/lib/apt/lists/*
 ENV GOLANG_VERSION 1.14.1
 
 RUN curl -sSL https://storage.googleapis.com/golang/go$GOLANG_VERSION.linux-amd64.tar.gz \
-		| tar -C /usr/local -xz
+                | tar -C /usr/local -xz
 
 ENV PATH /usr/local/go/bin:$PATH
 
@@ -39,7 +40,8 @@ RUN cd fpocket && make && make install
 RUN apt-get install -y autoconf
 WORKDIR /
 RUN git clone https://github.com/mittinatten/freesasa.git
-RUN cd freesasa && autoreconf -i && ./configure --disable-json --disable-xml && make && make install
+RUN apt-get install -y libc++-dev libc++abi-dev
+RUN cd freesasa && git submodule init && git submodule update && autoreconf -i && ./configure --disable-json --disable-xml && make && make install
 
 # DSSP
 RUN apt-get install -y dssp
@@ -56,7 +58,6 @@ RUN make build
 
 COPY config-example.yaml /varmed/config.yaml
 
-RUN mkdir /varmed/bin
 COPY pipeline-bins.tar.gz /
 RUN tar -C /varmed/ -xvf /pipeline-bins.tar.gz
 
