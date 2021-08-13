@@ -1,0 +1,24 @@
+version: "3.8"
+
+networks:
+  web:
+    external: true
+
+services:
+  varmed:
+    build:
+      context: .
+      args:
+        http_proxy: "http://proxy.fcen.uba.ar:8080"
+    image: "varmed"
+    container_name: "varmed"
+    networks:
+      - web
+    expose: [8888]
+    volumes:
+      - /data:/data/varmed
+    restart: always
+    environment:
+      HTTP_PROXY: "http://proxy.fcen.uba.ar:8080"
+    labels:
+      - "traefik.http.routers.varmed.rule=Host(`varmed.qb.fcen.uba.ar`)"
