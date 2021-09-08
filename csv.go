@@ -8,8 +8,8 @@ import (
 	"strings"
 )
 
-// ResultsCSV returns the CSV for a given PDB in a job.
-func ResultsCSV(results *Results) string {
+// ResultsCSV returns the CSV for all PDBs in a job.
+func ResultsCSV(job *Job) string {
 	buf := new(bytes.Buffer)
 	writer := csv.NewWriter(buf)
 	writer.Write([]string{"UniProt ID", "PDB ID", "PDB Position", "Position", "From Aa", "To Aa",
@@ -17,8 +17,32 @@ func ResultsCSV(results *Results) string {
 		"High Switchability", "DDG", "Outcome", "PubMed IDs", "dbSNP ID", "ClinVar Sig",
 		"ClinVar Phenotypes"})
 
+	for pdbID := range job.Pipeline.Results {
+		writePDBVariantsCSV(job, pdbID, writer)
+	}
+
+	writer.Flush()
+	return buf.String()
+}
+
+// PDBResultsCSV returns the CSV for a given PDB in a job.
+func PDBResultsCSV(job *Job, pdbID string) string {
+	buf := new(bytes.Buffer)
+	writer := csv.NewWriter(buf)
+	writer.Write([]string{"UniProt ID", "PDB ID", "PDB Position", "Position", "From Aa", "To Aa",
+		"Family", "Conservation Bitscore", "Binding Site", "Interface", "Buried", "High Aggregability",
+		"High Switchability", "DDG", "Outcome", "PubMed IDs", "dbSNP ID", "ClinVar Sig",
+		"ClinVar Phenotypes"})
+
+	writePDBVariantsCSV(job, pdbID, writer)
+	writer.Flush()
+	return buf.String()
+}
+
+func writePDBVariantsCSV(job *Job, pdbID string, writer *csv.Writer) {
+	results := job.Pipeline.Results[pdbID]
 	uniprotID := results.UniProt.ID
-	pdbID := results.PDB.ID
+
 	for _, v := range results.Variants {
 		position := v.Position
 		fromAa := v.FromAa
@@ -98,9 +122,5 @@ func ResultsCSV(results *Results) string {
 			dbSNPID,
 			cvSig,
 			cvPhenotypes})
-
 	}
-
-	writer.Flush()
-	return buf.String()
 }

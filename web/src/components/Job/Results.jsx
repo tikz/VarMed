@@ -174,8 +174,6 @@ export default class Results extends React.Component {
                   API_URL +
                   "/api/job/" +
                   this.props.jobId +
-                  "/" +
-                  this.state.results.pdb.id +
                   "/csv"
                 }
                 pdb={this.state.pdb}
