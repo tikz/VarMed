@@ -81,7 +81,6 @@ func JobPDBEndpoint(c *gin.Context) {
 // Returns a CSV file of variants in a job.
 func JobCSVEndpoint(c *gin.Context) {
 	jobID := c.Param("jobID")
-	pdbID := c.Param("pdbID")
 
 	job, err := loadJob(jobID)
 	if err != nil {
@@ -89,13 +88,7 @@ func JobCSVEndpoint(c *gin.Context) {
 		return
 	}
 
-	if _, ok := job.Pipeline.Results[pdbID]; !ok {
-		c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
-		return
-	}
-	results := job.Pipeline.Results[pdbID]
-
-	filename := fmt.Sprintf("%s_%s.csv", results.UniProt.ID, jobID[:5])
+	filename := fmt.Sprintf("%s_%s.csv", job.Pipeline.UniProt.ID, jobID[:5])
 	c.Writer.Header().Set("content-disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
 	c.String(http.StatusOK, ResultsCSV(job))
 }
