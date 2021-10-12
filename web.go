@@ -93,28 +93,6 @@ func JobCSVEndpoint(c *gin.Context) {
 	c.String(http.StatusOK, ResultsCSV(job))
 }
 
-// JobPDBCSVEndpoint handles GET /api/job/:jobID/:pdbID/csv
-// Returns a CSV file of variants from only a PDB single in a job.
-func JobPDBCSVEndpoint(c *gin.Context) {
-	jobID := c.Param("jobID")
-	pdbID := c.Param("pdbID")
-
-	job, err := loadJob(jobID)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		return
-	}
-
-	if _, ok := job.Pipeline.Results[pdbID]; !ok {
-		c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
-		return
-	}
-	results := job.Pipeline.Results[pdbID]
-
-	filename := fmt.Sprintf("%s_%s_%s.csv", results.UniProt.ID, results.PDB.ID, jobID[:5])
-	c.Writer.Header().Set("content-disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
-	c.String(http.StatusOK, PDBResultsCSV(job, pdbID))
-}
 
 // NewJobEndpoint handles POST /api/new-job
 // Starts a new job.
@@ -194,9 +172,8 @@ func httpServe() {
 	r.GET("/api/status", StatusEndpoint)
 	r.GET("/api/uniprot/:unpID", UniProtEndpoint)
 	r.GET("/api/job/:jobID", JobEndpoint)
-	r.GET("/api/job/:jobID/csv", JobCSVEndpoint)
+	r.GET("/api/csv/:jobID", JobCSVEndpoint)
 	r.GET("/api/job/:jobID/:pdbID", JobPDBEndpoint)
-	r.GET("/api/job/:jobID/:pdbID/csv", JobPDBCSVEndpoint)
 	r.GET("/api/structure/cif/:pdbID", CIFEndpoint)
 	r.GET("/api/mutated/:pdbID/:mutation", MutatedPDBEndpoint)
 	r.GET("/ws/job/:jobID", WSJobEndpoint)

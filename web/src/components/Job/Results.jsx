@@ -172,9 +172,8 @@ export default class Results extends React.Component {
               <VariantViewer
                 csvUrl={
                   API_URL +
-                  "/api/job/" +
-                  this.props.jobId +
-                  "/csv"
+                  "/api/csv/" +
+                  this.props.jobId
                 }
                 pdb={this.state.pdb}
                 posFeatures={this.state.posFeatures}
