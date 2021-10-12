@@ -157,7 +157,7 @@ export default class QueueIcon extends React.Component {
                       </Grid>
                       <Grid item xs={4}>
                         {isMyJob(j.shortId) && (
-                          <LinkRouter to={"job/" + myJobId(j.shortId)}>
+                          <LinkRouter to={"/job/" + myJobId(j.shortId)}>
                             <Typography variant="overline">
                               {j.shortId} (my job)
                             </Typography>
@@ -224,7 +224,7 @@ export default class QueueIcon extends React.Component {
                         <Typography variant="h6">#{j.position}</Typography>
                       </Grid>
                       <Grid item xs={4}>
-                        <LinkRouter to={"job/" + myJobId(j.id)}>
+                        <LinkRouter to={"/job/" + myJobId(j.id)}>
                           <Typography variant="overline">
                             {j.shortId} (my job)
                           </Typography>
