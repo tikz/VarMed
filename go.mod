@@ -9,7 +9,7 @@ require (
 	github.com/gin-contrib/static v0.0.1
 	github.com/gin-gonic/gin v1.7.3
 	github.com/gorilla/websocket v1.4.2
-	github.com/tikz/bio v0.0.0-20210813193953-7f1d95854824
+	github.com/tikz/bio v0.0.0-20220725145119-1dae789d2218
 	golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e // indirect
 	gopkg.in/yaml.v2 v2.4.0
 )
